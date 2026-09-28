@@ -1,0 +1,44 @@
+# Author Info
+# GitHub: OfflcerSam
+# Discord: offlcer_sam
+
+# Maintainer Info
+# GitHub: ???
+# Discord: ???
+
+# Shuttle Notes:
+#
+- type: vessel
+  id: Drum
+  parent: BaseVessel
+  name: SI Drum
+  description: A retrofitted gas tanker with some capability to also mine for gas, does not include gas filtering systems. Brought to you by Stonian Industries.
+  price: 33500 # ~31831 (calculated) * ~1.05 to 1.10 (markup) = 33422
+  category: Small
+  group: Shipyard
+  shuttlePath: /Maps/_NF/Shuttles/drum.yml
+  guidebookPage: ShipyardDrum
+  class:
+  - Atmospherics
+  engine:
+  - Plasma
+
+- type: gameMap
+  id: Drum
+  mapName: 'SI Drum'
+  mapPath: /Maps/_NF/Shuttles/drum.yml
+  minPlayers: 0
+  stations:
+    Drum:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Drum {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]

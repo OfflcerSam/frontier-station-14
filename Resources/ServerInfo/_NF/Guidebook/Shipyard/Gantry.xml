@@ -1,0 +1,91 @@
+<Document>
+  # GANTRY-CLASS ENGINEERING SHUTTLE
+
+  <Box>
+    <GuideEntityEmbed Entity="EngineeringTechFab" Caption="Engineering Equipment Fabrication"/>
+    <GuideEntityEmbed Entity="MaterialReclaimer" Caption="Material Reclamation"/>
+    <GuideEntityEmbed Entity="OreProcessor" Caption="Ore Processing"/>
+    <GuideEntityEmbed Entity="SalvageTechfabNF" Caption="Salvage Fabrication"/>
+  </Box>
+  
+  Add image later
+
+  # Operational Specifications
+
+  [color=#a4885c]Ship Size:[/color] Medium
+
+  [color=#a4885c]Recommended Crew:[/color] 2-4
+
+  [color=#a4885c]Power Gen Type:[/color] Uranium
+
+  # Shuttle Brief
+
+  The Gantry is a medium engineering shuttle designed around reliable fabrication, repair, material recovery, and field support.
+
+  Its larger workspace and broader equipment set make it better suited than the Rivet for sustained engineering operations.
+
+  [italic]Brought to you by Stonian Industries.[/italic]
+
+  # Ship Functions
+
+  <Box>
+    <GuideEntityEmbed Entity="ButtonFrameCautionSecurity" Caption="Toggle Blastdoors"/>
+    <GuideEntityEmbed Entity="ButtonFrameGrey" Caption="Toggle Window Shutters"/>
+    <GuideEntityEmbed Entity="ButtonFrameExit" Caption="Toggle Bay Shutters"/>
+  </Box>
+
+  # Operational Notes
+
+  Standard recommendations:
+
+  1. Take note of standard Piloting guides.
+
+  2. Take note of relevant standard role guides.
+
+  3. Ensure all critical components are anchored.
+
+  4. Take note of base power load and adjust generators accordingly to reduce fuel consumption.
+
+  5. Follow proper cleaning and maintenance guidelines.
+
+  6. Ship modification is encouraged; we will buy your ship back regardless of condition.
+
+  7. Have a safe and productive shift whenever possible.
+
+  # Piloting
+
+  [textlink="Piloting" link="Piloting"/]
+
+  [textlink="Sector Topology" link="SectorTopology"/]
+
+  # Staffing
+
+  The Gantry has a recommended crew count range of 2 to 4, but could support more or less.
+
+  Crew composition can vary as needed, but the following roles are supported.
+
+  Primary
+  <Box>
+    <GuideEntityEmbed Entity="RandomHumanoidVisitorEngineer" Caption="Ship Engineer"/>
+  </Box>
+
+  Secondary
+  <Box>
+    <GuideEntityEmbed Entity="RandomHumanoidVisitorSalvageSpecialist" Caption="Salvage Specialist"/>
+  </Box>
+
+  # Hiring crew
+
+  [textlink="Hiring" link="Hiring"/]
+
+  As a Captain of a Nanotrasen vessel, you have the authority to hire, fire, demote, or promote crew members at will.
+
+  # PREFLIGHT CHECKLIST
+
+  [textlink="Preflight Checklist" link="PreflightChecklist"/]
+
+
+  # Engineering
+
+  [textlink="Engineering" link="Engineering"/]
+</Document>

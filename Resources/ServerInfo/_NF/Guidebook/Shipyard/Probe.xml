@@ -1,0 +1,89 @@
+<Document>
+  # PROBE-CLASS SCIENCE SHIP
+
+  <Box>
+    <GuideEntityEmbed Entity="ResearchAndDevelopmentServer" Caption="Research Server"/>
+    <GuideEntityEmbed Entity="MachineArtifactAnalyzer" Caption="Artifact Analysis"/>
+    <GuideEntityEmbed Entity="MachineAnomalyVessel" Caption="Anomaly Research"/>
+  </Box>
+  
+  Add image later
+
+  # Operational Specifications
+
+  [color=#a4885c]Ship Size:[/color] Medium
+
+  [color=#a4885c]Recommended Crew:[/color] 1-3
+
+  [color=#a4885c]Power Gen Type:[/color] Uranium
+
+  # Shuttle Brief
+
+  The Probe is a repurposed mining platform converted into a compact vessel for scientific research.
+
+  It provides equipment for basic anomalous containment and general research operations, though notably is missing a Mech / Robot Fabricator.
+
+  [italic]Brought to you by Stonian Industries.[/italic]
+
+  # Ship Functions
+
+  <Box>
+    <GuideEntityEmbed Entity="ButtonFrameCautionSecurity" Caption="Toggle Blastdoors"/>
+    <GuideEntityEmbed Entity="ButtonFrameGrey" Caption="Toggle Shutters"/>
+  </Box>
+
+  # Operational Notes
+
+  Standard recommendations:
+
+  1. Take note of standard Piloting guides.
+
+  2. Take note of relevant standard role guides.
+
+  3. Ensure all critical components are anchored.
+
+  4. Take note of base power load and adjust generators accordingly to reduce fuel consumption.
+
+  5. Follow proper cleaning and maintenance guidelines.
+
+  6. Ship modification is encouraged; we will buy your ship back regardless of condition.
+
+  7. Have a safe and productive shift whenever possible.
+
+  # Piloting
+
+  [textlink="Piloting" link="Piloting"/]
+
+  [textlink="Sector Topology" link="SectorTopology"/]
+
+  # Staffing
+
+  The Probe has a recommended crew count range of 1 to 3, but could support more or less.
+
+  Crew composition can vary as needed, but the following roles are supported.
+
+  Primary
+  <Box>
+    <GuideEntityEmbed Entity="RandomHumanoidVisitorScientist" Caption="Scientist"/>
+  </Box>
+
+  Secondary
+  <Box>
+    <GuideEntityEmbed Entity="RandomHumanoidVisitorEngineer" Caption="Ship Engineer"/>
+  </Box>
+
+  # Hiring crew
+
+  [textlink="Hiring" link="Hiring"/]
+
+  As a Captain of a Nanotrasen vessel, you have the authority to hire, fire, demote, or promote crew members at will.
+
+  # PREFLIGHT CHECKLIST
+
+  [textlink="Preflight Checklist" link="PreflightChecklist"/]
+
+
+  # Science
+
+  [textlink="Science" link="Science"/]
+</Document>

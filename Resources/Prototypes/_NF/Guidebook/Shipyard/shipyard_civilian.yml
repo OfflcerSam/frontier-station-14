@@ -46,6 +46,7 @@
   - ShipyardNook
   - ShipyardPhoenix
   - ShipyardPlacebo
+  - ShipyardProbe
   - ShipyardProspector
   - ShipyardPulsar
   - ShipyardRetort
@@ -57,6 +58,11 @@
   - ShipyardSurveyor
   - ShipyardVagabond
   - ShipyardVoltage
+  - ShipyardDrum
+  - ShipyardGantry
+  - ShipyardRivet
+  - ShipyardPick
+  - ShipyardWayfarer
 
 - type: guideEntry
   id: ShipyardAdder
@@ -327,3 +333,33 @@
   id: ShipyardVoltage
   name: guide-entry-shipyard-voltage
   text: "/ServerInfo/_NF/Guidebook/Shipyard/Voltage.xml"
+
+- type: guideEntry
+  id: ShipyardDrum
+  name: guide-entry-shipyard-drum
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Drum.xml"
+
+- type: guideEntry
+  id: ShipyardGantry
+  name: guide-entry-shipyard-gantry
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Gantry.xml"
+
+- type: guideEntry
+  id: ShipyardPick
+  name: guide-entry-shipyard-pick
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Pick.xml"
+
+- type: guideEntry
+  id: ShipyardProbe
+  name: guide-entry-shipyard-probe
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Probe.xml"
+
+- type: guideEntry
+  id: ShipyardRivet
+  name: guide-entry-shipyard-rivet
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Rivet.xml"
+
+- type: guideEntry
+  id: ShipyardWayfarer
+  name: guide-entry-shipyard-wayfarer
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Wayfarer.xml"

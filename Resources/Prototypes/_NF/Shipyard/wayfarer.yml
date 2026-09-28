@@ -1,0 +1,44 @@
+# Author Info
+# GitHub: OfflcerSam
+# Discord: Offlcer_Sam
+
+# Maintainer Info
+# GitHub: ???
+# Discord: ???
+
+# Shuttle Notes:
+#
+- type: vessel
+  id: Wayfarer
+  parent: BaseVessel
+  name: SI Wayfarer
+  description: A former passenger spaceliner converted for salvage duty, while still retaining some service accommodations.
+  price: 133500 # ~116000 (calculated) * 1.15 to 1.30 (markup) = ~133400
+  category: Large
+  group: Shipyard
+  shuttlePath: /Maps/_NF/Shuttles/wayfarer.yml
+  guidebookPage: ShipyardWayfarer
+  class:
+  - Salvage
+  engine:
+  - Uranium
+
+- type: gameMap
+  id: Wayfarer
+  mapName: 'SI Wayfarer'
+  mapPath: /Maps/_NF/Shuttles/wayfarer.yml
+  minPlayers: 0
+  stations:
+    Wayfarer:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Wayfarer {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]

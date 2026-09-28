@@ -1,0 +1,44 @@
+# Author Info
+# GitHub: OfflcerSam
+# Discord: offlcer_sam
+
+# Maintainer Info
+# GitHub: ???
+# Discord: ???
+
+# Shuttle Notes:
+#
+- type: vessel
+  id: Gantry
+  parent: BaseVessel
+  name: SI Gantry
+  description: A compacted engineering shuttle designed for reliability for a low entry price. Brought to you by Stonian Industries.
+  price: 44000 # 37827 (calculated) * ~1.15 (markup) = 43501
+  category: Medium
+  group: Shipyard
+  shuttlePath: /Maps/_NF/Shuttles/gantry.yml
+  guidebookPage: ShipyardGantry
+  class:
+  - Engineering
+  engine:
+  - Uranium
+
+- type: gameMap
+  id: Gantry
+  mapName: 'SI Gantry'
+  mapPath: /Maps/_NF/Shuttles/gantry.yml
+  minPlayers: 0
+  stations:
+    Gantry:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Gantry {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]
