@@ -3,8 +3,7 @@
 
   <Box>
     <GuideEntityEmbed Entity="GasMiningDrill" Caption="Gas Mining"/>
-    <GuideEntityEmbed Entity="GasAnalyzer" Caption="Atmospheric Analysis"/>
-    <GuideEntityEmbed Entity="EngineeringTechFab" Caption="Engineering Fabrication"/>
+    <GuideEntityEmbed Entity="EngineeringTechFab" Caption="Fabrication"/>
   </Box>
 
   Add image later

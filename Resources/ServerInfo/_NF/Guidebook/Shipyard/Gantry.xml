@@ -2,10 +2,12 @@
   # GANTRY-CLASS ENGINEERING SHUTTLE
 
   <Box>
-    <GuideEntityEmbed Entity="EngineeringTechFab" Caption="Engineering Equipment Fabrication"/>
-    <GuideEntityEmbed Entity="MaterialReclaimer" Caption="Material Reclamation"/>
+	<GuideEntityEmbed Entity="BannerEngineering" Caption="Engineering"/>
+  	<GuideEntityEmbed Entity="EngineeringTechFab" Caption="Fabrication"/>
+	<GuideEntityEmbed Entity="SalvageTechfabNF" Caption="Fabrication"/>
+    <GuideEntityEmbed Entity="ScrapProcessor" Caption="Scrap Processing"/>
     <GuideEntityEmbed Entity="OreProcessor" Caption="Ore Processing"/>
-    <GuideEntityEmbed Entity="SalvageTechfabNF" Caption="Salvage Fabrication"/>
+    
   </Box>
   
   Add image later
