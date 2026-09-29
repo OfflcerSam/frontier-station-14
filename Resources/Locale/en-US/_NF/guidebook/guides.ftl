@@ -101,6 +101,13 @@ guide-entry-shipyard-stellaris = Stellaris
 guide-entry-shipyard-surveyor = Surveyor
 guide-entry-shipyard-vagabond = Vagabond
 
+guide-entry-shipyard-drum = Drum
+guide-entry-shipyard-gantry = Gantry
+guide-entry-shipyard-pick = Pick
+guide-entry-shipyard-probe = Probe
+guide-entry-shipyard-rivet = Rivet
+guide-entry-shipyard-wayfarer = Wayfarer
+
 # Medical Shipyard entries
 guide-entry-shipyard-akupara = Akupara
 guide-entry-shipyard-apothecary = Apothecary
