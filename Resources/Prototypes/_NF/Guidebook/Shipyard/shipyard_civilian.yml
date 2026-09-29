@@ -58,6 +58,7 @@
   - ShipyardSurveyor
   - ShipyardVagabond
   - ShipyardVoltage
+  #ADD
   - ShipyardDrum
   - ShipyardGantry
   - ShipyardRivet
@@ -334,6 +335,7 @@
   name: guide-entry-shipyard-voltage
   text: "/ServerInfo/_NF/Guidebook/Shipyard/Voltage.xml"
 
+#ADD
 - type: guideEntry
   id: ShipyardDrum
   name: guide-entry-shipyard-drum

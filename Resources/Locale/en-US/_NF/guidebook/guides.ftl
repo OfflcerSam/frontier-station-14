@@ -101,6 +101,7 @@ guide-entry-shipyard-stellaris = Stellaris
 guide-entry-shipyard-surveyor = Surveyor
 guide-entry-shipyard-vagabond = Vagabond
 
+#ADD
 guide-entry-shipyard-drum = Drum
 guide-entry-shipyard-gantry = Gantry
 guide-entry-shipyard-pick = Pick
