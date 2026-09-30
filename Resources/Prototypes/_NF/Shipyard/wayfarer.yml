@@ -13,7 +13,7 @@
   parent: BaseVessel
   name: SI Wayfarer
   description: A former passenger spaceliner converted for salvage duty, while still retaining some service accommodations.
-  price: 133500 # ~116000 (calculated) * 1.15 to 1.30 (markup) = ~133400
+  price: 139000 # ~120700 (calculated) * 1.15 to 1.30 (markup) = ~138805
   category: Large
   group: Shipyard
   shuttlePath: /Maps/_NF/Shuttles/wayfarer.yml
