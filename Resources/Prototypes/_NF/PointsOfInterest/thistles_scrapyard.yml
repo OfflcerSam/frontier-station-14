@@ -14,7 +14,7 @@
   name: "Thistle's Scrapyard"
   minimumDistance: 3500
   maximumDistance: 6000
-  spawnGroup: Optional
+  spawnGroup: Required
   gridPath: /Maps/_NF/POI/thistles_scrapyard.yml
   addComponents:
   - type: StationTransit
