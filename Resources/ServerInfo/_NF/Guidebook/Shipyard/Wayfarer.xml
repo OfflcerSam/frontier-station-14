@@ -30,6 +30,7 @@
   <Box>
 		<GuideEntityEmbed Entity="ButtonFrameGrey" Caption="Toggle Window Shutters"/>
 		<GuideEntityEmbed Entity="ButtonFrameExit" Caption="Toggle Bay Shutters"/>
+		<GuideEntityEmbed Entity="ButtonFrameCautionSecurity" Caption="Toggle Bridge Panic Mode"/>
 	</Box>
 
   # Operational Notes
