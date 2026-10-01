@@ -22,6 +22,9 @@
   - type: StationTransit
     routes:
       MinorPointsOfInterest: 30
+  - type: SolarPoweredGrid
+    trackOnInit: true
+    doNotCull: true
 
 - type: gameMap
   id: Courthouse
