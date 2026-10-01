@@ -116,7 +116,7 @@
   parent: [BaseStructureDisableToolUse, FaxMachineBase]
   id: FaxMachineNFThistles
   suffix: POI, Thistles
-  categories: [ HideSpawnMenu ]
+  categories: 
   components:
   - type: FaxMachine
     name: "Thistle's Scrapyard"

@@ -4,8 +4,8 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 09/30/2026 23:33:26
-  entityCount: 2759
+  time: 10/01/2026 00:29:29
+  entityCount: 2760
 maps: []
 grids:
 - 1
@@ -141,6 +141,11 @@ entities:
           decals:
             1: -12,20
             2: -10,20
+        - node:
+            color: '#334E6DC8'
+            id: BoxGreyscale
+          decals:
+            132: -8,15
         - node:
             angle: 1.5707963267948966 rad
             color: '#FFFFFFFF'
@@ -9108,6 +9113,13 @@ entities:
       parent: 1
     - type: Fixtures
       fixtures: {}
+- proto: FaxMachineNFThistles
+  entities:
+  - uid: 1493
+    components:
+    - type: Transform
+      pos: -6.5,18.5
+      parent: 1
 - proto: FireAlarmAssembly
   entities:
   - uid: 1719
@@ -9300,13 +9312,6 @@ entities:
     - type: Transform
       rot: 1.5707963267948966 rad
       pos: 1.5,18.5
-      parent: 1
-- proto: FoodPlateSmallTrash
-  entities:
-  - uid: 2930
-    components:
-    - type: Transform
-      pos: -6.660777,18.501266
       parent: 1
 - proto: GasCanisterBrokenBase
   entities:
@@ -12807,6 +12812,13 @@ entities:
     components:
     - type: Transform
       pos: 7.3666406,22.81066
+      parent: 1
+- proto: NFHolopadThistlesScrapyard
+  entities:
+  - uid: 1492
+    components:
+    - type: Transform
+      pos: -7.5,15.5
       parent: 1
 - proto: NitrogenCanister
   entities:
