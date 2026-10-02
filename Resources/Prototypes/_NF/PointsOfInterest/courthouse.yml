@@ -14,7 +14,7 @@
   name: "Courthouse"
   minimumDistance: 1150
   maximumDistance: 2050
-  spawnGroup: Required
+  spawnGroup: Courthouse
   gridPath: /Maps/_NF/POI/courthouse.yml
   addComponents:
   - type: IFF
@@ -22,9 +22,6 @@
   - type: StationTransit
     routes:
       MinorPointsOfInterest: 30
-  - type: SolarPoweredGrid
-    trackOnInit: true
-    doNotCull: true
 
 - type: gameMap
   id: Courthouse
