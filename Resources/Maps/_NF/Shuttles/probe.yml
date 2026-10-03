@@ -4,7 +4,7 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/03/2026 18:43:30
+  time: 10/03/2026 18:55:04
   entityCount: 690
 maps: []
 grids:
@@ -201,10 +201,22 @@ entities:
           decals:
             228: -1,-3
         - node:
+            zIndex: 8
+            color: '#EFB34196'
+            id: BrickCornerOverlaySE
+          decals:
+            385: 3,-10
+        - node:
             color: '#D381C996'
             id: BrickCornerOverlaySW
           decals:
             207: -1,-8
+        - node:
+            zIndex: 8
+            color: '#D381C996'
+            id: BrickEndOverlayW
+          decals:
+            367: -3,-10
         - node:
             zIndex: 5
             color: '#496EA0FF'
@@ -212,17 +224,22 @@ entities:
           decals:
             336: 0,-1
         - node:
-            color: '#D381C996'
-            id: BrickLineOverlayE
-          decals:
-            108: 1,-10
-        - node:
             zIndex: 8
             color: '#D381C996'
             id: BrickLineOverlayE
           decals:
             264: 1,-8
             265: 1,-7
+            372: 0,-11
+            399: -3,-6
+        - node:
+            zIndex: 8
+            color: '#EFB34196'
+            id: BrickLineOverlayE
+          decals:
+            379: 3,-9
+            380: 3,-8
+            381: 3,-7
         - node:
             zIndex: 4
             color: '#D381C996'
@@ -239,11 +256,19 @@ entities:
             323: 6,-5
             324: 3,-5
         - node:
-            zIndex: 6
+            zIndex: 8
+            color: '#D381C996'
+            id: BrickLineOverlayN
+          decals:
+            368: -2,-10
+            369: -1,-10
+            375: 1,-10
+        - node:
+            zIndex: 8
             color: '#EFB34196'
             id: BrickLineOverlayN
           decals:
-            326: 3,-7
+            378: 2,-10
         - node:
             zIndex: 6
             color: '#D381C996'
@@ -251,7 +276,6 @@ entities:
           decals:
             320: 5,-6
             321: 6,-6
-            325: 3,-6
         - node:
             zIndex: 8
             color: '#D381C996'
@@ -260,6 +284,15 @@ entities:
             262: -1,-8
             263: 1,-8
             267: 2,-4
+            370: -2,-10
+            371: -1,-10
+            374: 1,-10
+        - node:
+            zIndex: 8
+            color: '#EFB34196'
+            id: BrickLineOverlayS
+          decals:
+            386: 2,-10
         - node:
             zIndex: 5
             color: '#496EA0FF'
@@ -270,32 +303,27 @@ entities:
             color: '#D381C996'
             id: BrickLineOverlayW
           decals:
-            157: -3,-10
             206: -1,-4
         - node:
+            zIndex: 8
+            color: '#D381C996'
+            id: BrickLineOverlayW
+          decals:
+            373: 0,-11
+        - node:
+            zIndex: 8
             color: '#EFB34196'
             id: BrickLineOverlayW
           decals:
-            107: 2,-10
-        - node:
-            zIndex: 5
-            color: '#FFFFFFFF'
-            id: BrickTileDarkCornerNe
-          decals:
-            137: -1,-9
-            139: -1,-9
+            382: 3,-7
+            383: 3,-8
+            384: 3,-9
         - node:
             zIndex: 4
             color: '#FFFFFFFF'
             id: BrickTileDarkCornerNw
           decals:
             279: 1,-15
-        - node:
-            zIndex: 5
-            color: '#FFFFFFFF'
-            id: BrickTileDarkCornerNw
-          decals:
-            140: 1,-9
         - node:
             zIndex: 4
             color: '#FFFFFFFF'
@@ -348,6 +376,13 @@ entities:
             310: 5,-5
             311: 6,-5
         - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: BrickTileDarkLineN
+          decals:
+            344: -1,-9
+            345: 1,-9
+        - node:
             zIndex: 2
             color: '#FFFFFFFF'
             id: BrickTileDarkLineS
@@ -387,19 +422,36 @@ entities:
             color: '#FFFFFFFF'
             id: BrickTileSteelCornerNe
           decals:
-            133: -1,-9
-            138: -1,-9
+            348: -1,-11
         - node:
-            zIndex: 5
+            zIndex: 8
             color: '#FFFFFFFF'
             id: BrickTileSteelCornerNw
           decals:
-            134: 1,-9
+            365: 1,-11
         - node:
             color: '#FFFFFFFF'
             id: BrickTileSteelCornerSe
           decals:
             148: 1,-8
+        - node:
+            zIndex: 5
+            color: '#FFFFFFFF'
+            id: BrickTileSteelCornerSe
+          decals:
+            355: 2,-9
+        - node:
+            zIndex: 6
+            color: '#FFFFFFFF'
+            id: BrickTileSteelCornerSe
+          decals:
+            356: 2,-9
+        - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: BrickTileSteelCornerSe
+          decals:
+            357: 2,-9
         - node:
             zIndex: 7
             color: '#FFFFFFFF'
@@ -432,6 +484,13 @@ entities:
             239: -2,-7
             243: -2,-6
         - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: BrickTileSteelLineE
+          decals:
+            358: 2,-8
+            359: 2,-7
+        - node:
             zIndex: 2
             color: '#FFFFFFFF'
             id: BrickTileSteelLineN
@@ -448,12 +507,29 @@ entities:
             color: '#FFFFFFFF'
             id: BrickTileSteelLineN
           decals:
-            132: 1,-9
+            349: -2,-11
+            350: -3,-11
+        - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: BrickTileSteelLineN
+          decals:
+            363: 3,-11
+            364: 2,-11
         - node:
             color: '#FFFFFFFF'
             id: BrickTileSteelLineS
           decals:
             150: 2,-4
+        - node:
+            zIndex: 5
+            color: '#FFFFFFFF'
+            id: BrickTileSteelLineS
+          decals:
+            351: -3,-9
+            352: -2,-9
+            353: -1,-9
+            354: 1,-9
         - node:
             zIndex: 7
             color: '#FFFFFFFF'
@@ -479,6 +555,14 @@ entities:
             id: BrickTileSteelLineW
           decals:
             235: 1,-3
+        - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: BrickTileSteelLineW
+          decals:
+            360: 4,-8
+            361: 4,-9
+            362: 4,-10
         - node:
             zIndex: 8
             color: '#FFFFFFFF'
@@ -519,6 +603,7 @@ entities:
             249: -2,-6
             250: -2,-5
             256: 1,-7
+            398: -3,-6
         - node:
             zIndex: 4
             color: '#FFFFFFFF'
@@ -544,6 +629,9 @@ entities:
             id: MiniTileInnerOverlayNE
           decals:
             271: -2,-5
+            391: 0,-10
+            394: 1,-5
+            397: 0,-3
         - node:
             zIndex: 8
             color: '#D381C996'
@@ -551,6 +639,14 @@ entities:
           decals:
             269: 1,-3
             273: -1,-5
+            390: 0,-10
+            396: 0,-3
+        - node:
+            zIndex: 8
+            color: '#EFB34196'
+            id: MiniTileInnerOverlayNW
+          decals:
+            387: 3,-10
         - node:
             zIndex: 8
             color: '#D381C996'
@@ -558,12 +654,25 @@ entities:
           decals:
             266: 1,-4
             270: -2,-7
+            376: 0,-10
+            388: 3,-6
+            392: 0,-8
+            395: 1,-6
         - node:
             zIndex: 8
             color: '#D381C996'
             id: MiniTileInnerOverlaySW
           decals:
             272: -1,-7
+            377: 0,-10
+            389: 3,-6
+            393: 0,-8
+        - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: MiniTileSteelInnerNw
+          decals:
+            366: 4,-11
         - node:
             color: '#334E6DC8'
             id: MonoOverlay
@@ -584,14 +693,11 @@ entities:
             79: -3,-11
             81: -2,-9
             82: -3,-9
-            84: 1,-9
             85: 1,-11
             88: 1,-7
             89: 1,-8
             90: 2,-3
             97: 2,-4
-            145: -1,-9
-            146: 1,-9
             209: -2,-7
             210: -2,-5
         - node:
@@ -603,6 +709,8 @@ entities:
             315: 4,-6
             316: 7,-6
             317: 7,-5
+            346: 1,-9
+            347: -1,-9
         - node:
             zIndex: 6
             color: '#D381C996'
@@ -669,11 +777,6 @@ entities:
           decals:
             193: -6,-7
         - node:
-            color: '#FFFFFFFF'
-            id: WarnFull
-          decals:
-            199: -3,-6
-        - node:
             color: '#52B4E996'
             id: WarnFullGreyscale
           decals:
@@ -735,6 +838,15 @@ entities:
             id: WarnLineS
           decals:
             202: -2,-5
+        - node:
+            zIndex: 8
+            color: '#FFFFFFFF'
+            id: WarnLineS
+          decals:
+            400: -3,-6
+            401: -2,-7
+            402: -2,-6
+            403: -2,-5
     - type: GridAtmosphere
       version: 2
       data:
@@ -940,7 +1052,6 @@ entities:
   - uid: 12
     components:
     - type: Transform
-      rot: 1.5707963267948966 rad
       pos: -2.5,-5.5
       parent: 1
 - proto: AirSensor
