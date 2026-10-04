@@ -4,8 +4,8 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/04/2026 03:24:10
-  entityCount: 4207
+  time: 10/04/2026 03:38:28
+  entityCount: 4209
 maps: []
 grids:
 - 1
@@ -938,6 +938,16 @@ entities:
             2070: 2,-14
             2071: 1,-14
             2072: 2,-15
+            2193: 5,-8
+            2194: 5,-7
+            2195: 5,-6
+            2196: 6,-2
+            2197: 6,-3
+            2198: 5,-2
+            2199: 6,-1
+            2200: 5,-4
+            2208: 10,-22
+            2209: 9,-22
         - node:
             color: '#FFFFFFFF'
             id: DirtHeavy
@@ -970,6 +980,18 @@ entities:
             2120: 6,-30
             2121: 5,-20
             2122: 5,-19
+            2150: 12,-4
+            2158: 8,-1
+            2159: 8,0
+            2167: 15,2
+            2168: 17,-5
+            2169: 18,-4
+            2170: 18,-5
+            2186: -2,-20
+            2187: -6,-14
+            2188: -5,-14
+            2201: 5,-4
+            2202: 6,-4
         - node:
             color: '#FFFFFFFF'
             id: DirtHeavyMonotile
@@ -989,6 +1011,18 @@ entities:
             2106: 15,40
             2107: 15,39
             2108: 16,40
+            2151: 12,-1
+            2152: 13,-1
+            2160: 8,-3
+            2161: 11,-4
+            2171: 18,-6
+            2172: 10,-11
+            2173: 11,-11
+            2183: -6,-20
+            2184: -2,-21
+            2185: -1,-20
+            2189: -4,-17
+            2190: -2,-18
         - node:
             color: '#FFFFFFFF'
             id: DirtLight
@@ -1018,6 +1052,17 @@ entities:
             2116: 17,12
             2123: 6,-20
             2124: 6,-21
+            2178: 5,-11
+            2179: 7,-16
+            2180: 8,-26
+            2181: -5,-22
+            2182: -6,-21
+            2191: -3,-18
+            2203: 5,-1
+            2204: 5,-7
+            2205: 5,-6
+            2206: 12,-22
+            2207: 11,-22
         - node:
             cleanable: True
             color: '#FFFFFFFF'
@@ -1050,6 +1095,21 @@ entities:
             2118: 5,-30
             2119: 5,-31
             2125: 7,-20
+            2153: 12,0
+            2154: 13,-4
+            2155: 9,-3
+            2156: 8,-4
+            2157: 9,0
+            2162: 11,0
+            2163: 9,2
+            2164: 8,2
+            2165: 8,3
+            2166: 16,2
+            2174: 9,-11
+            2175: 10,-12
+            2176: 5,-12
+            2177: 6,-11
+            2192: -3,-15
         - node:
             color: '#FFFFFFFF'
             id: FlowersBROne
@@ -8771,6 +8831,16 @@ entities:
     - type: Transform
       pos: 5.5,-1.5
       parent: 1
+  - uid: 4208
+    components:
+    - type: Transform
+      pos: -3.5,-11.5
+      parent: 1
+  - uid: 4209
+    components:
+    - type: Transform
+      pos: -3.5,-10.5
+      parent: 1
 - proto: CableHV
   entities:
   - uid: 1202
@@ -12512,12 +12582,12 @@ entities:
       - 4206
       - 4205
       - 4207
-      - 1874
       - 1875
-      - 1873
       - 1876
+      - 1874
       - 1877
       - 1878
+      - 4188
       - 1879
       - 1880
       - 1881
@@ -12736,7 +12806,7 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 1856
-  - uid: 1873
+  - uid: 1874
     components:
     - type: Transform
       pos: -2.5,-21.5
@@ -12744,7 +12814,7 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 1853
-  - uid: 1874
+  - uid: 1875
     components:
     - type: Transform
       pos: -3.5,-21.5
@@ -12752,19 +12822,10 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 1853
-  - uid: 1875
-    components:
-    - type: Transform
-      pos: -4.5,-21.5
-      parent: 1
-    - type: DeviceNetwork
-      deviceLists:
-      - 1853
   - uid: 1876
     components:
     - type: Transform
-      rot: 3.141592653589793 rad
-      pos: -4.5,-23.5
+      pos: -4.5,-21.5
       parent: 1
     - type: DeviceNetwork
       deviceLists:
@@ -12773,7 +12834,7 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: -3.5,-23.5
+      pos: -4.5,-23.5
       parent: 1
     - type: DeviceNetwork
       deviceLists:
@@ -12782,7 +12843,7 @@ entities:
     components:
     - type: Transform
       rot: 3.141592653589793 rad
-      pos: -2.5,-23.5
+      pos: -3.5,-23.5
       parent: 1
     - type: DeviceNetwork
       deviceLists:
@@ -12858,6 +12919,15 @@ entities:
     - type: DeviceNetwork
       deviceLists:
       - 1850
+  - uid: 4188
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: -2.5,-23.5
+      parent: 1
+    - type: DeviceNetwork
+      deviceLists:
+      - 1853
   - uid: 4202
     components:
     - type: Transform
@@ -27960,6 +28030,11 @@ entities:
       parent: 1
 - proto: WoodDoor
   entities:
+  - uid: 1873
+    components:
+    - type: Transform
+      pos: -3.5,-12.5
+      parent: 1
   - uid: 4184
     components:
     - type: Transform
@@ -27979,11 +28054,6 @@ entities:
     components:
     - type: Transform
       pos: -4.5,-12.5
-      parent: 1
-  - uid: 4188
-    components:
-    - type: Transform
-      pos: -3.5,-12.5
       parent: 1
 - proto: WoodSecretDoor
   entities:
