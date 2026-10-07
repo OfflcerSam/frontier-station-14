@@ -19,9 +19,13 @@
 
   # Generator Families
 
+  [textlink="Stirling Generators" link="NFStationaryStirlingGenerators"]
+  Generators with interchangeable solid or liquid fuel modules.
+
   [textlink="Combustion Engines" link="NFStationaryCombustionGenerators"]
   Fueled engines that use combustion.
 
   [textlink="Radioisotope Thermoelectric Generators" link="NFStationaryIsotopeGenerators"]
   Auxiliary generators that use finite isotope cells to generate power.
 </Document>
+

@@ -1,0 +1,124 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+- type: entity
+  parent: BaseItem
+  id: NFFuelHopperCompact
+  name: basic compact fuel hopper
+  description: A removable fuel hopper with a securing latch.
+  components:
+  - type: FuelModule
+    kind: Solid
+    moduleSize: Compact
+    baseCapacity: 4000
+    materialFuelValues:
+      Wood: 0.0625
+      Coal: 0.1
+      Plasma: 0.125
+      FuelGradePlasma: 0.125
+  - type: Sprite
+    sprite: _NF/Objects/Misc/stock_parts.rsi
+    state: matter_bin
+    color: "#CDAD7F"
+  - type: Item
+    size: Large
+  - type: CollisionWake
+    enabled: false
+  - type: Fixtures
+    fixtures:
+      fuel_intake:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.3,-0.3,0.3,0.3"
+        hard: false
+        layer: [BulletImpassable]
+  - type: Appearance
+  - type: Openable
+    closeable: true
+    openOnActivate: true
+    examineText: fuel-module-lid-open
+    closedPopup: fuel-module-lid-closed
+    openVerbText: fuel-module-open
+    closeVerbText: fuel-module-close
+  - type: Lock
+    locked: false
+    useAccess: false
+    unlockOnClick: false
+  - type: ItemSlots
+    slots:
+      matter_bin:
+        startingItem: MatterBinStockPart
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [MachinePart]
+  - type: ContainerContainer
+    containers:
+      matter_bin: !type:ContainerSlot
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 200
+  - type: GuideHelp
+    guides: [NFStationaryStirlingGenerators]
+
+- type: entity
+  parent: NFFuelHopperCompact
+  id: NFFuelHopperStandard
+  name: basic standard fuel hopper
+  components:
+  - type: FuelModule
+    moduleSize: Standard
+    baseCapacity: 12000
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 300
+
+- type: entity
+  parent: NFFuelHopperCompact
+  id: NFLiquidFuelTankCompact
+  name: basic compact liquid fuel tank
+  description: A removable fuel tank with a securing latch and level gauge.
+  components:
+  - type: FuelModule
+    kind: Liquid
+    baseCapacity: 500
+  - type: Sprite
+    color: "#77B8D4"
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 500
+  - type: ChemicalFuelGeneratorAdapter
+    solution: tank
+    reagents:
+      WeldingFuel: 1
+      Ethanol: 0.8
+      Plasma: 1.2
+  - type: RefillableSolution
+    solution: tank
+  - type: DrainableSolution
+    solution: tank
+  - type: SolutionTransfer
+    transferAmount: 50
+  - type: ExaminableSolution
+    solution: tank
+    examinableWhileClosed: false
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 200
+      Glass: 100
+
+- type: entity
+  parent: NFLiquidFuelTankCompact
+  id: NFLiquidFuelTankStandard
+  name: basic standard liquid fuel tank
+  components:
+  - type: FuelModule
+    moduleSize: Standard
+    baseCapacity: 1500
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 1500
+
+

@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorStirlingCompactMachineCircuitboard
+  result: NFStationaryGeneratorStirlingCompactMachineCircuitboard
+
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorStirlingStandardMachineCircuitboard
+  result: NFStationaryGeneratorStirlingStandardMachineCircuitboard
+
+# Shell cost plus one included basic Matter Bin (50 Steel, 50 Plastic).
+- type: latheRecipe
+  id: NFFuelHopperCompact
+  result: NFFuelHopperCompact
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 250
+    Plastic: 50
+
+- type: latheRecipe
+  id: NFFuelHopperStandard
+  result: NFFuelHopperStandard
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 350
+    Plastic: 50
+
+- type: latheRecipe
+  id: NFLiquidFuelTankCompact
+  result: NFLiquidFuelTankCompact
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 250
+    Glass: 100
+    Plastic: 50
+
+- type: latheRecipe
+  id: NFLiquidFuelTankStandard
+  result: NFLiquidFuelTankStandard
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 250
+    Glass: 100
+    Plastic: 50

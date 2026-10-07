@@ -88,6 +88,8 @@
   recipes:
   - PortableGeneratorDKJrMachineCircuitboard
   - NFStationaryGeneratorCombustionStandardMachineCircuitboard
+  - NFStationaryGeneratorStirlingCompactMachineCircuitboard
+  - NFStationaryGeneratorStirlingStandardMachineCircuitboard
   - NFStationaryGeneratorIsotopeCompactMachineCircuitboard
   - NFStationaryGeneratorIsotopeStandardMachineCircuitboard
 
@@ -116,7 +118,12 @@
   - PicoManipulatorStockPart
   - NFWeaponParticleDecelerator
   - NFIsotopeCellCasing
+  - NFFuelHopperCompact
+  - NFFuelHopperStandard
+  - NFLiquidFuelTankCompact
+  - NFLiquidFuelTankStandard
   - NFRadiationShieldingInsertR2
   - NFRadiationShieldingInsertR3
   - NFRadiationShieldingInsertR4
+
 

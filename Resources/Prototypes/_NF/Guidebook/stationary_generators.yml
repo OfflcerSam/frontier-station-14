@@ -5,6 +5,7 @@
   children:
   - NFStationaryCombustionGenerators
   - NFStationaryIsotopeGenerators
+  - NFStationaryStirlingGenerators
 
 - type: guideEntry
   id: NFStationaryCombustionGenerators
@@ -15,3 +16,8 @@
   id: NFStationaryIsotopeGenerators
   name: guide-entry-stationary-isotope-generators
   text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryIsotopeGenerators.xml"
+
+- type: guideEntry
+  id: NFStationaryStirlingGenerators
+  name: guide-entry-stationary-stirling-generators
+  text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryStirlingGenerators.xml"

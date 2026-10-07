@@ -1326,6 +1326,12 @@
   recipeUnlocks:
   - PortableGeneratorPacmanMachineCircuitboard
   - NFStationaryGeneratorCombustionStandardMachineCircuitboard
+  - NFStationaryGeneratorStirlingCompactMachineCircuitboard
+  - NFStationaryGeneratorStirlingStandardMachineCircuitboard
+  - NFFuelHopperCompact
+  - NFFuelHopperStandard
+  - NFLiquidFuelTankCompact
+  - NFLiquidFuelTankStandard
   - PowerComputerCircuitboard
   technologyPrerequisites:
   - NFTrashPowerGeneration
@@ -1960,5 +1966,6 @@
   - NFImprovedSalvageWeapons
   - NFExplosiveTechnology
   position: 4, 40
+
 
 

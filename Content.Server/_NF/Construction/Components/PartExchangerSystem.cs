@@ -78,6 +78,15 @@ public sealed class PartExchangerSystem : EntitySystem
             }
         }
 
+        // Frontier: a removable fuel module owns its capacity part.
+        if (TryComp<Content.Shared._NF.Power.FuelModules.FuelModuleComponent>(args.Args.Target.Value, out var moduleComponent))
+        {
+            EntityManager.System<Content.Server._NF.Power.FuelModules.FuelModuleSystem>()
+                .TryExchangeModulePart((args.Args.Target.Value, moduleComponent), uid);
+            args.Handled = true;
+            return;
+        }
+
         // Exchange machine parts with the machine or frame.
         if (TryComp<MachineComponent>(args.Args.Target.Value, out var machine))
             TryExchangeMachineParts(machine, args.Args.Target.Value, uid, partsByType, component.PreferHigherRating);
@@ -329,7 +338,7 @@ public sealed class PartExchangerSystem : EntitySystem
         if (args.Target == null)
             return;
 
-        if (!HasComp<MachineComponent>(args.Target) && !HasComp<MachineFrameComponent>(args.Target))
+        if (!HasComp<MachineComponent>(args.Target) && !HasComp<MachineFrameComponent>(args.Target) && !HasComp<Content.Shared._NF.Power.FuelModules.FuelModuleComponent>(args.Target)) // Frontier: removable fuel modules
             return;
 
         if (TryComp<WiresPanelComponent>(args.Target, out var panel) && !panel.Open)
@@ -352,3 +361,4 @@ public sealed class PartExchangerSystem : EntitySystem
         });
     }
 }
+

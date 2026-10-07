@@ -1,0 +1,32 @@
+<!-- SPDX-FileCopyrightText: 2026 OfflcerSam -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<Document>
+  # Stirling Generators
+
+  <Box>
+    <GuideEntityEmbed Entity="NFStationaryGeneratorStirlingCompact" Caption="Compact: 1 tile, 8 kW rated, 16 kW maximum" />
+    <GuideEntityEmbed Entity="NFStationaryGeneratorStirlingStandard" Caption="Standard: 2 tiles, 20 kW rated, 30 kW maximum" />
+  </Box>
+
+  # Operation
+
+  Requires a matching fuel module, room oxygen and MV or HV cable. Emits hot carbon dioxide. Fuel consumption follows the selected target, even when network demand is lower. Loss of oxygen or fuel stops the engine.
+
+  # Fuel Modules
+
+  Stop the engine and unscrew its service hatch to install a module. Use a crowbar to remove it. Compact and Standard modules fit matching chassis. Fuel and upgrades remain in the removed module.
+
+  Open the module lid to fill it. Close and latch the lid to secure it. The engine can draw fuel with the lid closed. The generator's interaction menu operates an installed module's lid and latch.
+
+  Hoppers accept wood, coal, plasma sheets and fuel-grade plasma rods. An open hopper catches thrown compatible fuel. Tanks accept Welding Fuel, Ethanol and Plasma reagent.
+
+  Basic hopper capacity: 40 pieces Compact, 120 Standard. At rated output, a full plasma load lasts 2.5 / 3 hours; coal 2 / 2.4 hours; wood 1.25 / 1.5 hours.
+
+  Basic tank capacity: 500u Compact, 1500u Standard. Welding Fuel lasts 2.5 / 3 hours at rated output. Ethanol provides 80 percent and Plasma 120 percent of Welding Fuel's endurance.
+
+  # Upgrades and Handling
+
+  Capacitors raise the output ceiling and ramp rate. Manipulators reduce fuel consumption. Remove a module, open its lid and use an RPED to upgrade its Matter Bin: R2 / R3 / R4 capacity is 120 / 140 / 160 percent. RPED upgrades do not change intake type.
+
+  A relative impact of at least 15 m/s can open an unlatched lid and spill 25 percent of its contents. Open modules also spill. A two-second cooldown prevents repeated spills from one collision. Solid spills release whole pieces; smaller remainders stay inside. Latched lids resist these spills.
+</Document>

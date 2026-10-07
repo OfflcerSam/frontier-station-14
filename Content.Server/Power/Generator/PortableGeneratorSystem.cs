@@ -262,6 +262,14 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
             fuelCapacity = solution.MaxVolume.Float();
         }
 
+        // Frontier: the installed module owns the actual liquid volume.
+        if (EntityManager.System<Content.Server._NF.Power.FuelModules.FuelModuleSystem>().GetInstalledModule(uid) is { } module &&
+            _solutionContainers.TryGetSolution(module, "tank", out _, out var fuelSolution))
+        {
+            fuelVolume = fuelSolution.Volume.Float();
+            fuelCapacity = fuelSolution.MaxVolume.Float();
+        }
+
         _uiSystem.SetUiState(
             uid,
             GeneratorComponentUiKey.Key,
@@ -272,5 +280,6 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
             });
     }
 }
+
 
 
