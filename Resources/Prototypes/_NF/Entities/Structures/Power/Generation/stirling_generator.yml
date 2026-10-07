@@ -99,6 +99,7 @@
   - type: GuideHelp
     guides:
     - NFStationaryStirlingGenerators
+  - type: FuelLeak
   - type: Destructible
     thresholds:
     - trigger: !type:DamageTrigger
@@ -182,3 +183,68 @@
     stackRequirements:
       CableHV: 5
       Steel: 3
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompact
+  id: NFStationaryGeneratorStirlingCompactSolid
+  suffix: Solid module
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        startingItem: NFFuelHopperCompact
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompact
+  id: NFStationaryGeneratorStirlingCompactLiquid
+  suffix: Liquid module
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        startingItem: NFLiquidFuelTankCompact
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandard
+  id: NFStationaryGeneratorStirlingStandardSolid
+  suffix: Solid module
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        startingItem: NFFuelHopperStandard
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandard
+  id: NFStationaryGeneratorStirlingStandardLiquid
+  suffix: Liquid module
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        startingItem: NFLiquidFuelTankStandard
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [FuelModule]
+

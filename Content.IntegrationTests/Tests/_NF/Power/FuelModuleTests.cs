@@ -6,7 +6,9 @@ using Content.Server.Power.Generator;
 using Content.Shared._NF.Power.FuelModules;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
-using Content.Shared.Nutrition.EntitySystems;
+using Content.Shared.Examine;
+using Content.Shared.Damage;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Power.Generator;
 using Content.Shared.Wires;
 using Robust.Shared.GameObjects;
@@ -50,73 +52,52 @@ public sealed class FuelModuleTests : InteractionTest
     }
 
     [Test]
-    public async Task LidControlsLoading()
+    public async Task PanelControlsLoading()
     {
+        await SpawnTarget("NFStationaryGeneratorStirlingCompactSolid");
+        await InteractUsing(Screw);
+        await InteractUsing("SheetPlasma", 2);
+        await Server.WaitAssertion(() => Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget!.Value), Is.Zero));
+        await InteractUsing(Screw);
+        await InteractUsing("SheetPlasma", 2);
+        await Server.WaitAssertion(() => Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget!.Value), Is.EqualTo(25)));
+        await Delete(Target!.Value);
         await SpawnTarget("NFFuelHopperCompact");
-        await InteractUsing("SheetPlasma", 2);
-        await Server.WaitAssertion(() =>
-        {
-            Assert.That(SEntMan.GetComponent<FuelModuleComponent>(STarget!.Value).FractionalFuel, Is.Empty);
-            Assert.That(SEntMan.System<OpenableSystem>().TryOpen(STarget.Value), Is.True);
-        });
-        await InteractUsing("SheetPlasma", 2);
-        await Server.WaitAssertion(() =>
-            Assert.That(SEntMan.GetComponent<FuelModuleComponent>(STarget!.Value).FractionalFuel["Plasma"], Is.EqualTo(200)));
         await PlaceInHands("SheetPlasma");
         Assert.That(await ThrowItem(), Is.True);
         await RunTicks(90);
-        await Server.WaitAssertion(() =>
-            Assert.That(SEntMan.GetComponent<FuelModuleComponent>(STarget!.Value).FractionalFuel["Plasma"], Is.EqualTo(300)));
+        await Server.WaitAssertion(() => Assert.That(SEntMan.GetComponent<FuelModuleComponent>(STarget!.Value).FractionalFuel["Plasma"], Is.EqualTo(100)));
     }
 
-    [Test]
-    public async Task ImpactSpillsContents()
-    {
-        await SpawnTarget("NFFuelHopperCompact");
-        await Server.WaitAssertion(() =>
-        {
-            var entity = STarget!.Value;
-            var module = SEntMan.GetComponent<FuelModuleComponent>(entity);
-            var generator = SEntMan.System<FuelModuleSystem>();
-            module.FractionalFuel["Plasma"] = 850;
-            Assert.That(generator.HandleImpact((entity, module), 14.9f), Is.False);
-            Assert.That(generator.HandleImpact((entity, module), 15f), Is.True);
-            Assert.That(SEntMan.System<OpenableSystem>().IsClosed(entity), Is.False);
-            Assert.That(module.FractionalFuel["Plasma"], Is.EqualTo(650));
-            Assert.That(generator.HandleImpact((entity, module), 15f), Is.False);
-            Assert.That(module.FractionalFuel["Plasma"], Is.EqualTo(650));
-            Assert.That(generator.ToggleLid(entity, SPlayer), Is.True);
-            Assert.That(generator.ToggleLidLock(entity, SPlayer), Is.True);
-            module.NextSpillTime = TimeSpan.Zero;
-            Assert.That(generator.HandleImpact((entity, module), 30f), Is.False);
-            Assert.That(module.FractionalFuel["Plasma"], Is.EqualTo(650));
-        });
-    }
-
-    [TestCase("NFLiquidFuelTankCompact", 500f)]
-    public async Task ImpactSpillsContents(string prototypeId, float fuelCapacity)
+    [TestCase("NFStationaryGeneratorStirlingCompactSolid", FuelModuleKind.Solid, FuelModuleSize.Compact)]
+    [TestCase("NFStationaryGeneratorStirlingCompactLiquid", FuelModuleKind.Liquid, FuelModuleSize.Compact)]
+    [TestCase("NFStationaryGeneratorStirlingStandardSolid", FuelModuleKind.Solid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorStirlingStandardLiquid", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
+    public async Task MappingVariantsIncludeModules(string prototypeId, FuelModuleKind fuel, FuelModuleSize state)
     {
         await SpawnTarget(prototypeId);
         await Server.WaitAssertion(() =>
         {
-            var entity = STarget!.Value;
-            var module = SEntMan.GetComponent<FuelModuleComponent>(entity);
-            var solution = SEntMan.System<SharedSolutionContainerSystem>();
-            Assert.That(solution.TryGetSolution(entity, "tank", out var fuelSolution, out var fuel), Is.True);
-            solution.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(200), out _);
-            solution.TryAddReagent(fuelSolution.Value, "Ethanol", FixedPoint2.New(200), out _);
-            var generator = SEntMan.System<FuelModuleSystem>();
-            Assert.That(generator.GetModuleFuel((entity, module)), Is.EqualTo(360).Within(0.01));
-            Assert.That(generator.HandleImpact((entity, module), 15), Is.True);
-            Assert.That(fuel!.Volume.Float(), Is.EqualTo(300));
-            Assert.That(fuel.MaxVolume.Float(), Is.EqualTo(fuelCapacity));
-            Assert.That(generator.GetModuleFuel((entity, module)), Is.EqualTo(270).Within(0.01));
-            Assert.That(generator.HandleImpact((entity, module), 15), Is.False);
+            var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(STarget!.Value);
+            Assert.That(module, Is.Not.Null);
+            var moduleComponent = SEntMan.GetComponent<FuelModuleComponent>(module!.Value);
+            Assert.That(moduleComponent.Kind, Is.EqualTo(fuel));
+            Assert.That(moduleComponent.ModuleSize, Is.EqualTo(state));
+            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget.Value), Is.Zero);
+            var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget.Value, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("It has a fuel label for"));
+            Assert.That(markup, Does.Not.Contain("installed."));
+        });
+        await InteractUsing(Screw);
+        await Server.WaitAssertion(() =>
+        {
+            var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget!.Value, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("installed."));
+            Assert.That(markup, Does.Not.Contain("fuel label for"));
         });
     }
-
     [TestCase("NFLiquidFuelTankCompact")]
-    public async Task LidControlsLoading(string prototypeId)
+    public async Task PanelControlsLoading(string prototypeId)
     {
         await SpawnTarget("NFStationaryGeneratorStirlingCompact");
         await Interact(Screw, prototypeId);
@@ -133,11 +114,53 @@ public sealed class FuelModuleTests : InteractionTest
         {
             Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget!.Value), Is.Zero);
             var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(STarget.Value)!.Value;
-            Assert.That(SEntMan.System<OpenableSystem>().TryOpen(module), Is.True);
+            SEntMan.System<SharedWiresSystem>().TogglePanel(STarget.Value, SEntMan.GetComponent<WiresPanelComponent>(STarget.Value), false, SPlayer);
         });
         await Interact();
         await Server.WaitAssertion(() =>
             Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget!.Value), Is.GreaterThan(0)));
+    }
+
+    [TestCase("NFStationaryGeneratorStirlingCompactLiquid", 500f, 100f)]
+    [TestCase("NFStationaryGeneratorStirlingStandardLiquid", 1500f, 100f)]
+    [TestCase("NFStationaryGeneratorCombustionStandard", 1800f, 100f)]
+    [TestCase("NFLiquidFuelTankCompact", 500f, 50f)]
+    public async Task FuelLeaksAboveDamageThreshold(string prototypeId, float fuelCapacity, float destructionThreshold)
+    {
+        await SpawnTarget(prototypeId);
+        await Server.WaitAssertion(() =>
+        {
+            var entity = STarget!.Value;
+            var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(entity) ?? entity;
+            var solution = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solution.TryGetSolution(module, "tank", out var fuelSolution, out var fuel), Is.True);
+            solution.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(fuelCapacity / 2), out _);
+            solution.TryAddReagent(fuelSolution.Value, "Ethanol", FixedPoint2.New(fuelCapacity / 2), out _);
+            var damageable = SEntMan.System<DamageableSystem>();
+            damageable.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(destructionThreshold * 0.19f) } }, true);
+            Assert.That(fuel!.Volume.Float(), Is.EqualTo(fuelCapacity).Within(0.01));
+            damageable.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(destructionThreshold * 0.01f) } }, true);
+            Assert.That(fuel.Volume.Float(), Is.EqualTo(fuelCapacity * 0.98f).Within(0.01));
+            damageable.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(destructionThreshold * 0.06f) } }, true);
+            Assert.That(fuel.Volume.Float(), Is.EqualTo(fuelCapacity * 0.92f).Within(0.01));
+            damageable.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(-destructionThreshold * 0.07f) } }, true);
+            Assert.That(fuel.Volume.Float(), Is.EqualTo(fuelCapacity * 0.92f).Within(0.01));
+            damageable.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(destructionThreshold * 0.01f) } }, true);
+            Assert.That(fuel.Volume.Float(), Is.EqualTo(fuelCapacity * 0.90f).Within(0.01));
+        });
+    }
+
+    [TestCase("NFStationaryGeneratorStirlingCompactSolid")]
+    public async Task FuelLeaksAboveDamageThreshold(string prototypeId)
+    {
+        await SpawnTarget(prototypeId);
+        await InteractUsing("SheetPlasma", 4);
+        await Server.WaitAssertion(() =>
+        {
+            SEntMan.System<DamageableSystem>().TryChangeDamage(STarget!.Value,
+                new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(90) } }, true);
+            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget.Value), Is.EqualTo(50));
+        });
     }
 
     [TestCase("NFFuelHopperCompact", 4000f)]
@@ -145,7 +168,6 @@ public sealed class FuelModuleTests : InteractionTest
     public async Task ModuleUpgradesThroughRPED(string prototypeId, float fuelCapacity)
     {
         await SpawnTarget(prototypeId);
-        await Server.WaitAssertion(() => SEntMan.System<OpenableSystem>().TryOpen(STarget!.Value));
         await InteractUsing("RPEDT4Filled");
         await Server.WaitAssertion(() =>
         {
@@ -180,6 +202,10 @@ public sealed class FuelModuleTests : InteractionTest
         });
     }
 }
+
+
+
+
 
 
 

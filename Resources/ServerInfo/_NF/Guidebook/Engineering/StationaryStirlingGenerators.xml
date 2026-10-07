@@ -16,9 +16,9 @@
 
   Stop the engine and unscrew its service hatch to install a module. Use a crowbar to remove it. Compact and Standard modules fit matching chassis. Fuel and upgrades remain in the removed module.
 
-  Open the module lid to fill it. Close and latch the lid to secure it. The engine can draw fuel with the lid closed. The generator's interaction menu operates an installed module's lid and latch.
+  Close the maintenance panel before adding fuel. Loose modules can be filled directly. There are no separate fuel lids or latches.
 
-  Hoppers accept wood, coal, plasma sheets and fuel-grade plasma rods. An open hopper catches thrown compatible fuel. Tanks accept Welding Fuel, Ethanol and Plasma reagent.
+  Hoppers accept wood, coal, plasma sheets and fuel-grade plasma rods. Hoppers catch thrown compatible fuel; an installed hopper requires a closed maintenance panel. Tanks accept Welding Fuel, Ethanol and Plasma reagent.
 
   Basic hopper capacity: 40 pieces Compact, 120 Standard. At rated output, a full plasma load lasts 2.5 / 3 hours; coal 2 / 2.4 hours; wood 1.25 / 1.5 hours.
 
@@ -26,7 +26,9 @@
 
   # Upgrades and Handling
 
-  Capacitors raise the output ceiling and ramp rate. Manipulators reduce fuel consumption. Remove a module, open its lid and use an RPED to upgrade its Matter Bin: R2 / R3 / R4 capacity is 120 / 140 / 160 percent. RPED upgrades do not change intake type.
+  Capacitors raise the output ceiling and ramp rate. Manipulators reduce fuel consumption. Remove a module and use an RPED to upgrade its Matter Bin: R2 / R3 / R4 capacity is 120 / 140 / 160 percent. RPED upgrades do not change intake type.
 
-  A relative impact of at least 15 m/s can open an unlatched lid and spill 25 percent of its contents. Open modules also spill. A two-second cooldown prevents repeated spills from one collision. Solid spills release whole pieces; smaller remainders stay inside. Latched lids resist these spills.
+  At 80 percent remaining integrity, liquid tanks leak 2 percent of capacity. Each further 2 percent integrity lost releases another 2 percent of capacity. Large hits count each crossed step. Leaks occur only on damage; repairs cause no leakage. Damage does not spill solid fuel.
 </Document>
+
+

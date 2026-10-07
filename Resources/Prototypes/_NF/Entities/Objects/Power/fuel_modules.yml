@@ -4,7 +4,7 @@
   parent: BaseItem
   id: NFFuelHopperCompact
   name: basic compact fuel hopper
-  description: A removable fuel hopper with a securing latch.
+  description: A removable hopper for solid generator fuel.
   components:
   - type: FuelModule
     kind: Solid
@@ -31,17 +31,6 @@
         hard: false
         layer: [BulletImpassable]
   - type: Appearance
-  - type: Openable
-    closeable: true
-    openOnActivate: true
-    examineText: fuel-module-lid-open
-    closedPopup: fuel-module-lid-closed
-    openVerbText: fuel-module-open
-    closeVerbText: fuel-module-close
-  - type: Lock
-    locked: false
-    useAccess: false
-    unlockOnClick: false
   - type: ItemSlots
     slots:
       matter_bin:
@@ -77,7 +66,7 @@
   parent: NFFuelHopperCompact
   id: NFLiquidFuelTankCompact
   name: basic compact liquid fuel tank
-  description: A removable fuel tank with a securing latch and level gauge.
+  description: A removable generator fuel tank with a level gauge.
   components:
   - type: FuelModule
     kind: Liquid
@@ -88,6 +77,19 @@
     solutions:
       tank:
         maxVol: 500
+  - type: FuelLeak
+  - type: Damageable
+    damageContainer: Inorganic
+    damageModifierSet: Metallic
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 50
+      behaviors:
+      - !type:SpillBehavior
+        solution: tank
+      - !type:DoActsBehavior
+        acts: [Destruction]
   - type: ChemicalFuelGeneratorAdapter
     solution: tank
     reagents:
@@ -102,7 +104,7 @@
     transferAmount: 50
   - type: ExaminableSolution
     solution: tank
-    examinableWhileClosed: false
+
   - type: PhysicalComposition
     materialComposition:
       Steel: 200
@@ -120,5 +122,7 @@
     solutions:
       tank:
         maxVol: 1500
+
+
 
 

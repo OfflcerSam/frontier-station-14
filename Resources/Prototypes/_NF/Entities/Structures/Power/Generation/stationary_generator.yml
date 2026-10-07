@@ -98,6 +98,7 @@
   - type: GuideHelp
     guides:
     - NFStationaryCombustionGenerators
+  - type: FuelLeak
   - type: Destructible
     thresholds:
     - trigger: !type:DamageTrigger
@@ -129,6 +130,7 @@
     stackRequirements:
       CableHV: 10
       Steel: 5
+
 
 
 

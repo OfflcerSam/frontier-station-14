@@ -15,6 +15,8 @@
 
   Pour Welding Fuel, Ethanol or Plasma reagent into the tank. Juice granatapfel to make Welding Fuel, or grind plasma ore and sheets to obtain Plasma reagent. Solid materials cannot be inserted directly. Other reagents contaminate the tank and prevent starting; empty the fuel and refill with an accepted liquid.
 
+  At 80 percent remaining integrity, the tank leaks 2 percent of capacity. Each further 2 percent integrity lost releases another 2 percent of capacity. Leakage occurs on damage events, including while switched off.
+
   # Stock Parts
 
   <Box>
@@ -29,3 +31,4 @@
 
   With every part at rating 4, standard combustion reaches a 63 kW ceiling and 2880u capacity. Raising the target beyond its rated output uses more fuel and oxygen; keeping the rated target gives longer endurance. Different models may use different parts and support different upgrades.
 </Document>
+

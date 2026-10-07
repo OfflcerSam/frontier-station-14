@@ -2,16 +2,17 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 guide-entry-stationary-stirling-generators = Stirling Generators
 fuel-module-install-denied = You cannot fit that module here right now.
-fuel-module-service-denied = Stop the engine and unscrew the hatch first.
-fuel-module-open = Open fuel lid
-fuel-module-close = Close fuel lid
-fuel-module-lock = Secure fuel lid
-fuel-module-unlock = Release fuel lid
-fuel-module-lid-open = The fuel lid is open.
-fuel-module-lid-closed = The fuel lid is closed.
-fuel-module-installed = Fuel module: [color=lightblue]{$module}[/color].
-fuel-module-none = empty
-fuel-module-capacity = Capacity label: [color=lightblue]{$capacity} {$units}[/color].
+fuel-module-service-denied = You must stop the engine first.
+fuel-module-panel-closed = You must open the panel first.
+fuel-module-panel-open = You must close the maintenance panel.
+fuel-module-installed = It has a [color=lightblue]{$module}[/color] installed.
+fuel-module-none = It has an empty fuel module slot.
+fuel-module-label-solid = It has a fuel label for [color=lightblue]solids[/color].
+fuel-module-label-liquid = It has a fuel label for [color=lightblue]liquids[/color].
+fuel-module-capacity = It has a capacity label reading [color=lightblue]{$capacity} {$units}[/color].
 fuel-module-liquid-units = u
 fuel-module-solid-units = material units
-fuel-module-material = {$material}: approximately {$amount} pieces.
+fuel-module-material = It has approximately {$amount} pieces of {$material} inside.
+fuel-module-loaded = You place {THE($material)} into {THE($target)}.
+fuel-module-poured = You pour fuel into {THE($target)}.
+

@@ -15,45 +15,35 @@ using Content.Shared.Construction.Components;
 using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Content.Shared.Interaction;
-using Content.Shared.Lock;
 using Content.Shared.Materials;
-using Content.Shared.Nutrition.Components;
-using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Power.Generator;
 using Content.Shared.Stacks;
 using Content.Shared.Storage;
 using Content.Shared.Throwing;
 using Content.Shared.Tools.Systems;
-using Content.Shared.Verbs;
 using Content.Shared.Wires;
 using Robust.Shared.Containers;
 using Robust.Shared.Physics.Events;
-using Robust.Shared.Physics.Systems;
-using Robust.Shared.Timing;
-using Robust.Shared.Map.Components;
+using Robust.Shared.Prototypes;
 
 namespace Content.Server._NF.Power.FuelModules;
 
 /// <summary>Exclusive fuel routing to removable, size-matched containers.</summary>
 public sealed class FuelModuleSystem : EntitySystem
 {
+    [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
     [Dependency] private readonly ItemSlotsSystem _itemSlots = default!;
-    [Dependency] private readonly SharedContainerSystem _containers = default!;
     [Dependency] private readonly Content.Server.Stack.StackSystem _stack = default!;
     [Dependency] private readonly MaterialStorageSystem _materialStorage = default!;
     [Dependency] private readonly SharedSolutionContainerSystem _solutionContainers = default!;
     [Dependency] private readonly GeneratorSystem _generator = default!;
-    [Dependency] private readonly OpenableSystem _openable = default!;
     [Dependency] private readonly SharedToolSystem _tools = default!;
-    [Dependency] private readonly SharedPhysicsSystem _physics = default!;
     [Dependency] private readonly PuddleSystem _puddles = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
-    [Dependency] private readonly IGameTiming _timing = default!;
 
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<MapGridComponent, StartCollideEvent>(OnCollision);
         SubscribeLocalEvent<FuelModuleComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<FuelModuleComponent, InteractUsingEvent>(OnInteractUsing, before: new[] { typeof(Content.Server.Construction.ConstructionSystem) });
         SubscribeLocalEvent<FuelModuleComponent, ExaminedEvent>(OnExamined);
@@ -62,7 +52,6 @@ public sealed class FuelModuleSystem : EntitySystem
         SubscribeLocalEvent<FuelModuleComponent, EntRemovedFromContainerMessage>(OnContainerRemoved);
         SubscribeLocalEvent<FuelModuleHostComponent, InteractUsingEvent>(OnInteractUsing,
             before: new[] { typeof(Content.Server.Construction.ConstructionSystem) });
-        SubscribeLocalEvent<FuelModuleHostComponent, GetVerbsEvent<InteractionVerb>>(OnGetVerbs);
         SubscribeLocalEvent<FuelModuleHostComponent, ExaminedEvent>(OnExamined);
         SubscribeLocalEvent<FuelModuleHostComponent, StartCollideEvent>(OnCollision);
         SubscribeLocalEvent<FuelModuleHostComponent, GeneratorGetFuelEvent>(OnGetFuel);
@@ -124,41 +113,57 @@ public sealed class FuelModuleSystem : EntitySystem
         {
             arguments.Handled = true;
             if (!TryInstallModule(entity, arguments.Used, arguments.User))
-                _popup.PopupEntity(Loc.GetString("fuel-module-install-denied"), entity, arguments.User);
+                _popup.PopupEntity(Loc.GetString(!Comp<WiresPanelComponent>(entity).Open ? "fuel-module-panel-closed" : Comp<FuelGeneratorComponent>(entity).On ? "fuel-module-service-denied" : "fuel-module-install-denied"), entity, arguments.User);
             return;
         }
         if (_tools.HasQuality(arguments.Used, "Prying") && GetInstalledModule(entity) != null)
         {
             arguments.Handled = true;
             if (!TryRemoveModule(entity, arguments.User))
-                _popup.PopupEntity(Loc.GetString("fuel-module-service-denied"), entity, arguments.User);
+                _popup.PopupEntity(Loc.GetString(!Comp<WiresPanelComponent>(entity).Open ? "fuel-module-panel-closed" : "fuel-module-service-denied"), entity, arguments.User);
             return;
         }
         if (GetInstalledModule(entity) is not { } module)
             return;
-        if (TryLoadSolidFuel((module, Comp<FuelModuleComponent>(module)), arguments.Used, arguments.User))
+        if (Comp<WiresPanelComponent>(entity).Open &&
+            (HasComp<StackComponent>(arguments.Used) || HasComp<SolutionTransferComponent>(arguments.Used)))
+        {
             arguments.Handled = true;
+            _popup.PopupEntity(Loc.GetString("fuel-module-panel-open"), entity, arguments.User);
+            return;
+        }
+        if (TryLoadSolidFuel((module, Comp<FuelModuleComponent>(module)), arguments.Used, arguments.User))
+        {
+            arguments.Handled = true;
+            _popup.PopupEntity(Loc.GetString("fuel-module-loaded", ("material", arguments.Used), ("target", entity.Owner)), entity, arguments.User);
+        }
         else if (Comp<FuelModuleComponent>(module).Kind == FuelModuleKind.Liquid &&
-                 !_openable.IsClosed(module) &&
                  _solutionContainers.TryGetDrainableSolution(arguments.Used, out var fuelSolution, out var solution) &&
                  _solutionContainers.TryGetSolution((EntityUid) module, "tank", out var fuelCapacity, out var fuelVolume))
         {
             // Use the existing pouring interaction on the actual tank, including transfer amount and source lid checks.
+            var fuelAmount = fuelVolume.Volume;
             var startAttempt = new AfterInteractEvent(arguments.User, arguments.Used, module, arguments.ClickLocation, true);
             RaiseLocalEvent(arguments.Used, startAttempt);
             arguments.Handled = startAttempt.Handled;
+            if (fuelVolume.Volume > fuelAmount)
+                _popup.PopupEntity(Loc.GetString("fuel-module-poured", ("target", entity.Owner)), entity, arguments.User);
         }
     }
 
     private void OnInteractUsing(Entity<FuelModuleComponent> entity, ref InteractUsingEvent arguments)
     {
         if (!arguments.Handled && entity.Comp.Kind == FuelModuleKind.Solid)
+        {
             arguments.Handled = TryLoadSolidFuel(entity, arguments.Used, arguments.User);
+            if (arguments.Handled)
+                _popup.PopupEntity(Loc.GetString("fuel-module-loaded", ("material", arguments.Used), ("target", entity.Owner)), entity, arguments.User);
+        }
     }
 
     public bool TryLoadSolidFuel(Entity<FuelModuleComponent> module, EntityUid material, EntityUid user)
     {
-        if (module.Comp.Kind != FuelModuleKind.Solid || _openable.IsClosed(module) ||
+        if (module.Comp.Kind != FuelModuleKind.Solid ||
             !TryComp<StackComponent>(material, out var quantity) ||
             !TryComp<PhysicalCompositionComponent>(material, out var composition) ||
             composition.MaterialComposition.Count != 1)
@@ -228,8 +233,7 @@ public sealed class FuelModuleSystem : EntitySystem
 
     public void EmptyModule(Entity<FuelModuleComponent> module)
     {
-        if (!_openable.IsClosed(module))
-            SpillContents(module, 1f);
+        SpillContents(module, 1f);
     }
 
     public void UpdateModuleCapacity(Entity<FuelModuleComponent> module)
@@ -248,7 +252,7 @@ public sealed class FuelModuleSystem : EntitySystem
 
     public bool TryExchangeModulePart(Entity<FuelModuleComponent> module, EntityUid exchanger)
     {
-        if (_openable.IsClosed(module) || !TryComp<StorageComponent>(exchanger, out var arguments) ||
+        if (!TryComp<StorageComponent>(exchanger, out var arguments) ||
             arguments.Container == null || !TryComp<PartExchangerComponent>(exchanger, out var generator) ||
             !generator.PreferHigherRating)
             return false;
@@ -288,45 +292,24 @@ public sealed class FuelModuleSystem : EntitySystem
         finally { _itemSlots.SetLock(module, "matter_bin", true); }
     }
 
-    public bool ToggleLid(EntityUid module, EntityUid user)
-    {
-        return TryComp<OpenableComponent>(module, out var arguments) && _openable.TryToggle((module, arguments), user);
-    }
-
-    public bool ToggleLidLock(EntityUid module, EntityUid user)
-    {
-        return EntityManager.System<LockSystem>().IsLocked((EntityUid) module)
-            ? EntityManager.System<LockSystem>().TryUnlock(module, user)
-            : EntityManager.System<LockSystem>().TryLock(module, user);
-    }
-
-    private void OnGetVerbs(Entity<FuelModuleHostComponent> entity, ref GetVerbsEvent<InteractionVerb> arguments)
-    {
-        if (!arguments.CanAccess || !arguments.CanInteract || arguments.Hands == null || GetInstalledModule(entity) is not { } module)
-            return;
-        var user = arguments.User;
-        arguments.Verbs.Add(new InteractionVerb
-        {
-            Text = Loc.GetString(_openable.IsClosed(module) ? "fuel-module-open" : "fuel-module-close"),
-            Act = () => ToggleLid(module, user),
-        });
-        arguments.Verbs.Add(new InteractionVerb
-        {
-            Text = Loc.GetString(EntityManager.System<LockSystem>().IsLocked((EntityUid) module) ? "fuel-module-unlock" : "fuel-module-lock"),
-            Act = () => ToggleLidLock(module, user),
-        });
-    }
-
     private void OnExamined(Entity<FuelModuleHostComponent> entity, ref ExaminedEvent arguments)
     {
-        if (arguments.IsInDetailsRange && TryComp<WiresPanelComponent>(entity, out var panel) && panel.Open)
-            arguments.PushMarkup(Loc.GetString("fuel-module-installed",
-                ("module", GetInstalledModule(entity) is { } module ? Name(module) : Loc.GetString("fuel-module-none"))));
+        if (!arguments.IsInDetailsRange)
+            return;
+        var module = GetInstalledModule(entity);
+        if (TryComp<WiresPanelComponent>(entity, out var panel) && panel.Open)
+        {
+            arguments.PushMarkup(module is { } ? Loc.GetString("fuel-module-installed", ("module", Name(module.Value))) : Loc.GetString("fuel-module-none"));
+        }
+        else if (module is { })
+        {
+            arguments.PushMarkup(Loc.GetString(Comp<FuelModuleComponent>(module.Value).Kind == FuelModuleKind.Solid
+                ? "fuel-module-label-solid" : "fuel-module-label-liquid"));
+        }
     }
-
     private void OnExamined(Entity<FuelModuleComponent> entity, ref ExaminedEvent arguments)
     {
-        if (!arguments.IsInDetailsRange || _openable.IsClosed(entity))
+        if (!arguments.IsInDetailsRange)
             return;
         arguments.PushMarkup(Loc.GetString("fuel-module-capacity", ("capacity",
             entity.Comp.BaseCapacity * (1f + 0.2f * (entity.Comp.MatterBinRating - 1f))),
@@ -334,50 +317,20 @@ public sealed class FuelModuleSystem : EntitySystem
         if (entity.Comp.Kind == FuelModuleKind.Solid)
             foreach (var (materialId, materialUnits) in entity.Comp.FractionalFuel)
                 if (materialUnits > 0f)
-                    arguments.PushText(Loc.GetString("fuel-module-material", ("material", materialId), ("amount", Math.Floor(materialUnits / 100f))));
+                    arguments.PushText(Loc.GetString("fuel-module-material", ("material", Loc.GetString(_prototypeManager.Index<MaterialPrototype>(materialId).Name)), ("amount", Math.Floor(materialUnits / 100f))));
     }
 
     private void OnCollision(Entity<FuelModuleHostComponent> entity, ref StartCollideEvent arguments)
     {
-        if (GetInstalledModule(entity) is { } module)
+        if (TryComp<WiresPanelComponent>(entity, out var panel) && !panel.Open && GetInstalledModule(entity) is { } module)
             OnCollision((module, Comp<FuelModuleComponent>(module)), ref arguments);
     }
 
     private void OnCollision(Entity<FuelModuleComponent> entity, ref StartCollideEvent arguments)
     {
-        // Catch fuel before evaluating impact, so successful loading never spills the hopper.
-        if (HasComp<ThrownItemComponent>(arguments.OtherEntity) &&
-            TryLoadSolidFuel(entity, arguments.OtherEntity, arguments.OtherEntity))
-            return;
-        var impactSpeed = (_physics.GetMapLinearVelocity(arguments.OurEntity) -
-                           _physics.GetMapLinearVelocity(arguments.OtherEntity)).Length();
-        HandleImpact(entity, impactSpeed);
+        if (HasComp<ThrownItemComponent>(arguments.OtherEntity))
+            TryLoadSolidFuel(entity, arguments.OtherEntity, arguments.OtherEntity);
     }
-
-    private void OnCollision(Entity<MapGridComponent> entity, ref StartCollideEvent arguments)
-    {
-        var impactSpeed = (_physics.GetMapLinearVelocity(arguments.OurEntity) -
-                           _physics.GetMapLinearVelocity(arguments.OtherEntity)).Length();
-        if (impactSpeed < 15f || !HasComp<MapGridComponent>(arguments.OtherEntity))
-            return;
-        var moduleSlot = EntityQueryEnumerator<FuelModuleComponent, TransformComponent>();
-        while (moduleSlot.MoveNext(out var module, out var moduleComponent, out var transform))
-            if (transform.GridUid == entity.Owner)
-                HandleImpact((module, moduleComponent), impactSpeed);
-    }
-
-    public bool HandleImpact(Entity<FuelModuleComponent> module, float impactSpeed)
-    {
-        if (!float.IsFinite(impactSpeed) || impactSpeed < module.Comp.MinimumImpactSpeed ||
-            _timing.CurTime < module.Comp.NextSpillTime || EntityManager.System<LockSystem>().IsLocked((EntityUid) module))
-            return false;
-        if (_openable.IsClosed(module) && !_openable.TryOpen(module))
-            return false;
-        module.Comp.NextSpillTime = _timing.CurTime + TimeSpan.FromSeconds(2);
-        SpillContents(module, module.Comp.SpillFraction);
-        return true;
-    }
-
     public void SpillContents(Entity<FuelModuleComponent> module, float spillAmount)
     {
         spillAmount = Math.Clamp(spillAmount, 0f, 1f);
@@ -398,6 +351,10 @@ public sealed class FuelModuleSystem : EntitySystem
         }
     }
 }
+
+
+
+
 
 
 

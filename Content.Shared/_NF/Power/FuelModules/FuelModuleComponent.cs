@@ -15,9 +15,6 @@ public sealed partial class FuelModuleComponent : Component
     [DataField] public Dictionary<string, float> MaterialFuelValues = new();
     // Remaining material units, including partially burned pieces, retain their original material identity.
     [DataField] public Dictionary<string, float> FractionalFuel = new();
-    [DataField] public float MinimumImpactSpeed = 15f;
-    [DataField] public float SpillFraction = 0.25f;
-    public TimeSpan NextSpillTime;
 }
 
 [RegisterComponent]
@@ -26,3 +23,4 @@ public sealed partial class FuelModuleHostComponent : Component
     [DataField] public string ModuleSlot = "fuel_module";
     [DataField] public FuelModuleSize ModuleSize;
 }
+
