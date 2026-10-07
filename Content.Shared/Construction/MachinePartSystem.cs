@@ -11,7 +11,7 @@ namespace Content.Shared.Construction
     /// <summary>
     /// Deals with machine parts and machine boards.
     /// </summary>
-    public sealed class MachinePartSystem : EntitySystem
+    public sealed partial class MachinePartSystem : EntitySystem
     {
         [Dependency] private readonly IPrototypeManager _prototype = default!;
         [Dependency] private readonly SharedLatheSystem _lathe = default!;
@@ -120,7 +120,12 @@ namespace Content.Shared.Construction
                 }
             }
 
-            var genericPartInfo = comp.ComponentRequirements.Values.Concat(comp.ComponentRequirements.Values);
+            // Frontier: charge the default R1 stock parts created by machine construction.
+            foreach (var (partPrototypeId, partCount) in comp.Requirements)
+                AddPartMaterialCost(_prototype.Index(partPrototypeId).StockPartPrototype, partCount, coefficient, materials);
+
+            // Frontier: include tags once, rather than counting component requirements twice.
+            var genericPartInfo = comp.ComponentRequirements.Values.Concat(comp.TagRequirements.Values);
             foreach (var info in genericPartInfo)
             {
                 var amount = info.Amount;
@@ -153,3 +158,4 @@ namespace Content.Shared.Construction
         }
     }
 }
+

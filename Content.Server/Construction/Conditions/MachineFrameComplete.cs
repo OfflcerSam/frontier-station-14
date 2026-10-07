@@ -26,6 +26,16 @@ namespace Content.Server.Construction.Conditions
             if (!entityManager.TryGetComponent(uid, out MachineFrameComponent? machineFrame))
                 return false;
 
+            if (machineFrame.BoardContainer.ContainedEntities.Count > 0 &&
+                entityManager.TryGetComponent<Content.Shared.Construction.Components.MachineBoardComponent>(machineFrame.BoardContainer.ContainedEntities[0], out var machineBoard))
+            {
+                var transform = entityManager.GetComponent<TransformComponent>(uid);
+                // Frontier: validate every occupied tile before completing a machine frame.
+                if (!entityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
+                    machineBoard.Prototype, transform.Coordinates, transform.LocalRotation, uid))
+                    return false;
+            }
+
             return entityManager.EntitySysManager.GetEntitySystem<MachineFrameSystem>().IsComplete(machineFrame);
         }
 
@@ -128,3 +138,4 @@ namespace Content.Server.Construction.Conditions
         }
     }
 }
+

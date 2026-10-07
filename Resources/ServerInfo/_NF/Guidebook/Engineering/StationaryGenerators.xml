@@ -1,0 +1,21 @@
+<Document>
+  # Stationary Generators
+
+  <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" />
+
+  The standard combustion generator occupies two tiles and produces up to 35 kW with standard parts. Clear both tiles before unpacking or rebuilding it. Rotate the flatpack to choose its orientation. The electrical connection is on the base tile, with the body extending into the next tile.
+
+  Anchor it above HV or MV cable, select the matching output while stopped, pour fuel into its tank, and start it through the generator controls. It consumes room oxygen and produces hot carbon dioxide. Supply fresh air and remove exhaust. It stops if oxygen is insufficient.
+
+  # Fuel
+
+  The 1800-unit tank lasts about 3 hours on Welding Fuel, 2 hours 24 minutes on Ethanol, or 3 hours 36 minutes on Plasma reagent at the 35 kW target with standard parts. Fuel use follows the selected target, even if the ship draws less power. Lower the target to save fuel.
+
+  Juice granatapfel for Welding Fuel. Grind plasma ore or sheets for Plasma reagent. Solid rods and ore cannot be inserted directly. Only Welding Fuel, Ethanol and Plasma are accepted: other chemicals clog the engine. Use the existing empty-fuel control to clear contamination.
+
+  # Construction and upgrades
+
+  Research Basic Power Generation and print the machine board. The machine requires two Capacitors, one Manipulator, one Matter Bin, ten HV cables and five Steel sheets, in addition to its frame or flatpack shell. The Flatpacker charges for standard stock parts. Install upgrades afterward with an RPED.
+
+  Capacitors improve the target ceiling and ramp rate. Manipulators reduce fuel use. Matter Bins increase tank capacity. At rating 4, the ceiling is 45.5 kW and the tank holds 2880 units. Raising the target also raises fuel and oxygen use. Examine the machine upgrades to see the installed bonuses.
+</Document>

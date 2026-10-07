@@ -286,6 +286,15 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
 
             var eff = 1 / CalcFuelEfficiency(gen.TargetPower, gen.OptimalPower, gen);
             var consumption = gen.OptimalBurnRate * frameTime * eff;
+            // Frontier: allow stationary engines to require oxygen before burning fuel.
+            var beforeFuelBurn = new Content.Server._NF.Power.EntitySystems.GeneratorBeforeFuelBurnEvent(consumption);
+            RaiseLocalEvent(uid, ref beforeFuelBurn);
+            if (beforeFuelBurn.Cancelled)
+            {
+                SetFuelGeneratorOn(uid, false, gen);
+                continue;
+            }
+
             RaiseLocalEvent(uid, new GeneratorUseFuel(consumption));
         }
     }
@@ -346,3 +355,4 @@ public sealed class GeneratorEmpty
 {
     public static readonly GeneratorEmpty Instance = new();
 }
+

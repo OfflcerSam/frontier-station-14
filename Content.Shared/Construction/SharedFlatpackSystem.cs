@@ -83,7 +83,8 @@ public abstract class SharedFlatpackSystem : EntitySystem
         // TODO FLATPAK
         // Make this logic smarter. This should eventually allow for shit like building microwaves on tables and such.
         // Also: make it ignore ghosts
-        if (_entityLookup.AnyEntitiesIntersecting(coords, LookupFlags.Dynamic | LookupFlags.Static))
+        if (_entityLookup.AnyEntitiesIntersecting(coords, LookupFlags.Dynamic | LookupFlags.Static) || // Frontier: full machine footprint
+            !EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(comp.Entity.Value, coords, xform.LocalRotation, uid))
         {
             // this popup is on the server because the predicts on the intersection is crazy
             if (_net.IsServer)
@@ -159,3 +160,4 @@ public abstract class SharedFlatpackSystem : EntitySystem
     // Frontier: a function to bind something to a station.  Will only be run serverside.
     protected abstract void BindToStation(EntityUid toBind, StationBoundObjectComponent bindingParams);
 }
+

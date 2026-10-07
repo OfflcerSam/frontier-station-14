@@ -1,0 +1,4 @@
+- type: guideEntry
+  id: NFStationaryGenerators
+  name: guide-entry-stationary-generators
+  text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryGenerators.xml"

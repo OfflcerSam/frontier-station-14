@@ -1321,6 +1321,7 @@
   cost: 2500
   recipeUnlocks:
   - PortableGeneratorPacmanMachineCircuitboard
+  - NFStationaryGeneratorCombustionStandardMachineCircuitboard
   - PowerComputerCircuitboard
   technologyPrerequisites:
   - NFTrashPowerGeneration
@@ -1953,3 +1954,4 @@
   - NFImprovedSalvageWeapons
   - NFExplosiveTechnology
   position: 4, 40
+

@@ -305,6 +305,11 @@ namespace Content.Server.Construction
             if (newEntity == metaData.EntityPrototype?.ID || !PrototypeManager.HasIndex<EntityPrototype>(newEntity))
                 return null;
 
+            // Frontier: recheck at replacement time, including non-frame construction paths.
+            if (!EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
+                newEntity, transform.Coordinates, transform.LocalRotation, uid))
+                return null;
+
             // [Optional] Exit if the new entity's prototype is a parent of the original
             // E.g., if an entity with the 'AirlockCommand' prototype was to be replaced with a new entity that
             // had the 'Airlock' prototype, and DoNotReplaceInheritingEntities was true, the code block would
@@ -473,3 +478,4 @@ namespace Content.Server.Construction
     {
     }
 }
+
