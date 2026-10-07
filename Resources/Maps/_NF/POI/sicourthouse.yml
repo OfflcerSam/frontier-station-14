@@ -4,7 +4,7 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/07/2026 04:52:06
+  time: 10/07/2026 07:12:39
   entityCount: 5815
 maps: []
 grids:
@@ -8666,6 +8666,15 @@ entities:
     - type: Transform
       pos: 14.5,-2.5
       parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        598:
+        - - Start
+          - Close
+        - - Timer
+          - AutoClose
+        - - Timer
+          - Open
     - type: Fixtures
       fixtures: {}
   - uid: 600
@@ -8673,6 +8682,15 @@ entities:
     - type: Transform
       pos: 14.5,0.5
       parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        597:
+        - - Start
+          - Close
+        - - Timer
+          - AutoClose
+        - - Timer
+          - Open
     - type: Fixtures
       fixtures: {}
   - uid: 601
@@ -8680,6 +8698,15 @@ entities:
     - type: Transform
       pos: 14.5,3.5
       parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        596:
+        - - Start
+          - Close
+        - - Timer
+          - AutoClose
+        - - Timer
+          - Open
     - type: Fixtures
       fixtures: {}
 - proto: BusSchedule
