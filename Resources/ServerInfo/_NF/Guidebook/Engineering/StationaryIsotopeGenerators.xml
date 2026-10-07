@@ -1,0 +1,39 @@
+<!-- SPDX-FileCopyrightText: 2026 OfflcerSam -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<Document>
+  # Radioisotope Thermoelectric Generators
+
+  <Box>
+    <GuideEntityEmbed Entity="NFStationaryGeneratorIsotopeCompact" Caption="Compact: one tile, one cell" />
+    <GuideEntityEmbed Entity="NFStationaryGeneratorIsotopeStandard" Caption="Standard: two tiles, two cells" />
+    <GuideEntityEmbed Entity="NFIsotopeCellCasing" />
+  </Box>
+
+  These auxiliary generators require isotope cells (The existing rare-loot RTG is a separate machine). Research Fission Powercells for the boards, universal empty casing and R2 shielding. Bananium Power Generators research unlocks R3 and R4 shielding. Print boards in a circuit imprinter; print casings and inserts in a protolathe.
+
+  Load an empty casing by applying processed Uranium sheets or fuel-grade Uranium rods: 30 pieces total (3000 material units). Alternatively, use 10 processed Bananium pieces or 15 fuel-grade Bananium rods (1500 units). Incremental loading and mixtures of processed material and rods of the SAME isotope are supported. Raw ore and mixed isotopes are rejected. Excess whole pieces stay outside; a mixture must leave enough room to complete the charge with whole pieces.
+
+  Uranium is used here for gameplay. Real RTGs use other isotopes; no enrichment or nuclear processing is required.
+
+  A loaded cell is inactive until first insertion. Insertion activates it permanently: removing it, disconnecting power or unanchoring the generator does not pause decay. Cells age while the world is running. Loaded and active cells cannot be reclaimed. Depletion leaves a partially radioactive casing that can be refilled or reclaimed for its casing materials only.
+
+  At R1, each Uranium cell supplies 5 kW for a four-hour lifetime; Bananium averages 7.5 kW for two and a half hours, varying by up to 20 percent every ten seconds. Both hold full output for the first 75 percent of life, then gradually taper to 40 percent just before depletion. Capacitors improve conversion to 105 / 110 / 115 percent at R2 / R3 / R4, without extending cell life. Two cells age independently.
+
+  There is no target slider or start switch. Insert a viable cell and connect MV or HV cable. Open the hatch to inspect the cell gauges and shielding label. Use a multitool on the generator, or select Read generator output while holding one, to measure available electrical output. A cell produces heat while inside: Uranium 100 W, Bananium 250 W, tapering with age. Provide cooling; these generators do not need oxygen.
+
+  # Isotope Service and Shielding
+
+  Unscrew the hatch with a screwdriver. Insert cells first, then a shielding insert. A crowbar removes the insert before removing cells. Close the hatch afterward. Opening the hatch alone does not remove shielding, and cell slots remain fixed regardless of stock-part upgrades.
+
+  Activated cells are radioactive. Bananium emits more than Uranium. Depleted cells retain weak radiation, including while being refilled. The R1 housing provides basic shielding. Removable R2, R3 and R4 inserts replace that protection; they do not stack. Capacitors never increase radiation.
+
+  <Box>
+    <GuideEntityEmbed Entity="NFRadiationShieldingInsertR2" Caption="R2: 5 Steel + 5 Reinforced Glass" />
+    <GuideEntityEmbed Entity="NFRadiationShieldingInsertR3" Caption="R3: 5 Plasteel + 5 Reinforced Plasma Glass" />
+    <GuideEntityEmbed Entity="NFRadiationShieldingInsertR4" Caption="R4: 10 Plasteel + 10 Reinforced Uranium Glass" />
+  </Box>
+</Document>
+
+
+
+

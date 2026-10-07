@@ -198,6 +198,10 @@ public sealed class MaterialReclaimerSystem : SharedMaterialReclaimerSystem
         if (!Resolve(uid, ref component))
             return;
 
+        // Frontier: contents may change after admission; sealed cells must still permit reclamation.
+        if (!OnReclaimAttempt(item))
+            return;
+
         base.Reclaim(uid, item, completion, component);
 
         var xform = Transform(uid);
@@ -341,3 +345,4 @@ public sealed class MaterialReclaimerSystem : SharedMaterialReclaimerSystem
         }
     }
 }
+

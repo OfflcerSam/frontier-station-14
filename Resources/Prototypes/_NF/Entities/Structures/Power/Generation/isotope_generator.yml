@@ -1,0 +1,207 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+- type: entity
+  parent: [BaseMachine, SmallConstructibleMachine]
+  id: NFStationaryGeneratorIsotopeCompact
+  name: Compact Radioisotope Thermoelectric Generator
+  description: A compact auxiliary generator with a single isotope-cell bay.
+  components:
+  - type: Transform
+    anchored: true
+    noRot: false
+  - type: Physics
+    bodyType: Static
+  - type: Rotatable
+    rotateWhileAnchored: false
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,0.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+  - type: MachineFootprint
+    tiles: ["0, 0"]
+  - type: Sprite
+    sprite: _NF/Structures/Power/Generation/isotope_generator_placeholder.rsi
+    state: generator
+    noRot: false
+    scale: 0.5, 0.5
+  - type: Machine
+    board: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+  - type: WiresPanel
+  - type: IsotopeGenerator
+    cellSlots: [cell1]
+  - type: RadiationShielding
+    cellSlots: [cell1]
+  - type: RadiationBlockingContainer
+    resistance: 0.5
+  - type: ItemSlots
+    slots:
+      shielding:
+        name: isotope-slot-shielding
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [RadiationShieldingInsert]
+      cell1:
+        name: isotope-slot-cell-one
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+  - type: ContainerContainer
+    containers:
+      shielding: !type:ContainerSlot
+      cell1: !type:ContainerSlot
+      machine_board: !type:Container
+      machine_parts: !type:Container
+  - type: PowerSupplier
+    supplyRate: 0
+    enabled: false
+  - type: PowerSwitchable
+    examineText: power-switchable-generator-examine
+    switchText: power-switchable-generator-switched
+    cables:
+    - voltage: HV
+      node: output_hv
+    - voltage: MV
+      node: output_mv
+  - type: UseDelay
+    delay: 1
+  - type: NodeContainer
+    examinable: true
+    nodes:
+      output_hv: !type:CableDeviceNode
+        nodeGroupID: HVPower
+      output_mv: !type:CableDeviceNode
+        nodeGroupID: MVPower
+        enabled: false
+  - type: PowerMonitoringDevice
+    group: Generator
+    loadNode: output_hv
+    sprite: _NF/Structures/Power/Generation/isotope_generator_placeholder.rsi
+    state: generator
+  - type: AmbientSound
+    enabled: false
+    range: 3
+    volume: -8
+    sound:
+      path: /Audio/Ambience/Objects/buzzing.ogg
+  - type: GuideHelp
+    guides: [NFStationaryIsotopeGenerators]
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:ChangeConstructionNodeBehavior
+        node: machineFrame
+      - !type:DoActsBehavior
+        acts: [Destruction]
+
+- type: entity
+  parent: NFStationaryGeneratorIsotopeCompact
+  id: NFStationaryGeneratorIsotopeStandard
+  name: Standard Radioisotope Thermoelectric Generator
+  description: An auxiliary generator with two isotope-cell bays.
+  components:
+  - type: Machine
+    board: NFStationaryGeneratorIsotopeStandardMachineCircuitboard
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1"]
+  - type: Sprite
+    offset: 0, 0.5
+    scale: 0.5, 1
+  - type: IsotopeGenerator
+    cellSlots: [cell1, cell2]
+  - type: RadiationShielding
+    cellSlots: [cell1, cell2]
+  - type: ItemSlots
+    slots:
+      shielding:
+        name: isotope-slot-shielding
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [RadiationShieldingInsert]
+      cell1:
+        name: isotope-slot-cell-one
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      cell2:
+        name: isotope-slot-cell-two
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+  - type: ContainerContainer
+    containers:
+      shielding: !type:ContainerSlot
+      cell1: !type:ContainerSlot
+      machine_board: !type:Container
+      machine_parts: !type:Container
+      cell2: !type:ContainerSlot
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+  name: Compact Radioisotope Thermoelectric Generator machine board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: NFStationaryGeneratorIsotopeCompact
+    requirements:
+      Capacitor: 1
+    stackRequirements:
+      CableHV: 5
+      Steel: 5
+      Glass: 5
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: NFStationaryGeneratorIsotopeStandardMachineCircuitboard
+  name: Standard Radioisotope Thermoelectric Generator machine board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: NFStationaryGeneratorIsotopeStandard
+    requirements:
+      Capacitor: 2
+    stackRequirements:
+      CableHV: 10
+      Steel: 10
+      Glass: 10
+
+

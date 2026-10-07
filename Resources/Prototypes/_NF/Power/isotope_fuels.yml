@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+- type: isotopeFuel
+  id: NFIsotopeFuelUranium
+  acceptedMaterials: [Uranium, FuelGradeUranium]
+  requiredMaterial: 3000
+  lifetime: 14400
+  electricalOutput: 5000
+  heatOutput: 100
+  activeRadiation: 0.5
+
+- type: isotopeFuel
+  id: NFIsotopeFuelBananium
+  acceptedMaterials: [Bananium, FuelGradeBananium]
+  requiredMaterial: 1500
+  lifetime: 9000
+  electricalOutput: 7500
+  heatOutput: 250
+  activeRadiation: 1.25
+  outputVariation: 0.2

@@ -1295,6 +1295,10 @@
   cost: 7500
   recipeUnlocks:
   - PowerCellMicroreactor
+  - NFIsotopeCellCasing
+  - NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+  - NFStationaryGeneratorIsotopeStandardMachineCircuitboard
+  - NFRadiationShieldingInsertR2
   technologyPrerequisites:
   - NFAdvancedSMES
   position: 2, 26
@@ -1362,6 +1366,8 @@
   cost: 5000
   recipeUnlocks:
   - PortableGeneratorDKJrMachineCircuitboard
+  - NFRadiationShieldingInsertR3
+  - NFRadiationShieldingInsertR4
   technologyPrerequisites:
   - NFPowerGeneration
   position: 4, 28
@@ -1954,4 +1960,5 @@
   - NFImprovedSalvageWeapons
   - NFExplosiveTechnology
   position: 4, 40
+
 

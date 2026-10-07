@@ -83,6 +83,23 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
         TryStartProcessItem(uid, args.OtherEntity, reclaimer);
     }
 
+    // Frontier: inspect nested contents before admitting a container to reclamation.
+    protected bool OnReclaimAttempt(EntityUid entity)
+    {
+        var reclaimAttempt = new Content.Shared._NF.Power.Isotope.MaterialReclaimAttemptEvent();
+        RaiseLocalEvent(entity, ref reclaimAttempt);
+        if (reclaimAttempt.Cancelled)
+            return false;
+        if (TryComp<ContainerManagerComponent>(entity, out var arguments))
+        {
+            foreach (var slot in arguments.Containers.Values)
+            foreach (var cell in slot.ContainedEntities)
+                if (!OnReclaimAttempt(cell))
+                    return false;
+        }
+        return true;
+    }
+
     private void OnActiveStartup(EntityUid uid, ActiveMaterialReclaimerComponent component, ComponentStartup args)
     {
         component.ReclaimingContainer = Container.EnsureContainer<Container>(uid, ActiveReclaimerContainerId);
@@ -104,6 +121,10 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
 
         if (_whitelistSystem.IsWhitelistFail(component.Whitelist, item) ||
             _whitelistSystem.IsBlacklistPass(component.Blacklist, item))
+            return false;
+
+        // Frontier: sealed finite fuel, including nested cells, must permit reclamation.
+        if (!OnReclaimAttempt(item))
             return false;
 
         if (Container.TryGetContainingContainer((item, null, null), out _) && !Container.TryRemoveFromContainer(item))
@@ -272,3 +293,5 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
 
 [ByRefEvent]
 public record struct GotReclaimedEvent(EntityCoordinates ReclaimerCoordinates);
+
+

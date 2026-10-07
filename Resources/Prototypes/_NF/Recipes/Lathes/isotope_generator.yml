@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+  result: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorIsotopeStandardMachineCircuitboard
+  result: NFStationaryGeneratorIsotopeStandardMachineCircuitboard
+
+- type: latheRecipe
+  id: NFIsotopeCellCasing
+  result: NFIsotopeCellCasing
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 200
+    Glass: 200
+
+- type: latheRecipe
+  id: NFRadiationShieldingInsertR2
+  result: NFRadiationShieldingInsertR2
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 500
+    ReinforcedGlass: 500
+
+- type: latheRecipe
+  id: NFRadiationShieldingInsertR3
+  result: NFRadiationShieldingInsertR3
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Plasteel: 500
+    ReinforcedPlasmaGlass: 500
+
+- type: latheRecipe
+  id: NFRadiationShieldingInsertR4
+  result: NFRadiationShieldingInsertR4
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Plasteel: 1000
+    ReinforcedUraniumGlass: 1000

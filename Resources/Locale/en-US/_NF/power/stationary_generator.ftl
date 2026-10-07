@@ -1,4 +1,4 @@
-guide-entry-stationary-generators = Stationary Generators
+guide-entry-stationary-generators = Stationary Generator
 stationary-generator-upgrade-target = Maximum target output
 stationary-generator-upgrade-ramp = Output ramp rate
 stationary-generator-upgrade-fuel = Fuel consumption
@@ -11,4 +11,8 @@ stationary-generator-maximum-target = Maximum target: { $power } kW
 machine-footprint-blocked = Construction blocked: every tile occupied by this machine needs clear floor space. Move obstructions or reposition the frame.
 bottomless-jerry-can-clear-sample = Clear sample
 machine-footprint-description = Footprint: { $count } tiles. Tile offsets from the frame: { $tiles } (rotate with the machine; positive Y is toward its top).
+
+
+guide-entry-stationary-combustion-generators = Combustion Engines
+guide-entry-stationary-isotope-generators = Radioisotope Thermoelectric Generators
 

@@ -1,48 +1,27 @@
 <!-- SPDX-FileCopyrightText: 2026 OfflcerSam -->
 <!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <Document>
-  # Stationary Generators
+  # Stationary Generator
 
-  Stationary generators are installed power machinery for ships, stations and outposts. Each model has its own footprint, fuel requirements and output. Leave room for the whole machine and plan fuel storage, electrical connections and any ventilation it needs.
-
-  <Box>
-    <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" Caption="Standard Combustion" />
-  </Box>
+  Stationary generators are dedicated power installations for ships, stations and outposts. Each model has its own footprint, fuel, and atmos requirements and differing hazards. The guides below cover each generator family.
 
   # Installation
 
-  Research the machine board, print it and assemble the machine through a frame or the Flatpacker. The Flatpacker includes the material cost of standard stock parts; upgraded parts are installed afterward with an [textlink="RPED" link="MachineUpgrading"].
+  Research and print the appropriate machine board. Assemble the machine through a frame or the Flatpacker. The Flatpacker includes standard stock parts; use an [textlink="RPED" link="MachineUpgrading"] for later upgrades.
 
-  Clear every tile the machine occupies. Rotate the flatpack before unpacking to choose its orientation. Unanchor a placed generator before rotating it. Its electrical connection is at the base tile, with the body extending into the adjacent tile.
+  Clear every tile the machine occupies. Rotate a flatpack before unpacking to choose its orientation. Unanchor a placed generator before rotating it. The electrical connection is at the base tile.
+  
+  Connect a supported [color=yellow]MV[/color] or [color=orange]HV[/color] [textlink="power cable" link="VoltageNetworks"] and select the matching voltage.
 
-  Connect a supported [color=yellow]MV[/color] or [color=orange]HV[/color] [textlink="power cable" link="VoltageNetworks"], select the matching output while stopped, then fuel and start the machine. The selected target controls fuel consumption even when the ship draws less power. Lower the target when less output is needed.
+  # Inspection and Service
 
-  # Combustion Engines
+  Examine a machine for visible condition and readable labels. Open its maintenance hatch to inspect accessible internal parts. Use an appropriate tool for measured diagnostics. Follow the generator's guide for fuel handling and servicing.
 
-  <Box>
-    <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" Caption="Standard Combustion" />
-    <GuideEntityEmbed Entity="JerryCanWeldingFuel" />
-    <GuideEntityEmbed Entity="SheetPlasma" />
-  </Box>
+  # Generator Families
 
-  Combustion engines use liquid fuel and surrounding [color=lightblue]oxygen[/color]. They release hot [color=orange]carbon dioxide[/color]. Supply fresh air and remove exhaust: an unventilated engine room will become unsafe, and an engine without enough oxygen shuts down. Restore its air supply before restarting.
+  [textlink="Combustion Engines" link="NFStationaryCombustionGenerators"]
+  Fueled engines that use combustion.
 
-  The standard model occupies [color=orange]two tiles[/color] and produces up to [color=orange][protodata="NFStationaryGeneratorCombustionStandard" comp="FuelGenerator" member="MaxTargetPower" format="N0"/] W[/color] with standard parts. Its 1800u tank lasts about 3 hours on Welding Fuel, 2 hours 24 minutes on Ethanol, or 3 hours 36 minutes on Plasma reagent at its rated 35 kW target.
-
-  Pour Welding Fuel, Ethanol or Plasma reagent into the tank. Juice granatapfel to make Welding Fuel, or grind plasma ore and sheets to obtain Plasma reagent. Solid materials cannot be inserted directly. Other reagents contaminate the tank and prevent starting; empty the fuel and refill with an accepted liquid.
-
-  # Stock Parts
-
-  <Box>
-    <GuideEntityEmbed Entity="CapacitorStockPart" Caption="Output and response" />
-    <GuideEntityEmbed Entity="MicroManipulatorStockPart" Caption="Fuel efficiency" />
-    <GuideEntityEmbed Entity="MatterBinStockPart" Caption="Tank capacity" />
-  </Box>
-
-  The standard engine retains its 35 kW efficiency reference at every tier. Its maximum targets are 52.5 / 56 / 59.5 / 63 kW for capacitor ratings 1 / 2 / 3 / 4. Overdrive increases fuel consumption through the existing power curve, reducing endurance above the rated target.
-
-  Capacitors increase the target ceiling and ramp rate. Manipulators reduce fuel use. Matter Bins increase tank capacity. Examine the machine upgrades to check the installed bonuses. The parts inside the RPED determine the resulting rating.
-
-  With every part at rating 4, standard combustion reaches a 63 kW ceiling and 2880u capacity. Raising the target beyond its rated output uses more fuel and oxygen; keeping the rated target gives longer endurance. Different models may use different parts and support different upgrades.
+  [textlink="Radioisotope Thermoelectric Generators" link="NFStationaryIsotopeGenerators"]
+  Auxiliary generators that use finite isotope cells to generate power.
 </Document>
-

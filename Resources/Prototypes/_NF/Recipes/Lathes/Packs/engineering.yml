@@ -87,6 +87,9 @@
   id: NFEngineeringBoards
   recipes:
   - PortableGeneratorDKJrMachineCircuitboard
+  - NFStationaryGeneratorCombustionStandardMachineCircuitboard
+  - NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+  - NFStationaryGeneratorIsotopeStandardMachineCircuitboard
 
 - type: latheRecipePack
   id: NFEngineeringBoardsCircuitImprinter
@@ -112,3 +115,8 @@
   - SuperMatterBinStockPart
   - PicoManipulatorStockPart
   - NFWeaponParticleDecelerator
+  - NFIsotopeCellCasing
+  - NFRadiationShieldingInsertR2
+  - NFRadiationShieldingInsertR3
+  - NFRadiationShieldingInsertR4
+

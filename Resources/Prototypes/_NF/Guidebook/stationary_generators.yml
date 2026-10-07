@@ -2,3 +2,16 @@
   id: NFStationaryGenerators
   name: guide-entry-stationary-generators
   text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryGenerators.xml"
+  children:
+  - NFStationaryCombustionGenerators
+  - NFStationaryIsotopeGenerators
+
+- type: guideEntry
+  id: NFStationaryCombustionGenerators
+  name: guide-entry-stationary-combustion-generators
+  text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryCombustionGenerators.xml"
+
+- type: guideEntry
+  id: NFStationaryIsotopeGenerators
+  name: guide-entry-stationary-isotope-generators
+  text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryIsotopeGenerators.xml"

@@ -6,7 +6,7 @@ namespace Content.Server.Radiation.Components;
 ///     Prevents entities from emitting or receiving radiation when placed inside this container.
 /// </summary>
 [RegisterComponent]
-[Access(typeof(RadiationSystem))]
+[Access(typeof(RadiationSystem), typeof(Content.Server._NF.Power.Isotope.RadiationShieldingSystem))] // Frontier: configurable shielding inserts
 public sealed partial class RadiationBlockingContainerComponent : Component
 {
     /// <summary>
@@ -15,3 +15,4 @@ public sealed partial class RadiationBlockingContainerComponent : Component
     [DataField("resistance")]
     public float RadResistance = 1f;
 }
+

@@ -1,0 +1,81 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+- type: entity
+  parent: BaseItem
+  id: NFIsotopeCellCasing
+  name: empty isotope casing
+  description: A reusable isotope casing fitted with a loading indicator and a cell-life gauge.
+  components:
+  - type: IsotopeCell
+  - type: Sprite
+    sprite: Objects/Power/power_cells.rsi
+    state: microreactor
+    color: "#A4D7A4"
+  - type: Item
+    size: Small
+  - type: RadiationSource
+    enabled: false
+    intensity: 0
+    slope: 0.25
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 200
+      Glass: 200
+  - type: GuideHelp
+    guides: [NFStationaryIsotopeGenerators]
+
+- type: entity
+  parent: BaseItem
+  id: NFRadiationShieldingInsertR2
+  name: reinforced radiation shielding insert
+  suffix: R2
+  description: A steel and reinforced-glass liner. Replaces a compatible machine's built-in shielding; does not add fuel slots.
+  components:
+  - type: RadiationShieldingInsert
+    rating: 2
+    resistance: 0.75
+  - type: Sprite
+    sprite: _NF/Objects/Misc/stock_parts.rsi
+    state: matter_bin
+    color: "#A8C7DB"
+  - type: Item
+    size: Normal
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 500
+      ReinforcedGlass: 500
+
+- type: entity
+  parent: NFRadiationShieldingInsertR2
+  id: NFRadiationShieldingInsertR3
+  name: plasma-glass radiation shielding insert
+  suffix: R3
+  description: A plasteel and reinforced plasma-glass liner for a compatible shielding slot.
+  components:
+  - type: RadiationShieldingInsert
+    rating: 3
+    resistance: 1
+  - type: Sprite
+    color: "#C39CD9"
+  - type: PhysicalComposition
+    materialComposition:
+      Plasteel: 500
+      ReinforcedPlasmaGlass: 500
+
+- type: entity
+  parent: NFRadiationShieldingInsertR2
+  id: NFRadiationShieldingInsertR4
+  name: uranium-glass radiation shielding insert
+  suffix: R4
+  description: A dense plasteel and reinforced uranium-glass liner for a compatible shielding slot.
+  components:
+  - type: RadiationShieldingInsert
+    rating: 4
+    resistance: 1.25
+  - type: Sprite
+    color: "#75D49F"
+  - type: PhysicalComposition
+    materialComposition:
+      Plasteel: 1000
+      ReinforcedUraniumGlass: 1000
+

@@ -97,7 +97,7 @@
     temperature: 373.15
   - type: GuideHelp
     guides:
-    - NFStationaryGenerators
+    - NFStationaryCombustionGenerators
   - type: Destructible
     thresholds:
     - trigger: !type:DamageTrigger
@@ -129,6 +129,7 @@
     stackRequirements:
       CableHV: 10
       Steel: 5
+
 
 
 
