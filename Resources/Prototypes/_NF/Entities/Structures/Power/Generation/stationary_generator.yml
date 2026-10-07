@@ -75,6 +75,9 @@
     solution: tank
   - type: ExaminableSolution
     solution: tank
+  - type: AmbientSound
+    sound:
+      path: /Audio/_NF/Machines/StationaryGenerators/engine-loop.ogg
   - type: PortableGenerator
     startChance: 1
   - type: PowerSupplier
@@ -126,5 +129,6 @@
     stackRequirements:
       CableHV: 10
       Steel: 5
+
 
 

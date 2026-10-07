@@ -5,7 +5,7 @@
   parent: JerryCan
   id: NFBottomlessJerryCan
   name: bottomless jerry can
-  suffix: Mapping, Testing
+  suffix: DEBUG
   description: A testing jerry can that endlessly reproduces the first liquid or mixture added. Use Clear sample to empty it and choose another mixture.
   components:
   - type: BottomlessSolution
@@ -17,3 +17,4 @@
   - type: StaticPrice
     price: 0
     vendPrice: 0
+
