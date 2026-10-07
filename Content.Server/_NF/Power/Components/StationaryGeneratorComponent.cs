@@ -14,6 +14,9 @@ public sealed partial class StationaryGeneratorComponent : Component
     public float RatedPower;
 
     [DataField(required: true)]
+    public float RatedMaximumPower;
+
+    [DataField(required: true)]
     public float RatedBurnRate;
 
     [DataField(required: true)]
@@ -38,4 +41,5 @@ public sealed partial class StationaryGeneratorComponent : Component
     [DataField]
     public float MatterBinRating = 1f;
 }
+
 

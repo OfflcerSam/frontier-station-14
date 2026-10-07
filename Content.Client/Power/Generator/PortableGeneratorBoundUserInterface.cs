@@ -1,4 +1,4 @@
-﻿using Content.Shared.Power.Generator;
+using Content.Shared.Power.Generator;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
 using Robust.Client.UserInterface;
@@ -44,7 +44,7 @@ public sealed class PortableGeneratorBoundUserInterface : BoundUserInterface
         _window?.Update(msg);
     }
 
-    public void SetTargetPower(int target)
+    public void SetTargetPower(float target)
     {
         SendMessage(new PortableGeneratorSetTargetPowerMessage(target));
     }
@@ -69,3 +69,4 @@ public sealed class PortableGeneratorBoundUserInterface : BoundUserInterface
         SendMessage(new PortableGeneratorEjectFuelMessage());
     }
 }
+

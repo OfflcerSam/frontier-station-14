@@ -1,21 +1,48 @@
+<!-- SPDX-FileCopyrightText: 2026 OfflcerSam -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
 <Document>
   # Stationary Generators
 
-  <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" />
+  Stationary generators are installed power machinery for ships, stations and outposts. Each model has its own footprint, fuel requirements and output. Leave room for the whole machine and plan fuel storage, electrical connections and any ventilation it needs.
 
-  The standard combustion generator occupies two tiles and produces up to 35 kW with standard parts. Clear both tiles before unpacking or rebuilding it. Rotate the flatpack to choose its orientation. The electrical connection is on the base tile, with the body extending into the next tile.
+  <Box>
+    <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" Caption="Standard Combustion" />
+  </Box>
 
-  Anchor it above HV or MV cable, select the matching output while stopped, pour fuel into its tank, and start it through the generator controls. It consumes room oxygen and produces hot carbon dioxide. Supply fresh air and remove exhaust. It stops if oxygen is insufficient.
+  # Installation
 
-  # Fuel
+  Research the machine board, print it and assemble the machine through a frame or the Flatpacker. The Flatpacker includes the material cost of standard stock parts; upgraded parts are installed afterward with an [textlink="RPED" link="MachineUpgrading"].
 
-  The 1800-unit tank lasts about 3 hours on Welding Fuel, 2 hours 24 minutes on Ethanol, or 3 hours 36 minutes on Plasma reagent at the 35 kW target with standard parts. Fuel use follows the selected target, even if the ship draws less power. Lower the target to save fuel.
+  Clear every tile the machine occupies. Rotate the flatpack before unpacking to choose its orientation. Unanchor a placed generator before rotating it. Its electrical connection is at the base tile, with the body extending into the adjacent tile.
 
-  Juice granatapfel for Welding Fuel. Grind plasma ore or sheets for Plasma reagent. Solid rods and ore cannot be inserted directly. Only Welding Fuel, Ethanol and Plasma are accepted: other chemicals clog the engine. Use the existing empty-fuel control to clear contamination.
+  Connect a supported [color=yellow]MV[/color] or [color=orange]HV[/color] [textlink="power cable" link="VoltageNetworks"], select the matching output while stopped, then fuel and start the machine. The selected target controls fuel consumption even when the ship draws less power. Lower the target when less output is needed.
 
-  # Construction and upgrades
+  # Combustion Engines
 
-  Research Basic Power Generation and print the machine board. The machine requires two Capacitors, one Manipulator, one Matter Bin, ten HV cables and five Steel sheets, in addition to its frame or flatpack shell. The Flatpacker charges for standard stock parts. Install upgrades afterward with an RPED.
+  <Box>
+    <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" Caption="Standard Combustion" />
+    <GuideEntityEmbed Entity="JerryCanWeldingFuel" />
+    <GuideEntityEmbed Entity="SheetPlasma" />
+  </Box>
 
-  Capacitors improve the target ceiling and ramp rate. Manipulators reduce fuel use. Matter Bins increase tank capacity. At rating 4, the ceiling is 45.5 kW and the tank holds 2880 units. Raising the target also raises fuel and oxygen use. Examine the machine upgrades to see the installed bonuses.
+  Combustion engines use liquid fuel and surrounding [color=lightblue]oxygen[/color]. They release hot [color=orange]carbon dioxide[/color]. Supply fresh air and remove exhaust: an unventilated engine room will become unsafe, and an engine without enough oxygen shuts down. Restore its air supply before restarting.
+
+  The standard model occupies [color=orange]two tiles[/color] and produces up to [color=orange][protodata="NFStationaryGeneratorCombustionStandard" comp="FuelGenerator" member="MaxTargetPower" format="N0"/] W[/color] with standard parts. Its 1800u tank lasts about 3 hours on Welding Fuel, 2 hours 24 minutes on Ethanol, or 3 hours 36 minutes on Plasma reagent at its rated 35 kW target.
+
+  Pour Welding Fuel, Ethanol or Plasma reagent into the tank. Juice granatapfel to make Welding Fuel, or grind plasma ore and sheets to obtain Plasma reagent. Solid materials cannot be inserted directly. Other reagents contaminate the tank and prevent starting; empty the fuel and refill with an accepted liquid.
+
+  # Stock Parts
+
+  <Box>
+    <GuideEntityEmbed Entity="CapacitorStockPart" Caption="Output and response" />
+    <GuideEntityEmbed Entity="MicroManipulatorStockPart" Caption="Fuel efficiency" />
+    <GuideEntityEmbed Entity="MatterBinStockPart" Caption="Tank capacity" />
+  </Box>
+
+  The standard engine retains its 35 kW efficiency reference at every tier. Its maximum targets are 52.5 / 56 / 59.5 / 63 kW for capacitor ratings 1 / 2 / 3 / 4. Overdrive increases fuel consumption through the existing power curve, reducing endurance above the rated target.
+
+  Capacitors increase the target ceiling and ramp rate. Manipulators reduce fuel use. Matter Bins increase tank capacity. Examine the machine upgrades to check the installed bonuses. The parts inside the RPED determine the resulting rating.
+
+  With every part at rating 4, standard combustion reaches a 63 kW ceiling and 2880u capacity. Raising the target beyond its rated output uses more fuel and oxygen; keeping the rated target gives longer endurance. Different models may use different parts and support different upgrades.
 </Document>
+

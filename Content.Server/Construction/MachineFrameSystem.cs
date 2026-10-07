@@ -19,6 +19,7 @@ public sealed class MachineFrameSystem : EntitySystem
     [Dependency] private readonly StackSystem _stack = default!;
     [Dependency] private readonly ConstructionSystem _construction = default!;
     [Dependency] private readonly SharedPopupSystem _popupSystem = default!;
+    [Dependency] private readonly IPrototypeManager _prototypeManager = default!; // Frontier
 
     public override void Initialize()
     {
@@ -57,6 +58,15 @@ public sealed class MachineFrameSystem : EntitySystem
             if (TryInsertBoard(uid, args.Used, component))
                 args.Handled = true;
             return;
+        }
+
+        // Frontier: a blocked completion needs visible feedback, while tools remain usable.
+        if (IsComplete(component) && TryComp<MachineBoardComponent>(component.BoardContainer.ContainedEntities[0], out var machineBoard))
+        {
+            var transform = Transform(uid);
+            if (!EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
+                    machineBoard.Prototype, transform.Coordinates, transform.LocalRotation, uid))
+                _popupSystem.PopupEntity(Loc.GetString("machine-footprint-blocked"), uid, args.User);
         }
 
         // If this changes in the future, then RegenerateProgress() also needs to be updated.
@@ -428,7 +438,21 @@ public sealed class MachineFrameSystem : EntitySystem
         if (!args.IsInDetailsRange || !component.HasBoard)
             return;
 
+        // Frontier: describe occupied tiles as soon as the board is installed.
+        if (TryComp<MachineBoardComponent>(component.BoardContainer.ContainedEntities[0], out var machineBoard) &&
+            _prototypeManager.Index(machineBoard.Prototype).TryGetComponent<Content.Shared._NF.Construction.MachineFootprintComponent>(out var footprint, Factory))
+        {
+            args.PushMarkup(Loc.GetString("machine-footprint-description", ("count", footprint.Tiles.Count),
+                ("tiles", string.Join(", ", footprint.Tiles))));
+            var transform = Transform(uid);
+            if (!EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
+                    machineBoard.Prototype, transform.Coordinates, transform.LocalRotation, uid))
+                args.PushMarkup(Loc.GetString("machine-footprint-blocked"));
+        }
+
         var board = component.BoardContainer.ContainedEntities[0];
         args.PushMarkup(Loc.GetString("machine-frame-component-on-examine-label", ("board", Name(board))));
     }
 }
+
+

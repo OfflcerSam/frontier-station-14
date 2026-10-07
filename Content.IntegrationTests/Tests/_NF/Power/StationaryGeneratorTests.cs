@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.Numerics;
+using Content.Server._NF.Chemistry;
+using Content.Shared.Chemistry.Components;
 using System.Collections.Generic;
 using Content.IntegrationTests.Tests.Interaction;
 using Content.Server._NF.Power.Components;
@@ -32,17 +34,32 @@ public sealed class StationaryGeneratorTests : InteractionTest
         await SpawnTarget("NFStationaryGeneratorCombustionStandard");
         await Server.WaitAssertion(() =>
         {
+            var generator = SEntMan.GetComponent<FuelGeneratorComponent>(SEntMan.GetEntity(Target!.Value));
+            Assert.That(generator.MaxTargetPower, Is.EqualTo(52500f));
+            var arguments = new PortableGeneratorSetTargetPowerMessage(52.5f);
+            SEntMan.EventBus.RaiseLocalEvent(SEntMan.GetEntity(Target.Value), arguments);
+            Assert.That(generator.TargetPower, Is.EqualTo(52500f));
+            arguments = new PortableGeneratorSetTargetPowerMessage(float.NaN);
+            SEntMan.EventBus.RaiseLocalEvent(SEntMan.GetEntity(Target.Value), arguments);
+            Assert.That(generator.TargetPower, Is.EqualTo(52500f));
+            arguments = new PortableGeneratorSetTargetPowerMessage(35f);
+            SEntMan.EventBus.RaiseLocalEvent(SEntMan.GetEntity(Target.Value), arguments);
+            Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(600f).Within(0.01f));
+        });
+        await Interact(Screw, "RPEDT4Filled");
+        await Server.WaitAssertion(() =>
+        {
             var entity = SEntMan.GetEntity(Target!.Value);
             var generator = SEntMan.GetComponent<FuelGeneratorComponent>(entity);
             var supplier = SEntMan.GetComponent<PowerSupplierComponent>(entity);
-            Assert.That(generator.MaxTargetPower, Is.EqualTo(35000f));
-            Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(600f).Within(0.01f));
+            Assert.That(generator.MaxTargetPower, Is.EqualTo(63000f).Within(0.01f));
+            Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(510f).Within(0.01f));
 
             SEntMan.System<StationaryGeneratorSystem>().ApplyPartRatings(
                 (entity, SEntMan.GetComponent<StationaryGeneratorComponent>(entity)), 4f, 4f, 4f);
             SEntMan.System<StationaryGeneratorSystem>().ApplyPartRatings(
                 (entity, SEntMan.GetComponent<StationaryGeneratorComponent>(entity)), 4f, 4f, 4f);
-            Assert.That(generator.MaxTargetPower, Is.EqualTo(45500f).Within(0.01f));
+            Assert.That(generator.MaxTargetPower, Is.EqualTo(63000f).Within(0.01f));
             Assert.That(generator.TargetPower, Is.EqualTo(35000f));
             Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(510f).Within(0.01f));
             Assert.That(supplier.SupplyRampRate, Is.EqualTo(12687.5f).Within(0.01f));
@@ -76,6 +93,85 @@ public sealed class StationaryGeneratorTests : InteractionTest
             SEntMan.EventBus.RaiseLocalEvent(entity, ref beforeFuelBurn);
             Assert.That(beforeFuelBurn.Cancelled, Is.False);
             Assert.That(atmosphere.GetMoles(Gas.Oxygen), Is.EqualTo(oxygenRequired - 1f).Within(0.001f));
+        });
+    }
+
+    [Test]
+    public async Task UpgradeThroughRPED()
+    {
+        await SpawnTarget("NFStationaryGeneratorCombustionStandard");
+        await Interact(Screw, "RPEDT2Filled");
+        await Server.WaitAssertion(() =>
+        {
+            var entity = SEntMan.GetEntity(Target!.Value);
+            var generator = SEntMan.GetComponent<FuelGeneratorComponent>(entity);
+            Assert.That(generator.OptimalPower, Is.EqualTo(35000f));
+            Assert.That(generator.MaxTargetPower, Is.EqualTo(56000f).Within(0.01f));
+            Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(570f).Within(0.01f));
+            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2160)));
+        });
+        await InteractUsing("RPEDT4Filled");
+        await Server.WaitAssertion(() =>
+        {
+            var entity = SEntMan.GetEntity(Target!.Value);
+            var generator = SEntMan.GetComponent<FuelGeneratorComponent>(entity);
+            Assert.That(generator.OptimalPower, Is.EqualTo(35000f));
+            Assert.That(generator.MaxTargetPower, Is.EqualTo(63000f).Within(0.01f));
+            Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(510f).Within(0.01f));
+            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2880)));
+        });
+    }
+
+    [Test]
+    public async Task BottomlessCanCopiesSample()
+    {
+        await SpawnTarget("NFBottomlessJerryCan");
+        await Server.WaitAssertion(() =>
+        {
+            var entity = SEntMan.GetEntity(Target!.Value);
+            var solution = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solution.TryGetSolution(entity, "beaker", out var fuelSolution), Is.True);
+            Assert.That(fuelSolution!.Value.Comp.Solution.CanReact, Is.False);
+            var sample = new Solution();
+            sample.AddReagent("WeldingFuel", FixedPoint2.New(10));
+            sample.AddReagent("Plasma", FixedPoint2.New(10));
+            Assert.That(solution.TryAddSolution(fuelSolution.Value, sample), Is.True);
+            Assert.That(fuelSolution.Value.Comp.Solution.Volume, Is.EqualTo(FixedPoint2.New(200)));
+            var refill = solution.SplitSolution(fuelSolution.Value, FixedPoint2.New(50));
+            Assert.That(refill.GetTotalPrototypeQuantity("Plasma"), Is.EqualTo(FixedPoint2.New(25)));
+            Assert.That(fuelSolution.Value.Comp.Solution.Volume, Is.EqualTo(FixedPoint2.New(200)));
+            solution.SplitSolution(fuelSolution.Value, FixedPoint2.New(200));
+            Assert.That(fuelSolution.Value.Comp.Solution.GetTotalPrototypeQuantity("WeldingFuel"), Is.EqualTo(FixedPoint2.New(100)));
+            SEntMan.System<BottomlessSolutionSystem>().ClearSample((entity, SEntMan.GetComponent<BottomlessSolutionComponent>(entity)));
+            Assert.That(fuelSolution.Value.Comp.Solution.Volume, Is.EqualTo(FixedPoint2.Zero));
+            solution.TryAddReagent(fuelSolution.Value, "Water", FixedPoint2.New(1), out _);
+            Assert.That(fuelSolution.Value.Comp.Solution.GetTotalPrototypeQuantity("Water"), Is.EqualTo(FixedPoint2.New(200)));
+            Assert.That(fuelSolution.Value.Comp.Solution.GetTotalPrototypeQuantity("Plasma"), Is.EqualTo(FixedPoint2.Zero));
+        });
+    }
+
+    [Test]
+    public async Task StartFailureReportsCause()
+    {
+        await SpawnTarget("NFStationaryGeneratorCombustionStandard");
+        await Server.WaitAssertion(() =>
+        {
+            var entity = SEntMan.GetEntity(Target!.Value);
+            var startAttempt = new GeneratorStartAttemptEvent();
+            SEntMan.EventBus.RaiseLocalEvent(entity, ref startAttempt);
+            Assert.That(startAttempt.FailureMessage, Is.EqualTo("stationary-generator-empty"));
+            var solution = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solution.TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            solution.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(10), out _);
+            startAttempt = new GeneratorStartAttemptEvent();
+            SEntMan.EventBus.RaiseLocalEvent(entity, ref startAttempt);
+            Assert.That(startAttempt.FailureMessage, Is.EqualTo("stationary-generator-no-oxygen"));
+            solution.TryAddReagent(fuelSolution.Value, "Water", FixedPoint2.New(1), out _);
+            startAttempt = new GeneratorStartAttemptEvent();
+            SEntMan.EventBus.RaiseLocalEvent(entity, ref startAttempt);
+            Assert.That(startAttempt.FailureMessage, Is.EqualTo("stationary-generator-contaminated"));
         });
     }
 
@@ -124,6 +220,9 @@ public sealed class StationaryGeneratorTests : InteractionTest
         });
     }
 }
+
+
+
 
 
 

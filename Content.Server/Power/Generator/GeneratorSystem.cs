@@ -196,6 +196,10 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
     private void OnTargetPowerSet(EntityUid uid, FuelGeneratorComponent component,
         PortableGeneratorSetTargetPowerMessage args)
     {
+        // Frontier: reject invalid floating-point UI input.
+        if (!float.IsFinite(args.TargetPower))
+            return;
+
         component.TargetPower = Math.Clamp(
             args.TargetPower,
             component.MinTargetPower / 1000,
@@ -355,4 +359,5 @@ public sealed class GeneratorEmpty
 {
     public static readonly GeneratorEmpty Instance = new();
 }
+
 

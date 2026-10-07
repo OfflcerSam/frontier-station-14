@@ -49,6 +49,7 @@
     board: NFStationaryGeneratorCombustionStandardMachineCircuitboard
   - type: StationaryGenerator
     ratedPower: 35000
+    ratedMaximumPower: 52500
     ratedBurnRate: 0.16666667
     ratedRampRate: 8750
     ratedFuelCapacity: 1800
@@ -57,7 +58,7 @@
     targetPower: 35000
     minTargetPower: 1000
     optimalPower: 35000
-    maxTargetPower: 35000
+    maxTargetPower: 52500
     optimalBurnRate: 0.16666667
     fuelEfficiencyConstant: 1.3
   - type: ChemicalFuelGeneratorAdapter
@@ -125,4 +126,5 @@
     stackRequirements:
       CableHV: 10
       Steel: 5
+
 

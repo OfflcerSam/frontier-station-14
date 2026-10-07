@@ -10,6 +10,8 @@ using Robust.Server.GameObjects;
 using Robust.Shared.Player;
 using Robust.Shared.Random;
 using Robust.Shared.Utility;
+using Content.Server._NF.Power.EntitySystems; // Frontier
+using Content.Shared.Chemistry.EntitySystems; // Frontier
 using Content.Shared.ActionBlocker; // Frontier
 
 namespace Content.Server.Power.Generator;
@@ -26,6 +28,7 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
     [Dependency] private readonly AudioSystem _audio = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly GeneratorSystem _generator = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainers = default!; // Frontier
     [Dependency] private readonly PowerSwitchableSystem _switchable = default!;
     [Dependency] private readonly ActiveGeneratorRevvingSystem _revving = default!;
     [Dependency] private readonly ActionBlockerSystem _actionBlocker = default!; // Frontier
@@ -126,6 +129,17 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
             return;
 
         var fuelGenerator = Comp<FuelGeneratorComponent>(uid);
+
+        // Frontier: report the specific prerequisite failure without overlapping generic messages.
+        var startAttempt = new GeneratorStartAttemptEvent();
+        RaiseLocalEvent(uid, ref startAttempt);
+        if (startAttempt.FailureMessage != null)
+        {
+            _audio.PlayPvs(component.StartSoundEmpty, uid);
+            if (user != null)
+                _popup.PopupEntity(Loc.GetString(startAttempt.FailureMessage), uid, user.Value);
+            return;
+        }
 
         var empty = _generator.GetFuel(uid) == 0;
         var clogged = _generator.GetIsClogged(uid);
@@ -238,9 +252,25 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
         if (powerSupplier.Net is { IsConnectedNetwork: true } net)
             networkStats = (net.NetworkNode.LastCombinedLoad, net.NetworkNode.LastCombinedSupply);
 
+        // Frontier: send real liquid volume separately from fuel-equivalent energy.
+        float? fuelVolume = null;
+        float? fuelCapacity = null;
+        if (TryComp<ChemicalFuelGeneratorAdapterComponent>(uid, out var generator) &&
+            _solutionContainers.TryGetSolution(uid, generator.SolutionName, out _, out var solution))
+        {
+            fuelVolume = solution.Volume.Float();
+            fuelCapacity = solution.MaxVolume.Float();
+        }
+
         _uiSystem.SetUiState(
             uid,
             GeneratorComponentUiKey.Key,
-            new PortableGeneratorComponentBuiState(fuelComp, fuel, clogged, networkStats));
+            new PortableGeneratorComponentBuiState(fuelComp, fuel, clogged, networkStats)
+            {
+                FuelVolume = fuelVolume,
+                FuelCapacity = fuelCapacity,
+            });
     }
 }
+
+

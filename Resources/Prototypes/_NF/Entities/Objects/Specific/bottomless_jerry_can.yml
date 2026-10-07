@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+- type: entity
+  parent: JerryCan
+  id: NFBottomlessJerryCan
+  name: bottomless jerry can
+  suffix: Mapping, Testing
+  description: A testing jerry can that endlessly reproduces the first liquid or mixture added. Use Clear sample to empty it and choose another mixture.
+  components:
+  - type: BottomlessSolution
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 200
+        canReact: false
+  - type: StaticPrice
+    price: 0
+    vendPrice: 0

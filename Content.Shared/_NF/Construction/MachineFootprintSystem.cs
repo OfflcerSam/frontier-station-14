@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.Numerics;
+using Content.Shared.Popups;
 using Content.Shared.Construction.Components;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
@@ -16,6 +17,7 @@ public sealed class MachineFootprintSystem : EntitySystem
     [Dependency] private readonly SharedMapSystem _map = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
+    [Dependency] private readonly SharedPopupSystem _popup = default!;
 
     public override void Initialize()
     {
@@ -27,7 +29,10 @@ public sealed class MachineFootprintSystem : EntitySystem
     {
         var transform = Transform(entity);
         if (!IsFootprintClear(entity.Comp, transform.Coordinates, transform.LocalRotation, entity.Owner))
+        {
             arguments.Cancel();
+            _popup.PopupClient(Loc.GetString("machine-footprint-blocked"), entity.Owner, arguments.User);
+        }
     }
 
     public bool CanPlace(EntProtoId prototypeId, EntityCoordinates coordinates, Angle rotation, EntityUid ignoredEntity)
@@ -68,4 +73,5 @@ public sealed class MachineFootprintSystem : EntitySystem
         return true;
     }
 }
+
 

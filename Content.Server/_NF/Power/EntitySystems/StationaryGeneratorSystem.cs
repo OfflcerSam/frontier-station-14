@@ -6,6 +6,8 @@ using Content.Server.Power.Components;
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Popups;
 using Content.Shared.Atmos;
+using Content.Server.Power.Generator;
+using Robust.Shared.Timing;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Construction.Components;
 using Content.Shared.FixedPoint;
@@ -23,13 +25,43 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
 
     [Dependency] private readonly AtmosphereSystem _atmosphere = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
+    [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly GeneratorSystem _generator = default!;
 
     public override void Initialize()
     {
         base.Initialize();
         SubscribeLocalEvent<StationaryGeneratorComponent, GeneratorBeforeFuelBurnEvent>(OnBeforeFuelBurn);
+        SubscribeLocalEvent<StationaryGeneratorComponent, GeneratorStartAttemptEvent>(OnStartAttempt);
         SubscribeLocalEvent<StationaryGeneratorComponent, RefreshPartsEvent>(OnRefreshParts);
         SubscribeLocalEvent<StationaryGeneratorComponent, UpgradeExamineEvent>(OnUpgradeExamine);
+    }
+
+    private void OnStartAttempt(Entity<StationaryGeneratorComponent> entity, ref GeneratorStartAttemptEvent arguments)
+    {
+        if (arguments.FailureMessage != null)
+            return;
+
+        if (_generator.GetIsClogged(entity))
+            arguments.FailureMessage = "stationary-generator-contaminated";
+        else if (_generator.GetFuel(entity) <= 0f)
+            arguments.FailureMessage = "stationary-generator-empty";
+        else if (TryComp<FuelGeneratorComponent>(entity, out var generator))
+            arguments.FailureMessage = GetOxygenFailure(entity,
+                generator.OptimalBurnRate * (float) _timing.TickPeriod.TotalSeconds /
+                CalcFuelEfficiency(generator.TargetPower, generator.OptimalPower, generator));
+    }
+
+    private string? GetOxygenFailure(Entity<StationaryGeneratorComponent> entity, float FuelUsed)
+    {
+        if (entity.Comp.OxygenMolesPerFuelUnit <= 0f)
+            return null;
+
+        var atmosphere = _atmosphere.GetContainingMixture(entity.Owner, false, true);
+        var oxygenRequired = FuelUsed * entity.Comp.OxygenMolesPerFuelUnit;
+        return atmosphere == null || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired
+            ? "stationary-generator-no-oxygen"
+            : null;
     }
 
     private void OnBeforeFuelBurn(Entity<StationaryGeneratorComponent> entity, ref GeneratorBeforeFuelBurnEvent arguments)
@@ -74,7 +106,7 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
         var capacityMultiplier = 1f + 0.20f * (entity.Comp.MatterBinRating - 1f);
 
         generator.OptimalPower = entity.Comp.RatedPower;
-        generator.MaxTargetPower = entity.Comp.RatedPower * targetMultiplier;
+        generator.MaxTargetPower = entity.Comp.RatedMaximumPower + entity.Comp.RatedPower * (targetMultiplier - 1f);
         generator.TargetPower = Math.Clamp(generator.TargetPower, generator.MinTargetPower, generator.MaxTargetPower);
         generator.OptimalBurnRate = entity.Comp.RatedBurnRate * burnMultiplier;
         supplier.SupplyRampRate = entity.Comp.RatedRampRate * rampMultiplier;
@@ -90,7 +122,7 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
     private void OnUpgradeExamine(Entity<StationaryGeneratorComponent> entity, ref UpgradeExamineEvent arguments)
     {
         arguments.AddPercentageUpgrade("stationary-generator-upgrade-target",
-            1f + 0.10f * (entity.Comp.CapacitorRating - 1f));
+            1f + entity.Comp.RatedPower / entity.Comp.RatedMaximumPower * 0.10f * (entity.Comp.CapacitorRating - 1f));
         arguments.AddPercentageUpgrade("stationary-generator-upgrade-ramp",
             1f + 0.15f * (entity.Comp.CapacitorRating - 1f));
         arguments.AddPercentageUpgrade("stationary-generator-upgrade-fuel",
@@ -99,4 +131,5 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
             1f + 0.20f * (entity.Comp.MatterBinRating - 1f));
     }
 }
+
 

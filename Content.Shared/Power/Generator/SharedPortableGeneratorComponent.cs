@@ -56,9 +56,9 @@ public sealed partial class PortableGeneratorComponent : Component
 [Serializable, NetSerializable]
 public sealed class PortableGeneratorSetTargetPowerMessage : BoundUserInterfaceMessage
 {
-    public int TargetPower;
+    public float TargetPower; // Frontier: support fractional kW targets
 
-    public PortableGeneratorSetTargetPowerMessage(int targetPower)
+    public PortableGeneratorSetTargetPowerMessage(float targetPower)
     {
         TargetPower = targetPower;
     }
@@ -103,6 +103,10 @@ public sealed class PortableGeneratorEjectFuelMessage : BoundUserInterfaceMessag
 public sealed class PortableGeneratorComponentBuiState : BoundUserInterfaceState
 {
     public float RemainingFuel;
+    // Frontier: liquid volume is distinct from fuel-equivalent energy.
+    public float? FuelVolume;
+    public float? FuelCapacity;
+    public float FuelBurnRate;
     public bool Clogged;
     public (float Load, float Supply)? NetworkStats;
     public float TargetPower;
@@ -117,6 +121,7 @@ public sealed class PortableGeneratorComponentBuiState : BoundUserInterfaceState
         (float Demand, float Supply)? networkStats)
     {
         RemainingFuel = remainingFuel;
+        FuelBurnRate = component.OptimalBurnRate; // Frontier: includes current part upgrades
         Clogged = clogged;
         TargetPower = component.TargetPower;
         MaximumPower = component.MaxTargetPower;
@@ -153,3 +158,4 @@ public enum GeneratorVisuals : byte
     /// </summary>
     Running,
 }
+
