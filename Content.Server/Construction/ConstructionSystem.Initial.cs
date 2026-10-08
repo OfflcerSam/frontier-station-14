@@ -302,6 +302,14 @@ namespace Content.Server.Construction
             }
 
             var newEntityProto = graph.Nodes[edge.Target].Entity.GetId(null, user, new(EntityManager));
+            // Frontier: check the whole frame before spending the gathered construction materials.
+            if (newEntityProto != null && !EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>()
+                    .CanPlace(newEntityProto, coords, angle, user))
+            {
+                _popup.PopupEntity(Loc.GetString("machine-footprint-blocked"), user, user);
+                FailCleanup();
+                return null;
+            }
             var newEntity = SpawnAttachedTo(newEntityProto, coords, rotation: angle);
 
             if (!TryComp(newEntity, out ConstructionComponent? construction))

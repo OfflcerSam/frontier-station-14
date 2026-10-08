@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.Numerics;
+using System.Linq;
 using Content.Shared.Popups;
 using Content.Shared.Construction.Components;
 using Robust.Shared.Map;
@@ -41,6 +42,15 @@ public sealed class MachineFootprintSystem : EntitySystem
             return true;
 
         return IsFootprintClear(footprint, coordinates, rotation, ignoredEntity);
+    }
+
+    public bool CanFitBoard(EntityUid frame, EntProtoId prototypeId)
+    {
+        var machineTiles = _prototypeManager.Index(prototypeId).TryGetComponent<MachineFootprintComponent>(out var footprint, Factory)
+            ? footprint.Tiles : new List<Vector2i> { Vector2i.Zero };
+        var frameTiles = TryComp<MachineFootprintComponent>(frame, out var frameFootprint)
+            ? frameFootprint.Tiles : new List<Vector2i> { Vector2i.Zero };
+        return machineTiles.Count == frameTiles.Count && machineTiles.All(frameTiles.Contains);
     }
 
     public bool IsFootprintClear(MachineFootprintComponent footprint, EntityCoordinates coordinates,

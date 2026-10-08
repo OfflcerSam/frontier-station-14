@@ -20,8 +20,11 @@ public sealed partial class SteamTurbineComponent : Component
     [DataField] public float HeatPerFuelUnit = 107f;
     [DataField] public float MaximumSteamPressure = 1.8f;
     [DataField] public float MaximumBoilerTemperature = 1000f;
-    [DataField] public float RatedBurstIntensity = 35f;
-    [DataField] public float MaximumBurstIntensity = 60f;
+    // RadiusToIntensity(3 / 4 metres, slope 0.5, peak intensity 1.5).
+    [DataField] public float RatedBurstIntensity = 14.137f;
+    [DataField] public float MaximumBurstIntensity = 32.987f;
+    [DataField] public float CasingHeatPower = 1000f;
+    [DataField] public float VaporMolesPerUnit = 2.88f;
     [DataField] public float VentHeatMultiplier = 2f;
     [DataField] public SoundSpecifier VaporReleaseSound = new SoundCollectionSpecifier("NFSteamVaporRelease");
     [DataField] public SoundSpecifier LeakSound = new SoundCollectionSpecifier("NFSteamDamageLeak");

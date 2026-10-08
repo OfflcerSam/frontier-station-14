@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.Numerics;
+using System.Collections.Generic;
 using Content.IntegrationTests.Tests.Interaction;
 using Content.Server._NF.Power.FuelModules;
 using Content.Server._NF.Power.Steam;
@@ -28,6 +29,189 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 public sealed class SteamTurbineTests : InteractionTest
 {
     [Test]
+    public async Task WaterReservoirFull()
+    {
+        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await PlaceInHands("Beaker");
+        await Server.WaitAssertion(() =>
+        {
+            var entity = STarget!.Value;
+            var beaker = HandSys.GetActiveItem((SPlayer, Hands))!.Value;
+            var solutions = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solutions.TryGetSolution(entity, "water", out var waterSolution, out _), Is.True);
+            Assert.That(solutions.TryGetSolution(beaker, "beaker", out var sourceSolution, out var contents), Is.True);
+            solutions.TryAddReagent(waterSolution!.Value, "Water", FixedPoint2.New(250), out _);
+            solutions.TryAddReagent(sourceSolution!.Value, "Water", FixedPoint2.New(30), out _);
+            Assert.That(SEntMan.System<SteamTurbineSystem>().TryFillWater(
+                (entity, SEntMan.GetComponent<SteamTurbineComponent>(entity)), beaker, SPlayer, FixedPoint2.New(20)), Is.False);
+            Assert.That(contents.Volume, Is.EqualTo(FixedPoint2.New(30)));
+        });
+    }
+
+    [Test]
+    public async Task RoomHeatAndExhaust()
+    {
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
+                new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandard",
+                new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f)));
+            var atmosphere = SEntMan.System<AtmosphereSystem>();
+            var environment = atmosphere.GetContainingMixture(entity)!;
+            var steamSystem = SEntMan.System<SteamTurbineSystem>();
+            var steam = SEntMan.GetComponent<SteamTurbineComponent>(entity);
+            steam.BoilerTemperature = 650f;
+            environment.Temperature = 293.15f;
+            var heat = atmosphere.GetThermalEnergy(environment, atmosphere.GetHeatCapacity(environment, false));
+            steamSystem.HeatRoom((entity, steam), 1f);
+            Assert.That(atmosphere.GetThermalEnergy(environment, atmosphere.GetHeatCapacity(environment, false)) - heat,
+                Is.EqualTo(1000f).Within(1f));
+            Assert.That(environment.Temperature, Is.LessThan(300f));
+            var solutions = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solutions.TryGetSolution(entity, "water", out var waterSolution, out _), Is.True);
+            solutions.TryAddReagent(waterSolution!.Value, "Water", FixedPoint2.New(250), out _);
+            var waterVaporBefore = environment.GetMoles(Gas.WaterVapor);
+            var carbonDioxideBefore = environment.GetMoles(Gas.CarbonDioxide);
+            SEntMan.EventBus.RaiseLocalEvent(entity, new GeneratorUseFuel(1f / 6f));
+            Assert.That(environment.GetMoles(Gas.CarbonDioxide) - carbonDioxideBefore, Is.EqualTo(0.15f).Within(0.001f));
+            // Account for the solution's 0.01u packet precision.
+            Assert.That(environment.GetMoles(Gas.WaterVapor) - waterVaporBefore, Is.EqualTo(0.0288f).Within(0.001f));
+            Assert.That(steam.WaterLossRate * steam.VaporMolesPerUnit, Is.EqualTo(0.05f).Within(0.0001f));
+        });
+    }
+
+    [TestCase("NFStationaryGeneratorCombustionStandard", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorStirlingStandard", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorIsotopeStandard", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorSteamStandard", "NFMachineFrame2x2")]
+    public async Task LargeMachineFrames(string machine, string frame)
+    {
+        await Server.WaitAssertion(() =>
+        {
+            for (var tileX = 0; tileX < 8; tileX++)
+            for (var tileY = 0; tileY < 8; tileY++)
+                MapSystem.SetTile(MapData.Grid, new Robust.Shared.Maths.Vector2i(tileX, tileY), new Tile(TileMan[Plating].TileId));
+        });
+        await StartConstruction(frame);
+        await InteractUsing(Steel, frame == "NFMachineFrame2x2" ? 20 : 10);
+        await Interact(Wrench);
+        await InteractUsing(Cable, frame == "NFMachineFrame2x2" ? 4 : 2);
+        AssertPrototype(frame);
+        await Server.WaitPost(() => SEntMan.DeleteEntity(STarget!.Value));
+        await RunTicks(3);
+        await SpawnTarget(machine);
+        await Interact(Screw, Pry);
+        AssertPrototype(frame);
+        await Interact(Screw);
+        AssertPrototype(machine);
+        await Interact(Screw, Pry, Pry);
+        AssertPrototype(frame);
+        await Server.WaitAssertion(() =>
+        {
+            var footprint = SEntMan.System<Content.Shared._NF.Construction.MachineFootprintSystem>();
+            Assert.That(footprint.CanFitBoard(STarget!.Value, machine), Is.True);
+            Assert.That(footprint.CanFitBoard(STarget.Value, "Protolathe"), Is.False);
+            var entity = SEntMan.SpawnEntity("MachineFrame", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
+            Assert.That(footprint.CanFitBoard(entity, machine), Is.False);
+            var board = SEntMan.SpawnEntity(machine + "MachineCircuitboard", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
+            var machineBoard = SEntMan.GetComponent<Content.Shared.Construction.Components.MachineBoardComponent>(board);
+            var flatpacker = SEntMan.SpawnEntity("MachineFlatpacker", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
+            var frameArea = frame == "NFMachineFrame2x2" ? 3 : 1;
+            var frameMaterialCost = SEntMan.System<Content.Shared.Construction.SharedFlatpackSystem>().GetFlatpackCreationCost(
+                (flatpacker, SEntMan.GetComponent<Content.Shared.Construction.Components.FlatpackCreatorComponent>(flatpacker)),
+                (board, machineBoard));
+            var materialCosts = SEntMan.System<Content.Shared.Construction.MachinePartSystem>().GetMachineBoardMaterialCost((board, machineBoard), -1);
+            // Per extra tile: five steel sheets (500) and one LV cable (15), on top of the 750 base steel fee.
+            Assert.That(frameMaterialCost["Steel"] - materialCosts.GetValueOrDefault("Steel"), Is.EqualTo(-750 - 515 * frameArea));
+            Assert.That(frameMaterialCost["Silver"] - materialCosts.GetValueOrDefault("Silver"), Is.EqualTo(-100));
+            Assert.That(frameMaterialCost["Gold"] - materialCosts.GetValueOrDefault("Gold"), Is.EqualTo(-50));
+            var generator = SEntMan.SpawnEntity(machine, new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)));
+            SEntMan.System<DamageableSystem>().TryChangeDamage(generator,
+                new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(200) } }, true);
+        });
+        await RunTicks(3);
+        await Server.WaitAssertion(() =>
+        {
+            var frameCount = 0;
+            foreach (var nearby in SEntMan.System<EntityLookupSystem>().GetEntitiesInRange<Content.Server.Construction.Components.MachineFrameComponent>(
+                         new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)), 0.3f))
+            {
+                Assert.That(SEntMan.GetComponent<MetaDataComponent>(nearby.Owner).EntityPrototype!.ID, Is.EqualTo(frame));
+                frameCount++;
+            }
+            Assert.That(frameCount, Is.EqualTo(1));
+        });
+    }
+
+    [Test]
+    public async Task RuptureEffects()
+    {
+        EntityUid gridUid = default;
+        EntityUid nearby = default;
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
+                new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
+            gridUid = grid!.Value.Owner;
+            SEntMan.EnsureComponent<Content.Shared.Gravity.GravityComponent>(gridUid).Enabled = true;
+            SEntMan.GetComponent<Content.Shared.Gravity.GravityComponent>(gridUid).Inherent = true;
+            foreach (var nearbyEntity in SEntMan.System<EntityLookupSystem>().GetEntitiesInRange<Content.Server.Atmos.Components.AirtightComponent>(
+                         new EntityCoordinates(gridUid, Vector2.Zero), 5f))
+                SEntMan.DeleteEntity(nearbyEntity.Owner);
+            for (var tileX = -4; tileX <= 4; tileX++)
+            for (var tileY = -4; tileY <= 4; tileY++)
+            {
+                MapSystem.SetTile(gridUid, SEntMan.GetComponent<Robust.Shared.Map.Components.MapGridComponent>(gridUid),
+                    new Robust.Shared.Maths.Vector2i(tileX, tileY), new Tile(TileMan["FloorSteel"].TileId));
+                if (Math.Abs(tileX) == 4 || Math.Abs(tileY) == 4)
+                    SEntMan.SpawnEntity("WallSolid", new EntityCoordinates(gridUid, new Vector2(tileX + 0.5f, tileY + 0.5f)));
+            }
+            nearby = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(gridUid, new Vector2(-0.5f, 0.5f)));
+        });
+        await RunTicks(100);
+        await Server.WaitAssertion(() =>
+        {
+            foreach (var environment in SEntMan.System<AtmosphereSystem>().GetAllMixtures(gridUid, true))
+            {
+                if (environment.Immutable)
+                    continue;
+                environment.Temperature = 293.15f;
+                environment.SetMoles(Gas.Oxygen, 21f);
+                environment.SetMoles(Gas.Nitrogen, 83f);
+            }
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquid",
+                new EntityCoordinates(gridUid, new Vector2(0.5f, 0.5f)));
+            var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(entity)!.Value;
+            var solutions = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solutions.TryGetSolution(module, "tank", out var fuelSolution, out _), Is.True);
+            solutions.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(100), out _);
+            SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true);
+            var steam = SEntMan.GetComponent<SteamTurbineComponent>(entity);
+            steam.BoilerTemperature = 650f;
+            steam.SteamPressure = 1f;
+            SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));
+            Assert.That(SEntMan.HasComponent<Content.Shared.Stunnable.KnockedDownComponent>(nearby), Is.True);
+            Assert.That(SEntMan.System<AtmosphereSystem>().IsHotspotActive(gridUid, new Robust.Shared.Maths.Vector2i(-1, 0)), Is.True);
+            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(entity), Is.LessThan(100f));
+        });
+        await RunTicks(5);
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.GetComponent<DamageableComponent>(nearby).TotalDamage, Is.GreaterThan(FixedPoint2.Zero));
+            for (var tileX = -1; tileX <= 1; tileX++)
+            for (var tileY = -1; tileY <= 1; tileY++)
+            {
+                var tile = MapSystem.GetTileRef(gridUid,
+                    SEntMan.GetComponent<Robust.Shared.Map.Components.MapGridComponent>(gridUid),
+                    new Robust.Shared.Maths.Vector2i(tileX, tileY));
+                Assert.That(tile.Tile.IsEmpty, Is.False);
+                Assert.That(((Content.Shared.Maps.ContentTileDefinition) TileMan[tile.Tile.TypeId]).MapAtmosphere, Is.False);
+            }
+        });
+    }
+
+    [Test]
     public async Task PressurizedRuptureIgnitesFuel()
     {
         EntityUid target = default;
@@ -36,6 +220,9 @@ public sealed class SteamTurbineTests : InteractionTest
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
                 new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
             var coordinates = new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f));
+            // The breathing fixture is a single open tile surrounded by walls; clear the turbine's footprint.
+            foreach (var nearbyEntity in SEntMan.System<EntityLookupSystem>().GetEntitiesInRange<Content.Server.Atmos.Components.AirtightComponent>(coordinates, 3f))
+                SEntMan.DeleteEntity(nearbyEntity.Owner);
             var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquid", coordinates);
             target = SEntMan.SpawnEntity("NFStationaryGeneratorStirlingCompact",
                 new EntityCoordinates(grid.Value.Owner, new Vector2(1.5f, 0.5f)));

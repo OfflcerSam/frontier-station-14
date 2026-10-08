@@ -26,6 +26,10 @@ using Content.Shared.Interaction;
 using Content.Shared.Power.Generator;
 using Content.Shared.Wires;
 using Robust.Shared.Timing;
+using System.Numerics;
+using Content.Shared.Stunnable;
+using Robust.Shared.Map;
+using Robust.Shared.Maths;
 
 namespace Content.Server._NF.Power.Steam;
 
@@ -45,6 +49,8 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
     [Dependency] private readonly SolutionTransferSystem _solutionTransfer = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
+    [Dependency] private readonly EntityLookupSystem _lookup = default!;
+    [Dependency] private readonly SharedStunSystem _stun = default!;
 
     public override void Initialize()
     {
@@ -64,6 +70,8 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         var query = EntityQueryEnumerator<SteamTurbineComponent, FuelGeneratorComponent, StationaryGeneratorComponent>();
         while (query.MoveNext(out var entity, out var steam, out var generator, out var stationary))
         {
+            if (!steam.Ruptured)
+                HeatRoom((entity, steam), frameTime);
             if (!generator.On || steam.Ruptured)
             {
                 steam.BoilerTemperature += (293.15f - steam.BoilerTemperature) * Math.Clamp(steam.CoolingRate * frameTime, 0f, 1f);
@@ -181,12 +189,12 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         if (removed <= FixedPoint2.Zero)
             return 0f;
         var steamMixture = new GasMixture();
-        steamMixture.SetMoles(Gas.WaterVapor, removed.Float());
+        steamMixture.SetMoles(Gas.WaterVapor, removed.Float() * entity.Comp.VaporMolesPerUnit);
         steamMixture.Temperature = Math.Max(entity.Comp.BoilingTemperature, entity.Comp.BoilerTemperature);
-        if (_atmosphere.GetContainingMixture(entity.Owner, false, true) is { } environment)
+        if (_atmosphere.GetContainingMixture(entity.Owner, false, true) is { Immutable: false } environment)
         {
             var ventHeat = Math.Max(0f, steamMixture.Temperature - environment.Temperature) *
-                removed.Float() * _atmosphere.GasSpecificHeats[(int) Gas.WaterVapor] *
+                steamMixture.GetMoles(Gas.WaterVapor) * _atmosphere.GasSpecificHeats[(int) Gas.WaterVapor] *
                 (entity.Comp.VentHeatMultiplier - 1f);
             _atmosphere.Merge(environment, steamMixture);
             if (ventHeat > 0f)
@@ -243,8 +251,13 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             _popup.PopupEntity(Loc.GetString("steam-turbine-pure-water"), entity, user);
             return false;
         }
-        if (!_solutionContainers.TryGetSolution(entity.Owner, entity.Comp.WaterSolution, out var waterSolution, out _))
+        if (!_solutionContainers.TryGetSolution(entity.Owner, entity.Comp.WaterSolution, out var waterSolution, out var water))
             return false;
+        if (water.AvailableVolume <= FixedPoint2.Zero)
+        {
+            _popup.PopupEntity(Loc.GetString("steam-turbine-water-full"), entity, user);
+            return false;
+        }
         if (_solutionTransfer.Transfer(user, source, sourceSolution.Value, entity.Owner, waterSolution.Value, amount) <= FixedPoint2.Zero)
             return false;
         _popup.PopupEntity(Loc.GetString("steam-turbine-water-poured", ("target", entity.Owner)), entity, user);
@@ -305,13 +318,16 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         entity.Comp.Ruptured = true;
         StopSteamAudio(entity);
         var running = TryComp<FuelGeneratorComponent>(entity, out var generator) && generator.On;
+        var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, new Vector2(0.5f, 0.5f)));
         if (running && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold)
-            _explosion.QueueExplosion(entity.Owner, "Default", Math.Min(entity.Comp.MaximumBurstIntensity,
+            _explosion.QueueExplosion(burstPosition, "Default", Math.Min(entity.Comp.MaximumBurstIntensity,
                 entity.Comp.SteamPressure <= 1f
                     ? entity.Comp.RatedBurstIntensity * entity.Comp.SteamPressure
                     : entity.Comp.RatedBurstIntensity + (entity.Comp.MaximumBurstIntensity - entity.Comp.RatedBurstIntensity) *
                       (entity.Comp.SteamPressure - 1f) / (entity.Comp.MaximumSteamPressure - 1f)),
-                5f, 10f, tileBreakScale: 0f, maxTileBreak: 0, canCreateVacuum: false);
+                0.5f, 1.5f, entity.Owner, tileBreakScale: 15f, maxTileBreak: 1, canCreateVacuum: false);
+        if (running && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold)
+            ApplyPressureKnockdown(entity);
         if (GetWaterLevel(entity) > 0f && entity.Comp.BoilerTemperature > entity.Comp.BoilingTemperature)
         {
             entity.Comp.LastReleaseSoundTime = _timing.CurTime.TotalSeconds - 10d;
@@ -328,6 +344,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         {
             _flammable.AdjustFireStacks(fuelModule, 2f, flammable);
             _flammable.Ignite(fuelModule, entity.Owner, flammable);
+            ReleaseBurnerFire(entity, fuelModule);
         }
         if (running && Transform(entity).GridUid is { } grid)
         {
@@ -336,6 +353,66 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         }
         if (generator != null)
             _generator.SetFuelGeneratorOn(entity, false, generator);
+    }
+
+    public void HeatRoom(Entity<SteamTurbineComponent> entity, float frameTime)
+    {
+        if (_atmosphere.GetContainingMixture(entity.Owner, false, true) is not { Immutable: false } environment)
+            return;
+        // Casing heat follows the boiler/room gradient, including residual heat after shutdown.
+        var heatFraction = Math.Max(0f, entity.Comp.BoilerTemperature - environment.Temperature) /
+            (entity.Comp.RatedSteamTemperature - 293.15f);
+        var heat = Math.Min(entity.Comp.CasingHeatPower * heatFraction * frameTime,
+            Math.Max(0f, entity.Comp.BoilerTemperature - environment.Temperature) * _atmosphere.GetHeatCapacity(environment, false));
+        if (heat > 0f)
+            _atmosphere.AddHeat(environment, heat * _atmosphere.GetHeatCapacity(environment, true) /
+                _atmosphere.GetHeatCapacity(environment, false));
+    }
+
+    private void ApplyPressureKnockdown(Entity<SteamTurbineComponent> entity)
+    {
+        var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, new Vector2(0.5f, 0.5f)));
+        var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
+        var radius = pressure <= 1f ? 3f * MathF.Sqrt(pressure) : 3f + (pressure - 1f) / (entity.Comp.MaximumSteamPressure - 1f);
+        foreach (var nearby in _lookup.GetEntitiesInRange<CrawlerComponent>(burstPosition, radius))
+        {
+            if (!EntityManager.System<SharedInteractionSystem>().InRangeUnobstructed(burstPosition,
+                    _transform.GetMapCoordinates(nearby.Owner), radius,
+                    predicate: obstacle => obstacle == entity.Owner || obstacle == nearby.Owner))
+                continue;
+            _stun.TryKnockdown(nearby.Owner, TimeSpan.FromSeconds(Math.Clamp(pressure, 0.2f, 2f)));
+        }
+    }
+
+    private void ReleaseBurnerFire(Entity<SteamTurbineComponent> entity, EntityUid fuelModule)
+    {
+        var transform = Transform(entity);
+        if (transform.GridUid is not { } grid)
+            return;
+        var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, new Vector2(0.5f, 0.5f)));
+        var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
+        var radius = pressure <= 1f ? 0.8f + 1.4f * pressure : 2.2f + (pressure - 1f);
+        var origin = _transform.GetGridOrMapTilePosition(entity.Owner, transform);
+        for (var tileX = -3; tileX <= 3; tileX++)
+        for (var tileY = -3; tileY <= 3; tileY++)
+        {
+            var position = origin + new Vector2i(tileX, tileY);
+            var coordinates = new EntityCoordinates(grid, new Vector2(position.X + 0.5f, position.Y + 0.5f));
+            if (!EntityManager.System<SharedInteractionSystem>().InRangeUnobstructed(burstPosition,
+                    _transform.ToMapCoordinates(coordinates), radius, predicate: obstacle => obstacle == entity.Owner) ||
+                _atmosphere.IsTileAirBlocked(grid, position) ||
+                _atmosphere.GetTileMixture(grid, transform.MapUid, position, true) is not { } environment ||
+                environment.GetMoles(Gas.Oxygen) < 1f || _generator.GetFuel(entity.Owner) < 1f)
+                continue;
+            // A finite parcel of escaped burner fuel, represented by atmos' combustible gas.
+            // This is a gameplay conversion for all accepted fuels, not flammable steam.
+            _fuelModules.ConsumeModuleFuel((fuelModule, Comp<FuelModuleComponent>(fuelModule)), 1f);
+            var gasRelease = new GasMixture();
+            gasRelease.SetMoles(Gas.Plasma, 0.6f);
+            gasRelease.Temperature = Math.Max(500f, entity.Comp.BoilerTemperature);
+            _atmosphere.Merge(environment, gasRelease);
+            _atmosphere.HotspotExpose(grid, position, gasRelease.Temperature, 50f, entity.Owner, true);
+        }
     }
 
     private void OnShutdown(Entity<SteamTurbineComponent> entity, ref ComponentShutdown arguments)

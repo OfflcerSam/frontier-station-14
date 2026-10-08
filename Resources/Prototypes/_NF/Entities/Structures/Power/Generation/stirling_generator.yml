@@ -160,6 +160,9 @@
     moduleSize: Standard
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1"]
+  - type: Construction
+    graph: NFMachine1x2
+    node: machine
   - type: Fixtures
     fixtures:
       fix1:

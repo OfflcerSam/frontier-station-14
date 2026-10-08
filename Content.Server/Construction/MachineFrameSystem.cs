@@ -161,6 +161,13 @@ public sealed class MachineFrameSystem : EntitySystem
         if (!TryComp<MachineBoardComponent>(used, out var machineBoard))
             return false;
 
+        // Frontier: a board requires the same frame footprint as its finished machine.
+        if (!EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanFitBoard(uid, machineBoard.Prototype))
+        {
+            _popupSystem.PopupEntity(Loc.GetString("machine-frame-wrong-size"), uid);
+            return true;
+        }
+
         if (!_container.TryRemoveFromContainer(used))
             return false;
 
@@ -278,6 +285,11 @@ public sealed class MachineFrameSystem : EntitySystem
     public bool IsComplete(MachineFrameComponent component)
     {
         if (!component.HasBoard)
+            return false;
+
+        // Frontier: enforce the size requirement even for boards inserted by other systems.
+        if (!TryComp<MachineBoardComponent>(component.BoardContainer.ContainedEntities[0], out var machineBoard) ||
+            !EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanFitBoard(component.Owner, machineBoard.Prototype))
             return false;
 
         // Frontier: restore upgradeable parts

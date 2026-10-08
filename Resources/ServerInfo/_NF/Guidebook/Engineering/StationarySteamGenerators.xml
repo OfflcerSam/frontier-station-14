@@ -19,5 +19,6 @@
 
   # Damage
 
-  At 20 percent chassis damage, the boiler begins venting hot water vapor on damage steps. Further hits vent more water and lower pressure. A running pressurized machine can burst if destroyed; its pressure blast cannot break floor tiles. A running machine with fuel can ignite the ejected fuel module even without pressure. Repairing the chassis restores its pressure sealing, but does not replace lost water.
+  At 20 percent chassis damage, the boiler begins venting hot water vapor on damage steps. Further hits vent more water and lower pressure. A running pressurized machine can burst if destroyed, injuring and knocking down nearby crew. The pressure blast can damage floor finishes and walls, but does not remove plating. Escaped burner fuel can create a small surrounding fire in oxygen; its reach grows with pressure. Repairing the chassis restores its pressure sealing, but does not replace lost water.
+  The casing warms the room, including while a stopped boiler cools. Keep ventilation and gas scrubbing available. Building or rebuilding this turbine requires a 2×2 machine frame; a normal machine frame is too small.
 </Document>

@@ -45,6 +45,9 @@
         enum.GeneratorVisualLayers.Body:
           True: { color: "#AAFFAA" }
           False: { color: "#FFFFFF" }
+  - type: Construction
+    graph: NFMachine1x2
+    node: machine
   - type: Machine
     board: NFStationaryGeneratorCombustionStandardMachineCircuitboard
   - type: Damageable

@@ -305,8 +305,13 @@ namespace Content.Server.Construction
             if (newEntity == metaData.EntityPrototype?.ID || !PrototypeManager.HasIndex<EntityPrototype>(newEntity))
                 return null;
 
-            // Frontier: recheck at replacement time, including non-frame construction paths.
-            if (!EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
+            // Frontier: same-size frame transitions retain existing space even if contents were dropped.
+            // Completed machines still require a clear footprint.
+            var frameFootprint = PrototypeManager.Index<EntityPrototype>(newEntity)
+                .TryGetComponent<ConstructionComponent>(out var frameConstruction, EntityManager.ComponentFactory) &&
+                frameConstruction.Node != "machine" &&
+                EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanFitBoard(uid, newEntity);
+            if (!frameFootprint && !EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
                 newEntity, transform.Coordinates, transform.LocalRotation, uid))
                 return null;
 

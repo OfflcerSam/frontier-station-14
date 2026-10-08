@@ -134,6 +134,9 @@
         layer: [MachineLayer]
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1"]
+  - type: Construction
+    graph: NFMachine1x2
+    node: machine
   - type: Sprite
     offset: 0, 0.5
     scale: 0.5, 1

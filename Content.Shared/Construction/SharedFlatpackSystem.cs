@@ -144,6 +144,25 @@ public abstract class SharedFlatpackSystem : EntitySystem
         {
             cost = MachinePart.GetMachineBoardMaterialCost(machineBoard.Value, -1);
             baseCost = entity.Comp.BaseMachineCost;
+            // Frontier: pay for the extra frame area as well as the standard flatpacking fee.
+            if (PrototypeManager.Index(machineBoard.Value.Comp.Prototype)
+                .TryGetComponent<Content.Shared._NF.Construction.MachineFootprintComponent>(out var footprint, Factory) &&
+                footprint.Tiles.Count > 1)
+            {
+                var frameArea = footprint.Tiles.Count - 1;
+                if (PrototypeManager.Index<EntityPrototype>("SheetSteel1")
+                    .TryGetComponent<PhysicalCompositionComponent>(out var frameMaterialCost, Factory))
+                {
+                    foreach (var (mat, frameMaterialAmount) in frameMaterialCost.MaterialComposition)
+                        cost[mat] = cost.GetValueOrDefault(mat) - frameMaterialAmount * 5 * frameArea;
+                }
+                if (PrototypeManager.Index<EntityPrototype>("CableApcStack1")
+                    .TryGetComponent<PhysicalCompositionComponent>(out frameMaterialCost, Factory))
+                {
+                    foreach (var (mat, frameMaterialAmount) in frameMaterialCost.MaterialComposition)
+                        cost[mat] = cost.GetValueOrDefault(mat) - frameMaterialAmount * frameArea;
+                }
+            }
         }
         else
             baseCost = entity.Comp.BaseComputerCost;

@@ -1,0 +1,144 @@
+- type: entity
+  parent: UnfinishedMachineFrame
+  id: NFUnfinishedMachineFrame1x2
+  name: 1x2 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine1x2
+    node: missingWires
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1"]
+  - type: Sprite
+    noRot: false
+    scale: 1, 2
+    offset: 0, 0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: MachineFrame
+  id: NFMachineFrame1x2
+  name: 1x2 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine1x2
+    node: machineFrame
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1"]
+  - type: Sprite
+    noRot: false
+    scale: 1, 2
+    offset: 0, 0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: MachineFrameDestroyed
+  id: NFMachineFrameDestroyed1x2
+  name: 1x2 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine1x2
+    node: destroyedMachineFrame
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1"]
+  - type: Sprite
+    noRot: false
+    scale: 1, 2
+    offset: 0, 0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: UnfinishedMachineFrame
+  id: NFUnfinishedMachineFrame2x2
+  name: 2x2 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine2x2
+    node: missingWires
+  - type: MachineFootprint
+    tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
+  - type: Sprite
+    noRot: false
+    scale: 2, 2
+    offset: 0.5, 0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,1.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: MachineFrame
+  id: NFMachineFrame2x2
+  name: 2x2 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine2x2
+    node: machineFrame
+  - type: MachineFootprint
+    tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
+  - type: Sprite
+    noRot: false
+    scale: 2, 2
+    offset: 0.5, 0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,1.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: MachineFrameDestroyed
+  id: NFMachineFrameDestroyed2x2
+  name: 2x2 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine2x2
+    node: destroyedMachineFrame
+  - type: MachineFootprint
+    tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
+  - type: Sprite
+    noRot: false
+    scale: 2, 2
+    offset: 0.5, 0.5
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,1.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
