@@ -74,7 +74,7 @@
           False: { visible: false }
       enum.GeneratorStatusVisuals.FuelKind:
         enum.GeneratorStatusLayers.FuelLabel:
-          none: { visible: false }
+          none: { visible: true, state: fuel_panel }
           solid: { visible: true, state: fuel_solid }
           liquid: { visible: true, state: fuel_liquid }
         enum.GeneratorStatusLayers.FuelLamp:

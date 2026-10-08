@@ -332,8 +332,9 @@ public sealed class FuelModuleSystem : EntitySystem
         }
         else
         {
-            arguments.PushMarkup(Loc.GetString("fuel-module-panel-cover"));
-            if (module is { })
+            if (module is null)
+                arguments.PushMarkup(Loc.GetString("fuel-module-panel-cover"));
+            else
                 arguments.PushMarkup(Loc.GetString(Comp<FuelModuleComponent>(module.Value).Kind == FuelModuleKind.Solid
                     ? "fuel-module-label-solid" : "fuel-module-label-liquid"));
         }

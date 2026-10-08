@@ -176,11 +176,13 @@ public sealed class GeneratorBoundsAndIndicatorsTests : InteractionTest
         });
     }
 
-    [TestCase("Solid", "solid")]
-    [TestCase("Liquid", "liquid")]
-    public async Task SupplyLampsTrackRealContents(string moduleKind, string expectedKind)
+    [TestCase("Standard", "Solid", "solid")]
+    [TestCase("Standard", "Liquid", "liquid")]
+    [TestCase("Commercial", "Solid", "solid")]
+    [TestCase("Commercial", "Liquid", "liquid")]
+    public async Task SupplyLampsTrackRealContents(string size, string moduleKind, string expectedKind)
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard" + moduleKind + "Empty");
+        await SpawnTarget("NFStationaryGeneratorSteam" + size + moduleKind + "Empty");
         await AssertIndicator(GeneratorStatusVisuals.FuelKind, expectedKind);
         await AssertIndicator(GeneratorStatusVisuals.FuelLevel, "empty");
         await AssertIndicator(GeneratorStatusVisuals.WaterLevel, "empty");
@@ -192,14 +194,14 @@ public sealed class GeneratorBoundsAndIndicatorsTests : InteractionTest
             if (moduleKind == "Liquid")
             {
                 Assert.That(solutions.TryGetSolution(module, "tank", out var tank, out _), Is.True);
-                solutions.TryAddReagent(tank!.Value, "WeldingFuel", FixedPoint2.New(1500), out _);
+                solutions.TryAddReagent(tank!.Value, "WeldingFuel", FixedPoint2.New(2250), out _);
             }
             else
-                SEntMan.GetComponent<Content.Shared._NF.Power.FuelModules.FuelModuleComponent>(module).FractionalFuel["Plasma"] = 12000;
+                SEntMan.GetComponent<Content.Shared._NF.Power.FuelModules.FuelModuleComponent>(module).FractionalFuel["Plasma"] = 18000;
             Assert.That(solutions.TryGetSolution(uid, "water", out var water, out _), Is.True);
-            solutions.TryAddReagent(water!.Value, "Water", FixedPoint2.New(250), out _);
+            solutions.TryAddReagent(water!.Value, "Water", FixedPoint2.New(500), out _);
             var steam = SEntMan.GetComponent<SteamTurbineComponent>(uid);
-            steam.BoilerTemperature = 700;
+            steam.BoilerTemperature = steam.RatedSteamTemperature + 50;
             steam.SteamPressure = 1.1f;
         });
         await AssertIndicator(GeneratorStatusVisuals.FuelLevel, "full");
@@ -208,7 +210,7 @@ public sealed class GeneratorBoundsAndIndicatorsTests : InteractionTest
         await Server.WaitAssertion(() =>
         {
             var steam = SEntMan.GetComponent<SteamTurbineComponent>(STarget!.Value);
-            steam.BoilerTemperature = 980;
+            steam.BoilerTemperature = steam.MaximumBoilerTemperature * 0.95f;
             steam.SteamPressure = 1.8f;
         });
         await AssertIndicator(GeneratorStatusVisuals.PressureLevel, "high");
@@ -221,8 +223,32 @@ public sealed class GeneratorBoundsAndIndicatorsTests : InteractionTest
             index = CEntMan.System<SpriteSystem>().LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.TemperatureLamp);
             Assert.That(sprite.AllLayers.ElementAt(index).Color, Is.EqualTo(Color.FromHex("#FF544A")));
         });
+        EntityUid removedModule = default;
+        await Server.WaitAssertion(() => removedModule = SEntMan.System<FuelModuleSystem>().GetInstalledModule(STarget!.Value)!.Value);
         await Interact(Screw, Pry);
         await AssertIndicator(GeneratorStatusVisuals.FuelKind, "none");
+        await Client.WaitAssertion(() =>
+        {
+            var sprite = CEntMan.GetComponent<SpriteComponent>(CTarget!.Value);
+            var sprites = CEntMan.System<SpriteSystem>();
+            var label = sprite.AllLayers.ElementAt(sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.FuelLabel));
+            Assert.That(label.Visible, Is.True);
+            Assert.That(label.RsiState.ToString(), Is.EqualTo("fuel_panel"));
+            var lamp = sprite.AllLayers.ElementAt(sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.FuelLamp));
+            Assert.That(lamp.Visible, Is.False);
+        });
+        await Server.WaitAssertion(() => Assert.That(
+            SEntMan.System<FuelModuleSystem>().TryInstallModule(STarget!.Value, removedModule, SPlayer), Is.True));
+        await AssertIndicator(GeneratorStatusVisuals.FuelKind, expectedKind);
+        await Client.WaitAssertion(() =>
+        {
+            var sprite = CEntMan.GetComponent<SpriteComponent>(CTarget!.Value);
+            var sprites = CEntMan.System<SpriteSystem>();
+            var label = sprite.AllLayers.ElementAt(sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.FuelLabel));
+            Assert.That(label.RsiState.ToString(), Is.EqualTo("fuel_" + expectedKind));
+            var lamp = sprite.AllLayers.ElementAt(sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.FuelLamp));
+            Assert.That(lamp.Visible, Is.True);
+        });
     }
 
     [TestCase("Compact", "empty1", "full1")]
