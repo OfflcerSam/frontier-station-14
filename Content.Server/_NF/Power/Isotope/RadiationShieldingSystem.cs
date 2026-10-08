@@ -117,6 +117,9 @@ public sealed class RadiationShieldingSystem : EntitySystem
         if (!arguments.IsInDetailsRange || !CanService(entity))
             return;
         var shielding = _itemSlots.GetItemOrNull(entity, entity.Comp.ShieldingSlot);
+        if (shielding != null)
+            arguments.PushMarkup(Loc.GetString(entity.Comp.CellSlots.Count == 1
+                ? "isotope-shielding-cover-one" : "isotope-shielding-cover-two"));
         arguments.PushMarkup(Loc.GetString("isotope-shielding", ("rating",
             shielding != null && TryComp<RadiationShieldingInsertComponent>(shielding, out var insert) ? insert.Rating : 1)));
 

@@ -103,22 +103,43 @@ public sealed class IsotopeGeneratorSystem : EntitySystem
         arguments.PushMarkup(Loc.GetString(heatOutput > 0f ? "isotope-warm" : "isotope-quiet"));
 
         if (!TryComp<WiresPanelComponent>(entity, out var panel) || !panel.Open)
+        {
+            arguments.PushMarkup(Loc.GetString(entity.Comp.CellSlots.Count == 1
+                ? "isotope-bay-panel-cover-one" : "isotope-bay-panel-cover-two"));
             return;
+        }
+
+        var emptyCellCount = 0;
+        var installedCellNames = new List<string>();
+        foreach (var slotId in entity.Comp.CellSlots)
+        {
+            if (_itemSlots.GetItemOrNull(entity, slotId) is { } cell && TryComp<IsotopeCellComponent>(cell, out var cellComponent))
+            {
+                installedCellNames.Add(cellComponent.FuelType != null
+                    ? Loc.GetString("isotope-cell-described", ("fuel", Loc.GetString(_prototypeManager.Index(cellComponent.FuelType.Value).ID)))
+                    : Loc.GetString("isotope-cell-described-empty"));
+            }
+            else
+                emptyCellCount++;
+        }
+
+        if (installedCellNames.Count == 0)
+            arguments.PushMarkup(Loc.GetString(emptyCellCount == 1 ? "isotope-bays-empty-one" : "isotope-bays-empty-two"));
+        else if (emptyCellCount > 0)
+            arguments.PushMarkup(Loc.GetString("isotope-bays-mixed", ("cell", installedCellNames[0])));
+        else if (installedCellNames.Count == 1)
+            arguments.PushMarkup(Loc.GetString("isotope-bays-filled-one", ("cell", installedCellNames[0])));
+        else
+            arguments.PushMarkup(Loc.GetString("isotope-bays-filled-two", ("first", installedCellNames[0]), ("second", installedCellNames[1])));
 
         foreach (var slotId in entity.Comp.CellSlots)
         {
-            if (!_itemSlots.TryGetSlot(entity, slotId, out var slot))
-                continue;
-            if (_itemSlots.GetItemOrNull(entity, slotId) is { } cell && TryComp<IsotopeCellComponent>(cell, out var cellComponent))
-            {
-                var markup = Loc.GetString("isotope-slot-filled", ("slot", Loc.GetString(slot.Name)), ("cell", Name(cell)));
-                if (cellComponent.State == IsotopeCellState.Active)
-                    markup += " " + Loc.GetString("isotope-cell-gauge",
-                        ("minutes", Math.Ceiling(cellComponent.RemainingLifetime / 60f)));
-                arguments.PushMarkup(markup);
-            }
-            else
-                arguments.PushMarkup(Loc.GetString("isotope-slot-empty", ("slot", Loc.GetString(slot.Name))));
+            if (_itemSlots.TryGetSlot(entity, slotId, out var slot) &&
+                _itemSlots.GetItemOrNull(entity, slotId) is { } cell &&
+                TryComp<IsotopeCellComponent>(cell, out var cellComponent) &&
+                cellComponent.State == IsotopeCellState.Active)
+                arguments.PushMarkup(Loc.GetString("isotope-bay-gauge", ("slot", Loc.GetString(slot.Name)),
+                    ("minutes", Math.Ceiling(cellComponent.RemainingLifetime / 60f))));
         }
     }
 

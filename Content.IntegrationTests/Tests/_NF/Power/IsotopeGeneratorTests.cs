@@ -13,6 +13,8 @@ using Content.Server.Power.Components;
 using Content.Server.Radiation.Components;
 using Content.Shared._NF.Power.Isotope;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
 using Content.Shared.Materials;
 using Content.Shared.Radiation.Components;
 using Content.Shared.Stacks;
@@ -223,6 +225,17 @@ public sealed class IsotopeGeneratorTests : InteractionTest
     public async Task ExamineRespectsHatch()
     {
         await SpawnTarget("NFStationaryGeneratorIsotopeCompact");
+        await InteractUsing(Screw);
+        await Server.WaitAssertion(() =>
+        {
+            var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget!.Value, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("It has an empty isotope cell bay."));
+            Assert.That(markup, Does.Not.Contain("shielding insert covering"));
+            Assert.That(SEntMan.GetComponent<DamageableComponent>(STarget.Value).DamageModifierSetId, Is.EqualTo("Metallic"));
+            Assert.That(SEntMan.GetComponent<RequireProjectileTargetComponent>(STarget.Value).Active, Is.False);
+            Assert.That(markup, Does.Contain("Its casing"));
+        });
+        await InteractUsing(Screw);
         await Server.WaitAssertion(() =>
         {
             var entity = STarget!.Value;
@@ -236,6 +249,7 @@ public sealed class IsotopeGeneratorTests : InteractionTest
             slot.SetLock(entity, "cell1", true);
             var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(entity, SPlayer).ToString();
             Assert.That(markup, Does.Contain("warm"));
+            Assert.That(markup, Does.Contain("The isotope cell bay is covered with a panel."));
             Assert.That(markup, Does.Not.Contain("Cell gauge reads"));
             Assert.That(markup, Does.Not.Contain("shielding label"));
             Assert.That(markup, Does.Not.Contain("Available electrical output"));
@@ -244,14 +258,41 @@ public sealed class IsotopeGeneratorTests : InteractionTest
         await Server.WaitAssertion(() =>
         {
             var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget!.Value, SPlayer).ToString();
-            Assert.That(markup, Does.Contain("Isotope cell 1"));
-            Assert.That(markup, Does.Contain("Cell gauge reads"));
+            Assert.That(markup, Does.Contain("It has a Uranium isotope cell."));
+            Assert.That(markup, Does.Contain("cell bay 1 gauge reads"));
             Assert.That(markup, Does.Contain("shielding label"));
+            Assert.That(markup, Does.Not.Contain("shielding insert covering"));
             Assert.That(markup, Does.Not.Contain("Available electrical output"));
             Assert.That(markup, Does.Not.Contain("isotope-slot-"));
             var arguments = new ExaminedEvent(new FormattedMessage(), STarget.Value, SPlayer, false, false);
             SEntMan.EventBus.RaiseLocalEvent(STarget.Value, arguments);
-            Assert.That(arguments.GetTotalMessage().ToString(), Does.Not.Contain("Cell gauge reads"));
+            Assert.That(arguments.GetTotalMessage().ToString(), Does.Not.Contain("gauge reads"));
+        });
+        await Delete(Target!.Value);
+        await SpawnTarget("NFStationaryGeneratorIsotopeStandard");
+        await InteractUsing(Screw);
+        await Server.WaitAssertion(() =>
+        {
+            var entity = STarget!.Value;
+            var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(entity, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("It has two empty isotope cell bays."));
+            var cell = SEntMan.SpawnEntity("NFIsotopeCellCasing", SEntMan.GetCoordinates(TargetCoords));
+            var cellComponent = SEntMan.GetComponent<IsotopeCellComponent>(cell);
+            var material = SEntMan.SpawnEntity("SheetUranium", SEntMan.GetCoordinates(TargetCoords));
+            Assert.That(SEntMan.System<IsotopeCellSystem>().TryLoadFuel((cell, cellComponent), material), Is.True);
+            var slot = SEntMan.System<ItemSlotsSystem>();
+            slot.SetLock(entity, "cell1", false);
+            Assert.That(slot.TryInsert(entity, "cell1", cell, SPlayer), Is.True);
+            slot.SetLock(entity, "cell1", true);
+            markup = SEntMan.System<ExamineSystemShared>().GetExamineText(entity, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("It has a Uranium isotope cell and an empty bay."));
+            var part = SEntMan.SpawnEntity("NFRadiationShieldingInsertR2", SEntMan.GetCoordinates(TargetCoords));
+            slot.SetLock(entity, "shielding", false);
+            Assert.That(slot.TryInsert(entity, "shielding", part, SPlayer), Is.True);
+            slot.SetLock(entity, "shielding", true);
+            markup = SEntMan.System<ExamineSystemShared>().GetExamineText(entity, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("You see the shielding insert covering the cell bays."));
+            Assert.That(markup, Does.Contain("R2"));
         });
     }
 

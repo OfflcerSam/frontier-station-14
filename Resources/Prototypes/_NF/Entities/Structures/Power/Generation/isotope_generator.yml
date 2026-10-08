@@ -30,6 +30,12 @@
     scale: 0.5, 0.5
   - type: Machine
     board: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: RequireProjectileTarget
+    active: false
+  - type: ExaminableDamage
+    messages: NFStationaryGeneratorDamageMessages
   - type: WiresPanel
   - type: IsotopeGenerator
     cellSlots: [cell1]

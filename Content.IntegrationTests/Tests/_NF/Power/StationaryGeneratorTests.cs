@@ -18,6 +18,10 @@ using Content.Shared._NF.Construction;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Construction;
 using Content.Shared.Construction.Components;
+using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
+using Content.Shared.Damage.Systems;
+using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Content.Shared.Power.Generator;
 using Robust.Shared.GameObjects;
@@ -34,7 +38,16 @@ public sealed class StationaryGeneratorTests : InteractionTest
         await SpawnTarget("NFStationaryGeneratorCombustionStandard");
         await Server.WaitAssertion(() =>
         {
-            var generator = SEntMan.GetComponent<FuelGeneratorComponent>(SEntMan.GetEntity(Target!.Value));
+            var entity = SEntMan.GetEntity(Target!.Value);
+            var generator = SEntMan.GetComponent<FuelGeneratorComponent>(entity);
+            var damageable = SEntMan.GetComponent<DamageableComponent>(entity);
+            Assert.That(damageable.DamageModifierSetId, Is.EqualTo("Metallic"));
+            Assert.That(SEntMan.GetComponent<RequireProjectileTargetComponent>(entity).Active, Is.False);
+            SEntMan.System<DamageableSystem>().TryChangeDamage(entity,
+                new DamageSpecifier { DamageDict = new() { ["Piercing"] = FixedPoint2.New(10), ["Structural"] = FixedPoint2.New(15) } });
+            Assert.That(damageable.TotalDamage, Is.GreaterThan(FixedPoint2.Zero));
+            Assert.That(SEntMan.System<ExamineSystemShared>().GetExamineText(entity, SPlayer).ToString(),
+                Does.Contain("Its casing"));
             Assert.That(generator.MaxTargetPower, Is.EqualTo(52500f));
             var arguments = new PortableGeneratorSetTargetPowerMessage(52.5f);
             SEntMan.EventBus.RaiseLocalEvent(SEntMan.GetEntity(Target.Value), arguments);

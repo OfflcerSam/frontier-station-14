@@ -46,6 +46,12 @@
           False: { color: "#FFFFFF" }
   - type: Machine
     board: NFStationaryGeneratorStirlingCompactMachineCircuitboard
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: RequireProjectileTarget
+    active: false
+  - type: ExaminableDamage
+    messages: NFStationaryGeneratorDamageMessages
   - type: StationaryGenerator
     ratedPower: 8000
     ratedMaximumPower: 16000

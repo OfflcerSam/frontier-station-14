@@ -16,3 +16,10 @@ machine-footprint-description = Footprint: { $count } tiles. Tile offsets from t
 guide-entry-stationary-combustion-generators = Combustion Engines
 guide-entry-stationary-isotope-generators = Radioisotope Thermoelectric Generators
 
+stationary-generator-damaged-1 = Its casing looks intact.
+stationary-generator-damaged-2 = Its casing has a few scratches.
+stationary-generator-damaged-3 = Its casing has shallow dents.
+stationary-generator-damaged-4 = [color=yellow]Its casing is visibly dented.[/color]
+stationary-generator-damaged-5 = [color=orange]Its casing is badly damaged.[/color]
+stationary-generator-damaged-6 = [color=red]Its casing is barely holding together.[/color]
+

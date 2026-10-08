@@ -6,7 +6,8 @@ fuel-module-service-denied = You must stop the engine first.
 fuel-module-panel-closed = You must open the panel first.
 fuel-module-panel-open = You must close the maintenance panel.
 fuel-module-installed = It has a [color=lightblue]{$module}[/color] installed.
-fuel-module-none = It has an empty fuel module slot.
+fuel-module-none = It has no fuel module installed.
+fuel-module-panel-cover = The fuel input is covered with a panel.
 fuel-module-label-solid = It has a fuel label for [color=lightblue]solids[/color].
 fuel-module-label-liquid = It has a fuel label for [color=lightblue]liquids[/color].
 fuel-module-capacity = It has a capacity label reading [color=lightblue]{$capacity} {$units}[/color].

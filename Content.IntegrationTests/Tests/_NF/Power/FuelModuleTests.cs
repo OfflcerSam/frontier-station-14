@@ -8,6 +8,7 @@ using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Examine;
 using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Power.Generator;
 using Content.Shared.Wires;
@@ -33,6 +34,8 @@ public sealed class FuelModuleTests : InteractionTest
             Assert.That(generator.GetModuleFuel((module.Value, moduleComponent)), Is.EqualTo(11.5f));
             Assert.That(generator.TryRemoveModule(STarget.Value, SPlayer), Is.True);
             Assert.That(generator.GetInstalledModule(STarget.Value), Is.Null);
+            Assert.That(SEntMan.System<ExamineSystemShared>().GetExamineText(STarget.Value, SPlayer).ToString(),
+                Does.Contain("It has no fuel module installed."));
             Assert.That(moduleComponent.FractionalFuel["Plasma"], Is.EqualTo(92));
             Assert.That(generator.TryInstallModule(STarget.Value, module.Value, SPlayer), Is.True);
             Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget.Value), Is.EqualTo(11.5f));
@@ -85,6 +88,7 @@ public sealed class FuelModuleTests : InteractionTest
             Assert.That(moduleComponent.ModuleSize, Is.EqualTo(state));
             Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget.Value), Is.Zero);
             var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget.Value, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("The fuel input is covered with a panel."));
             Assert.That(markup, Does.Contain("It has a fuel label for"));
             Assert.That(markup, Does.Not.Contain("installed."));
         });
@@ -94,6 +98,15 @@ public sealed class FuelModuleTests : InteractionTest
             var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget!.Value, SPlayer).ToString();
             Assert.That(markup, Does.Contain("installed."));
             Assert.That(markup, Does.Not.Contain("fuel label for"));
+            Assert.That(markup, Does.Not.Contain("covered with a panel"));
+            var damageable = SEntMan.GetComponent<DamageableComponent>(STarget.Value);
+            Assert.That(damageable.DamageModifierSetId, Is.EqualTo("Metallic"));
+            Assert.That(SEntMan.GetComponent<RequireProjectileTargetComponent>(STarget.Value).Active, Is.False);
+            SEntMan.System<DamageableSystem>().TryChangeDamage(STarget.Value,
+                new DamageSpecifier { DamageDict = new() { ["Piercing"] = FixedPoint2.New(10), ["Structural"] = FixedPoint2.New(15) } });
+            Assert.That(damageable.TotalDamage, Is.GreaterThan(FixedPoint2.Zero));
+            markup = SEntMan.System<ExamineSystemShared>().GetExamineText(STarget.Value, SPlayer).ToString();
+            Assert.That(markup, Does.Contain("Its casing"));
         });
     }
     [TestCase("NFLiquidFuelTankCompact")]

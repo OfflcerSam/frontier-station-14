@@ -47,6 +47,12 @@
           False: { color: "#FFFFFF" }
   - type: Machine
     board: NFStationaryGeneratorCombustionStandardMachineCircuitboard
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: RequireProjectileTarget
+    active: false
+  - type: ExaminableDamage
+    messages: NFStationaryGeneratorDamageMessages
   - type: StationaryGenerator
     ratedPower: 35000
     ratedMaximumPower: 52500

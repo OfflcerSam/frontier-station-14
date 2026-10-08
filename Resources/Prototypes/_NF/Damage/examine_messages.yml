@@ -1,5 +1,5 @@
-﻿- type: localizedDataset
-  id: ShieldMessages
-  values: 
-    prefix: comp-shield-damaged-
-    count: 5
+- type: localizedDataset
+  id: NFStationaryGeneratorDamageMessages
+  values:
+    prefix: stationary-generator-damaged-
+    count: 6

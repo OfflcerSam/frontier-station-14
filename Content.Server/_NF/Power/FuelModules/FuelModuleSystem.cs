@@ -301,10 +301,12 @@ public sealed class FuelModuleSystem : EntitySystem
         {
             arguments.PushMarkup(module is { } ? Loc.GetString("fuel-module-installed", ("module", Name(module.Value))) : Loc.GetString("fuel-module-none"));
         }
-        else if (module is { })
+        else
         {
-            arguments.PushMarkup(Loc.GetString(Comp<FuelModuleComponent>(module.Value).Kind == FuelModuleKind.Solid
-                ? "fuel-module-label-solid" : "fuel-module-label-liquid"));
+            arguments.PushMarkup(Loc.GetString("fuel-module-panel-cover"));
+            if (module is { })
+                arguments.PushMarkup(Loc.GetString(Comp<FuelModuleComponent>(module.Value).Kind == FuelModuleKind.Solid
+                    ? "fuel-module-label-solid" : "fuel-module-label-liquid"));
         }
     }
     private void OnExamined(Entity<FuelModuleComponent> entity, ref ExaminedEvent arguments)
