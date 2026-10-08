@@ -42,6 +42,8 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
         _upgradeQuery = GetEntityQuery<UpgradePowerSupplierComponent>(); // Frontier: keeping upgradeable power supplies
 
         UpdatesBefore.Add(typeof(PowerNetSystem));
+        // Frontier: mapped multi-tile exhaust links must settle before the first fuel tick.
+        UpdatesAfter.Add(typeof(Content.Server.NodeContainer.EntitySystems.NodeGroupSystem));
 
         SubscribeLocalEvent<FuelGeneratorComponent, PortableGeneratorSetTargetPowerMessage>(OnTargetPowerSet);
         SubscribeLocalEvent<FuelGeneratorComponent, PortableGeneratorEjectFuelMessage>(OnEjectFuel);

@@ -1,0 +1,442 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Mapping supplies only. Machine boards always build the Empty prototypes.
+
+- type: entity
+  parent: NFFuelHopperCompact
+  id: NFFuelHopperCompactFull
+  suffix: Full
+  components:
+  - type: FuelModule
+    fractionalFuel:
+      Plasma: 4000
+
+- type: entity
+  parent: NFLiquidFuelTankCompact
+  id: NFLiquidFuelTankCompactFull
+  suffix: Full
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 500
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 500
+
+- type: entity
+  parent: NFFuelHopperStandard
+  id: NFFuelHopperStandardFull
+  suffix: Full
+  components:
+  - type: FuelModule
+    fractionalFuel:
+      Plasma: 12000
+
+- type: entity
+  parent: NFLiquidFuelTankStandard
+  id: NFLiquidFuelTankStandardFull
+  suffix: Full
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 1500
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 1500
+
+- type: entity
+  parent: NFFuelHopperCommercial
+  id: NFFuelHopperCommercialFull
+  suffix: Full
+  components:
+  - type: FuelModule
+    fractionalFuel:
+      Plasma: 18000
+
+- type: entity
+  parent: NFLiquidFuelTankCommercial
+  id: NFLiquidFuelTankCommercialFull
+  suffix: Full
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 2250
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 2250
+
+- type: entity
+  parent: NFIsotopeCellCasing
+  id: NFIsotopeCellUraniumFull
+  suffix: Uranium, Full
+  components:
+  - type: IsotopeCell
+    state: Active
+    fuelType: NFIsotopeFuelUranium
+    loadedMaterial: 3000
+    remainingLifetime: 14400
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionStandardEmpty
+  id: NFStationaryGeneratorCombustionStandard
+  suffix: Filled
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 1800
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 1800
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompactEmpty
+  id: NFStationaryGeneratorStirlingCompact
+  suffix: Filled
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCompactFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandardEmpty
+  id: NFStationaryGeneratorStirlingStandard
+  suffix: Filled
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankStandardFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompactSolidEmpty
+  id: NFStationaryGeneratorStirlingCompactSolid
+  suffix: Solid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFFuelHopperCompactFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompactLiquidEmpty
+  id: NFStationaryGeneratorStirlingCompactLiquid
+  suffix: Liquid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCompactFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandardSolidEmpty
+  id: NFStationaryGeneratorStirlingStandardSolid
+  suffix: Solid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFFuelHopperStandardFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandardLiquidEmpty
+  id: NFStationaryGeneratorStirlingStandardLiquid
+  suffix: Liquid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankStandardFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorIsotopeCompactEmpty
+  id: NFStationaryGeneratorIsotopeCompact
+  suffix: Filled
+  components:
+  - type: ItemSlots
+    slots:
+      cell1:
+        name: isotope-slot-cell-one
+        startingItem: NFIsotopeCellUraniumFull
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      shielding:
+        name: isotope-slot-shielding
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [RadiationShieldingInsert]
+
+- type: entity
+  parent: NFStationaryGeneratorIsotopeStandardEmpty
+  id: NFStationaryGeneratorIsotopeStandard
+  suffix: Filled
+  components:
+  - type: ItemSlots
+    slots:
+      cell1:
+        name: isotope-slot-cell-one
+        startingItem: NFIsotopeCellUraniumFull
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      cell2:
+        name: isotope-slot-cell-two
+        startingItem: NFIsotopeCellUraniumFull
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      shielding:
+        name: isotope-slot-shielding
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [RadiationShieldingInsert]
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardEmpty
+  id: NFStationaryGeneratorSteamStandard
+  suffix: Filled
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankStandardFull
+        whitelist:
+          components: [FuelModule]
+  - type: SteamTurbine
+    boilerTemperature: 650
+    steamPressure: 1
+    wasPressurized: true
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 250
+        reagents:
+        - ReagentId: Water
+          Quantity: 250
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardSolidEmpty
+  id: NFStationaryGeneratorSteamStandardSolid
+  suffix: Solid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFFuelHopperStandardFull
+        whitelist:
+          components: [FuelModule]
+  - type: SteamTurbine
+    boilerTemperature: 650
+    steamPressure: 1
+    wasPressurized: true
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 250
+        reagents:
+        - ReagentId: Water
+          Quantity: 250
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardLiquidEmpty
+  id: NFStationaryGeneratorSteamStandardLiquid
+  suffix: Liquid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankStandardFull
+        whitelist:
+          components: [FuelModule]
+  - type: SteamTurbine
+    boilerTemperature: 650
+    steamPressure: 1
+    wasPressurized: true
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 250
+        reagents:
+        - ReagentId: Water
+          Quantity: 250
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialEmpty
+  id: NFStationaryGeneratorSteamCommercial
+  suffix: Filled
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCommercialFull
+        whitelist:
+          components: [FuelModule]
+  - type: SteamTurbine
+    boilerTemperature: 700
+    steamPressure: 1
+    wasPressurized: true
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 500
+        reagents:
+        - ReagentId: Water
+          Quantity: 500
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialSolidEmpty
+  id: NFStationaryGeneratorSteamCommercialSolid
+  suffix: Solid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFFuelHopperCommercialFull
+        whitelist:
+          components: [FuelModule]
+  - type: SteamTurbine
+    boilerTemperature: 700
+    steamPressure: 1
+    wasPressurized: true
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 500
+        reagents:
+        - ReagentId: Water
+          Quantity: 500
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
+  id: NFStationaryGeneratorSteamCommercialLiquid
+  suffix: Liquid
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCommercialFull
+        whitelist:
+          components: [FuelModule]
+  - type: SteamTurbine
+    boilerTemperature: 700
+    steamPressure: 1
+    wasPressurized: true
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 500
+        reagents:
+        - ReagentId: Water
+          Quantity: 500

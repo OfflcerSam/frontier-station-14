@@ -35,7 +35,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
     [Test]
     public async Task RatedFuelAndPartUpgrades()
     {
-        await SpawnTarget("NFStationaryGeneratorCombustionStandard");
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -97,7 +97,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
         {
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
                 new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
-            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorCombustionStandard",
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorCombustionStandardEmpty",
                 new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f)));
             var atmosphere = SEntMan.System<AtmosphereSystem>().GetContainingMixture(entity)!;
             var oxygenRequired = atmosphere.GetMoles(Gas.Oxygen);
@@ -112,7 +112,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
     [Test]
     public async Task UpgradeThroughRPED()
     {
-        await SpawnTarget("NFStationaryGeneratorCombustionStandard");
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
         await Interact(Screw, "RPEDT2Filled");
         await Server.WaitAssertion(() =>
         {
@@ -168,7 +168,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
     [Test]
     public async Task StartFailureReportsCause()
     {
-        await SpawnTarget("NFStationaryGeneratorCombustionStandard");
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -204,14 +204,14 @@ public sealed class StationaryGeneratorTests : InteractionTest
             MapSystem.SetTile(MapData.Grid, coordinates, new Tile(TileMan[Plating].TileId));
             MapSystem.SetTile(MapData.Grid, tileCoordinates, new Tile(TileMan[Plating].TileId));
             var footprint = SEntMan.System<MachineFootprintSystem>();
-            Assert.That(footprint.CanPlace("NFStationaryGeneratorCombustionStandard", coordinates,
+            Assert.That(footprint.CanPlace("NFStationaryGeneratorCombustionStandardEmpty", coordinates,
                 Angle.FromDegrees(rotation), SPlayer), Is.True);
             var intersectingEntity = SEntMan.SpawnEntity("WallSolid", tileCoordinates);
-            Assert.That(footprint.CanPlace("NFStationaryGeneratorCombustionStandard", coordinates,
+            Assert.That(footprint.CanPlace("NFStationaryGeneratorCombustionStandardEmpty", coordinates,
                 Angle.FromDegrees(rotation), SPlayer), Is.False);
             SEntMan.DeleteEntity(intersectingEntity);
             MapSystem.SetTile(MapData.Grid, tileCoordinates, Tile.Empty);
-            Assert.That(footprint.CanPlace("NFStationaryGeneratorCombustionStandard", coordinates,
+            Assert.That(footprint.CanPlace("NFStationaryGeneratorCombustionStandardEmpty", coordinates,
                 Angle.FromDegrees(rotation), SPlayer), Is.False);
         });
     }

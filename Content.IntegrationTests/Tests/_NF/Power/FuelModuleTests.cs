@@ -23,9 +23,9 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class FuelModuleTests : InteractionTest
 {
-    [TestCase("NFStationaryGeneratorCombustionStandard", false, 20f)]
-    [TestCase("NFStationaryGeneratorStirlingCompactLiquid", false, 20f)]
-    [TestCase("NFStationaryGeneratorStirlingCompactSolid", true, 40f)]
+    [TestCase("NFStationaryGeneratorCombustionStandardEmpty", false, 20f)]
+    [TestCase("NFStationaryGeneratorStirlingCompactLiquidEmpty", false, 20f)]
+    [TestCase("NFStationaryGeneratorStirlingCompactSolidEmpty", true, 40f)]
     public async Task DamageIgnitesFueledGenerators(string prototypeId, bool solid, float threshold)
     {
         await Server.WaitAssertion(() =>
@@ -63,7 +63,7 @@ public sealed class FuelModuleTests : InteractionTest
     [Test]
     public async Task ModuleRetainsFuel()
     {
-        await SpawnTarget("NFStationaryGeneratorStirlingCompact");
+        await SpawnTarget("NFStationaryGeneratorStirlingCompactEmpty");
         await Interact(Screw, "NFFuelHopperCompact");
         await Server.WaitAssertion(() =>
         {
@@ -87,7 +87,7 @@ public sealed class FuelModuleTests : InteractionTest
     [Test]
     public async Task ModuleRejectsWrongSize()
     {
-        await SpawnTarget("NFStationaryGeneratorStirlingCompact");
+        await SpawnTarget("NFStationaryGeneratorStirlingCompactEmpty");
         await Interact(Screw, "NFFuelHopperStandard");
         await Server.WaitAssertion(() =>
         {
@@ -99,7 +99,7 @@ public sealed class FuelModuleTests : InteractionTest
     [Test]
     public async Task PanelControlsLoading()
     {
-        await SpawnTarget("NFStationaryGeneratorStirlingCompactSolid");
+        await SpawnTarget("NFStationaryGeneratorStirlingCompactSolidEmpty");
         await InteractUsing(Screw);
         await InteractUsing("SheetPlasma", 2);
         await Server.WaitAssertion(() => Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget!.Value), Is.Zero));
@@ -114,12 +114,12 @@ public sealed class FuelModuleTests : InteractionTest
         await Server.WaitAssertion(() => Assert.That(SEntMan.GetComponent<FuelModuleComponent>(STarget!.Value).FractionalFuel["Plasma"], Is.EqualTo(100)));
     }
 
-    [TestCase("NFStationaryGeneratorStirlingCompactSolid", FuelModuleKind.Solid, FuelModuleSize.Compact)]
-    [TestCase("NFStationaryGeneratorStirlingCompactLiquid", FuelModuleKind.Liquid, FuelModuleSize.Compact)]
-    [TestCase("NFStationaryGeneratorStirlingStandardSolid", FuelModuleKind.Solid, FuelModuleSize.Standard)]
-    [TestCase("NFStationaryGeneratorStirlingStandardLiquid", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
-    [TestCase("NFStationaryGeneratorSteamStandardSolid", FuelModuleKind.Solid, FuelModuleSize.Standard)]
-    [TestCase("NFStationaryGeneratorSteamStandardLiquid", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorStirlingCompactSolidEmpty", FuelModuleKind.Solid, FuelModuleSize.Compact)]
+    [TestCase("NFStationaryGeneratorStirlingCompactLiquidEmpty", FuelModuleKind.Liquid, FuelModuleSize.Compact)]
+    [TestCase("NFStationaryGeneratorStirlingStandardSolidEmpty", FuelModuleKind.Solid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorStirlingStandardLiquidEmpty", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorSteamStandardSolidEmpty", FuelModuleKind.Solid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorSteamStandardLiquidEmpty", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
     public async Task MappingVariantsIncludeModules(string prototypeId, FuelModuleKind fuel, FuelModuleSize state)
     {
         await SpawnTarget(prototypeId);
@@ -156,7 +156,7 @@ public sealed class FuelModuleTests : InteractionTest
     [TestCase("NFLiquidFuelTankCompact")]
     public async Task PanelControlsLoading(string prototypeId)
     {
-        await SpawnTarget("NFStationaryGeneratorStirlingCompact");
+        await SpawnTarget("NFStationaryGeneratorStirlingCompactEmpty");
         await Interact(Screw, prototypeId);
         await PlaceInHands("JerryCan");
         await Server.WaitAssertion(() =>
@@ -178,9 +178,9 @@ public sealed class FuelModuleTests : InteractionTest
             Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(STarget!.Value), Is.GreaterThan(0)));
     }
 
-    [TestCase("NFStationaryGeneratorStirlingCompactLiquid", 500f, 100f)]
-    [TestCase("NFStationaryGeneratorStirlingStandardLiquid", 1500f, 100f)]
-    [TestCase("NFStationaryGeneratorCombustionStandard", 1800f, 100f)]
+    [TestCase("NFStationaryGeneratorStirlingCompactLiquidEmpty", 500f, 100f)]
+    [TestCase("NFStationaryGeneratorStirlingStandardLiquidEmpty", 1500f, 100f)]
+    [TestCase("NFStationaryGeneratorCombustionStandardEmpty", 1800f, 100f)]
     [TestCase("NFLiquidFuelTankCompact", 500f, 50f)]
     public async Task FuelLeaksAboveDamageThreshold(string prototypeId, float fuelCapacity, float destructionThreshold)
     {
@@ -207,7 +207,7 @@ public sealed class FuelModuleTests : InteractionTest
         });
     }
 
-    [TestCase("NFStationaryGeneratorStirlingCompactSolid")]
+    [TestCase("NFStationaryGeneratorStirlingCompactSolidEmpty")]
     public async Task FuelLeaksAboveDamageThreshold(string prototypeId)
     {
         await SpawnTarget(prototypeId);
@@ -239,8 +239,8 @@ public sealed class FuelModuleTests : InteractionTest
         });
     }
 
-    [TestCase("NFStationaryGeneratorStirlingCompact", "NFLiquidFuelTankCompact", 8000f, 9000f)]
-    [TestCase("NFStationaryGeneratorStirlingStandard", "NFLiquidFuelTankStandard", 20000f, 10800f)]
+    [TestCase("NFStationaryGeneratorStirlingCompactEmpty", "NFLiquidFuelTankCompact", 8000f, 9000f)]
+    [TestCase("NFStationaryGeneratorStirlingStandardEmpty", "NFLiquidFuelTankStandard", 20000f, 10800f)]
     public async Task StirlingFuelEconomy(string prototypeId, string fuelPrototype, float electricalOutput, float elapsed)
     {
         await SpawnTarget(prototypeId);

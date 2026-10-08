@@ -1,0 +1,158 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+- type: entity
+  parent: WaterTank
+  id: NFDebugWaterTank
+  suffix: DEBUG, Water
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 5000
+        reagents:
+        - ReagentId: Water
+          Quantity: 5000
+
+- type: entity
+  parent: WeldingFuelTank
+  id: NFDebugWeldingFuelTank
+  suffix: DEBUG, Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 5000
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 5000
+
+- type: entity
+  parent: NFLiquidFuelTankStandard
+  id: NFLiquidFuelTankStandardDebug
+  suffix: DEBUG, Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 1500
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 1500
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardLiquidEmpty
+  id: NFStationaryGeneratorSteamStandardDebugWater
+  suffix: DEBUG, Water
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 250
+        reagents:
+        - ReagentId: Water
+          Quantity: 250
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardLiquidEmpty
+  id: NFStationaryGeneratorSteamStandardDebugWeldingFuel
+  suffix: DEBUG, Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 250
+        reagents:
+        - ReagentId: Water
+          Quantity: 250
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankStandardDebug
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFLiquidFuelTankCommercial
+  id: NFLiquidFuelTankCommercialDebug
+  suffix: DEBUG, Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 2250
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 2250
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
+  id: NFStationaryGeneratorSteamCommercialDebugWater
+  suffix: DEBUG, Water
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 500
+        reagents:
+        - ReagentId: Water
+          Quantity: 500
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
+  id: NFStationaryGeneratorSteamCommercialDebugWeldingFuel
+  suffix: DEBUG, Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 500
+        reagents:
+        - ReagentId: Water
+          Quantity: 500
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCommercialDebug
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: Jug
+  id: NFDebugWaterJug
+  name: debug water jug
+  suffix: DEBUG, Water
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 5000
+        reagents:
+        - ReagentId: Water
+          Quantity: 5000
+  - type: SolutionTransfer
+    transferAmount: 500
+
+- type: entity
+  parent: Jug
+  id: NFDebugWeldingFuelJug
+  name: debug welding fuel jug
+  suffix: DEBUG, Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 5000
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 5000
+  - type: SolutionTransfer
+    transferAmount: 500

@@ -31,7 +31,7 @@ public sealed class CommercialSteamAdminLogsTests
         var marker = "steam-audit-" + Guid.NewGuid();
         await server.WaitAssertion(() =>
         {
-            var entity = entities.SpawnEntity("NFStationaryGeneratorSteamStandard", pair.TestMap!.GridCoords);
+            var entity = entities.SpawnEntity("NFStationaryGeneratorSteamStandardEmpty", pair.TestMap!.GridCoords);
             var actor = entities.SpawnEntity(null, pair.TestMap.GridCoords);
             entities.System<MetaDataSystem>().SetEntityName(entity, marker);
             entities.System<MetaDataSystem>().SetEntityName(actor, marker + "-operator");

@@ -12,3 +12,5 @@ steam-turbine-temperature-gauge = The boiler thermometer reads {$temperature}°C
 generator-piping-disconnected = The exhaust pipe is disconnected.
 generator-piping-blocked = The exhaust pressure is too high to start.
 generator-piping-pressure = The exhaust gauge reads {$pressure} kPa.
+generator-piping-intake-pressure = The air intake gauge reads {$pressure} kPa.
+generator-piping-intake-disconnected = The air intake is open to the room.

@@ -16,3 +16,12 @@
   category: construction-category-machines
   placementMode: SnapgridCenter
   canBuildInImpassable: false
+- type: construction
+  id: NFMachineFrame2x3
+  name: nf-machine-frame-2x3
+  graph: NFMachine2x3
+  startNode: start
+  targetNode: machine
+  category: construction-category-machines
+  placementMode: SnapgridCenter
+  canBuildInImpassable: false

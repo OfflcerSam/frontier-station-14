@@ -24,11 +24,7 @@ public sealed class GeneratorExhaustGasSystem : EntitySystem
         exhaustMixture.SetMoles(component.GasType, args.FuelUsed * component.MoleRatio);
         exhaustMixture.Temperature = component.Temperature;
 
-        // Frontier: required exhaust must never fall back to room emissions.
-        var environment = HasComp<Content.Server._NF.Power.Components.GeneratorPipingComponent>(uid)
-            ? (_piping.TryGetExhaustMixture(uid, out var mixture) ? mixture : null)
-            : _atmosphere.GetContainingMixture(uid, false, true);
-        if (environment != null)
-            _atmosphere.Merge(environment, exhaustMixture);
+        // Frontier: share routine emissions among connected generator exhaust ports.
+        _piping.ReleaseExhaust(uid, exhaustMixture);
     }
 }

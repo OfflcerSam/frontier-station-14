@@ -31,7 +31,7 @@ public sealed class SteamTurbineTests : InteractionTest
     [Test]
     public async Task WaterReservoirFull()
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await SpawnTarget("NFStationaryGeneratorSteamStandardEmpty");
         await PlaceInHands("Beaker");
         await Server.WaitAssertion(() =>
         {
@@ -55,7 +55,7 @@ public sealed class SteamTurbineTests : InteractionTest
         {
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
                 new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
-            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandard",
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardEmpty",
                 new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f)));
             var atmosphere = SEntMan.System<AtmosphereSystem>();
             var environment = atmosphere.GetContainingMixture(entity)!;
@@ -81,11 +81,11 @@ public sealed class SteamTurbineTests : InteractionTest
         });
     }
 
-    [TestCase("NFStationaryGeneratorCombustionStandard", "NFMachineFrame1x2")]
-    [TestCase("NFStationaryGeneratorStirlingStandard", "NFMachineFrame1x2")]
-    [TestCase("NFStationaryGeneratorIsotopeStandard", "NFMachineFrame1x2")]
-    [TestCase("NFStationaryGeneratorSteamStandard", "NFMachineFrame2x2")]
-    [TestCase("NFStationaryGeneratorSteamCommercial", "NFMachineFrame2x2")]
+    [TestCase("NFStationaryGeneratorCombustionStandardEmpty", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorStirlingStandardEmpty", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorIsotopeStandardEmpty", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorSteamStandardEmpty", "NFMachineFrame2x2")]
+    [TestCase("NFStationaryGeneratorSteamCommercialEmpty", "NFMachineFrame2x3")]
     public async Task LargeMachineFrames(string machine, string frame)
     {
         await Server.WaitAssertion(() =>
@@ -95,9 +95,9 @@ public sealed class SteamTurbineTests : InteractionTest
                 MapSystem.SetTile(MapData.Grid, new Robust.Shared.Maths.Vector2i(tileX, tileY), new Tile(TileMan[Plating].TileId));
         });
         await StartConstruction(frame);
-        await InteractUsing(Steel, frame == "NFMachineFrame2x2" ? 20 : 10);
+        await InteractUsing(Steel, frame == "NFMachineFrame2x3" ? 30 : frame == "NFMachineFrame2x2" ? 20 : 10);
         await Interact(Wrench);
-        await InteractUsing(Cable, frame == "NFMachineFrame2x2" ? 4 : 2);
+        await InteractUsing(Cable, frame == "NFMachineFrame2x3" ? 6 : frame == "NFMachineFrame2x2" ? 4 : 2);
         AssertPrototype(frame);
         await Server.WaitPost(() => SEntMan.DeleteEntity(STarget!.Value));
         await RunTicks(3);
@@ -115,10 +115,10 @@ public sealed class SteamTurbineTests : InteractionTest
             Assert.That(footprint.CanFitBoard(STarget.Value, "Protolathe"), Is.False);
             var entity = SEntMan.SpawnEntity("MachineFrame", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
             Assert.That(footprint.CanFitBoard(entity, machine), Is.False);
-            var board = SEntMan.SpawnEntity(machine + "MachineCircuitboard", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
+            var board = SEntMan.SpawnEntity(machine.Replace("Empty", "") + "MachineCircuitboard", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
             var machineBoard = SEntMan.GetComponent<Content.Shared.Construction.Components.MachineBoardComponent>(board);
             var flatpacker = SEntMan.SpawnEntity("MachineFlatpacker", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
-            var frameArea = frame == "NFMachineFrame2x2" ? 3 : 1;
+            var frameArea = frame == "NFMachineFrame2x3" ? 5 : frame == "NFMachineFrame2x2" ? 3 : 1;
             var frameMaterialCost = SEntMan.System<Content.Shared.Construction.SharedFlatpackSystem>().GetFlatpackCreationCost(
                 (flatpacker, SEntMan.GetComponent<Content.Shared.Construction.Components.FlatpackCreatorComponent>(flatpacker)),
                 (board, machineBoard));
@@ -182,7 +182,7 @@ public sealed class SteamTurbineTests : InteractionTest
                 environment.SetMoles(Gas.Oxygen, 21f);
                 environment.SetMoles(Gas.Nitrogen, 83f);
             }
-            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquid",
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquidEmpty",
                 new EntityCoordinates(gridUid, new Vector2(0.5f, 0.5f)));
             var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(entity)!.Value;
             var solutions = SEntMan.System<SharedSolutionContainerSystem>();
@@ -236,8 +236,8 @@ public sealed class SteamTurbineTests : InteractionTest
             // The breathing fixture is a single open tile surrounded by walls; clear the turbine's footprint.
             foreach (var nearbyEntity in SEntMan.System<EntityLookupSystem>().GetEntitiesInRange<Content.Server.Atmos.Components.AirtightComponent>(coordinates, 3f))
                 SEntMan.DeleteEntity(nearbyEntity.Owner);
-            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquid", coordinates);
-            target = SEntMan.SpawnEntity("NFStationaryGeneratorStirlingCompact",
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquidEmpty", coordinates);
+            target = SEntMan.SpawnEntity("NFStationaryGeneratorStirlingCompactEmpty",
                 new EntityCoordinates(grid.Value.Owner, new Vector2(1.5f, 0.5f)));
             var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(entity);
             Assert.That(module, Is.Not.Null);
@@ -266,7 +266,7 @@ public sealed class SteamTurbineTests : InteractionTest
     [Test]
     public async Task WaterFillingAndWarmup()
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await SpawnTarget("NFStationaryGeneratorSteamStandardEmpty");
         await PlaceInHands("Beaker");
         await Server.WaitAssertion(() =>
         {
@@ -324,7 +324,7 @@ public sealed class SteamTurbineTests : InteractionTest
     [Test]
     public async Task FuelHeatAndOutput()
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await SpawnTarget("NFStationaryGeneratorSteamStandardEmpty");
         await Interact(Screw, "NFLiquidFuelTankStandard");
         await Server.WaitAssertion(() =>
         {
@@ -366,7 +366,7 @@ public sealed class SteamTurbineTests : InteractionTest
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
                 new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
             var coordinates = new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f));
-            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandard", coordinates);
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardEmpty", coordinates);
             var module = SEntMan.SpawnEntity("NFLiquidFuelTankStandard", coordinates);
             var slots = SEntMan.System<ItemSlotsSystem>();
             slots.SetLock(entity, "fuel_module", false);
@@ -397,7 +397,7 @@ public sealed class SteamTurbineTests : InteractionTest
     [Test]
     public async Task DamageVentsSteam()
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await SpawnTarget("NFStationaryGeneratorSteamStandardEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = STarget!.Value;
@@ -430,7 +430,7 @@ public sealed class SteamTurbineTests : InteractionTest
     [Test]
     public async Task PressureRupture()
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await SpawnTarget("NFStationaryGeneratorSteamStandardEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = STarget!.Value;

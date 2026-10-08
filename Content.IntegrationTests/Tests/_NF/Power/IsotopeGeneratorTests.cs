@@ -87,8 +87,8 @@ public sealed class IsotopeGeneratorTests : InteractionTest
         });
     }
 
-    [TestCase("NFStationaryGeneratorIsotopeCompact")]
-    [TestCase("NFStationaryGeneratorIsotopeStandard")]
+    [TestCase("NFStationaryGeneratorIsotopeCompactEmpty")]
+    [TestCase("NFStationaryGeneratorIsotopeStandardEmpty")]
     public async Task ShieldingRequiresTools(string prototypeId)
     {
         await SpawnTarget(prototypeId);
@@ -157,7 +157,7 @@ public sealed class IsotopeGeneratorTests : InteractionTest
             Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
                 new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
             var coordinates = new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f));
-            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorIsotopeStandard", coordinates);
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorIsotopeStandardEmpty", coordinates);
             var generator = SEntMan.GetComponent<IsotopeGeneratorComponent>(entity);
             var supplier = SEntMan.GetComponent<PowerSupplierComponent>(entity);
             var slot = SEntMan.System<ItemSlotsSystem>();
@@ -240,7 +240,7 @@ public sealed class IsotopeGeneratorTests : InteractionTest
     [Test]
     public async Task ExamineRespectsHatch()
     {
-        await SpawnTarget("NFStationaryGeneratorIsotopeCompact");
+        await SpawnTarget("NFStationaryGeneratorIsotopeCompactEmpty");
         await InteractUsing(Screw);
         await Server.WaitAssertion(() =>
         {
@@ -285,7 +285,7 @@ public sealed class IsotopeGeneratorTests : InteractionTest
             Assert.That(arguments.GetTotalMessage().ToString(), Does.Not.Contain("gauge reads"));
         });
         await Delete(Target!.Value);
-        await SpawnTarget("NFStationaryGeneratorIsotopeStandard");
+        await SpawnTarget("NFStationaryGeneratorIsotopeStandardEmpty");
         await InteractUsing(Screw);
         await Server.WaitAssertion(() =>
         {
@@ -315,7 +315,7 @@ public sealed class IsotopeGeneratorTests : InteractionTest
     [Test]
     public async Task MultitoolReadsOutput()
     {
-        await SpawnTarget("NFStationaryGeneratorIsotopeCompact");
+        await SpawnTarget("NFStationaryGeneratorIsotopeCompactEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = STarget!.Value;

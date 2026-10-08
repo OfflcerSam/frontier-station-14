@@ -3,7 +3,8 @@
 
 - type: entity
   parent: PortableGeneratorSwitchableBase
-  id: NFStationaryGeneratorStirlingCompact
+  id: NFStationaryGeneratorStirlingCompactEmpty
+  suffix: Empty
   name: compact stirling generator
   description: A compact stationary generator with a removable fuel module.
   components:
@@ -136,7 +137,7 @@
   - type: Sprite
     state: engineering
   - type: MachineBoard
-    prototype: NFStationaryGeneratorStirlingCompact
+    prototype: NFStationaryGeneratorStirlingCompactEmpty
     requirements:
       Capacitor: 1
       Manipulator: 1
@@ -149,8 +150,9 @@
 
 
 - type: entity
-  parent: NFStationaryGeneratorStirlingCompact
-  id: NFStationaryGeneratorStirlingStandard
+  parent: NFStationaryGeneratorStirlingCompactEmpty
+  id: NFStationaryGeneratorStirlingStandardEmpty
+  suffix: Empty
   name: standard stirling generator
   description: A two-tile stationary generator with a removable fuel module.
   components:
@@ -194,7 +196,7 @@
   name: standard stirling generator machine board
   components:
   - type: MachineBoard
-    prototype: NFStationaryGeneratorStirlingStandard
+    prototype: NFStationaryGeneratorStirlingStandardEmpty
     requirements:
       Capacitor: 2
       Manipulator: 1
@@ -203,9 +205,9 @@
       Steel: 3
 
 - type: entity
-  parent: NFStationaryGeneratorStirlingCompact
-  id: NFStationaryGeneratorStirlingCompactSolid
-  suffix: Solid
+  parent: NFStationaryGeneratorStirlingCompactEmpty
+  id: NFStationaryGeneratorStirlingCompactSolidEmpty
+  suffix: Solid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -219,9 +221,9 @@
           components: [FuelModule]
 
 - type: entity
-  parent: NFStationaryGeneratorStirlingCompact
-  id: NFStationaryGeneratorStirlingCompactLiquid
-  suffix: Liquid
+  parent: NFStationaryGeneratorStirlingCompactEmpty
+  id: NFStationaryGeneratorStirlingCompactLiquidEmpty
+  suffix: Liquid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -235,9 +237,9 @@
           components: [FuelModule]
 
 - type: entity
-  parent: NFStationaryGeneratorStirlingStandard
-  id: NFStationaryGeneratorStirlingStandardSolid
-  suffix: Solid
+  parent: NFStationaryGeneratorStirlingStandardEmpty
+  id: NFStationaryGeneratorStirlingStandardSolidEmpty
+  suffix: Solid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -251,9 +253,9 @@
           components: [FuelModule]
 
 - type: entity
-  parent: NFStationaryGeneratorStirlingStandard
-  id: NFStationaryGeneratorStirlingStandardLiquid
-  suffix: Liquid
+  parent: NFStationaryGeneratorStirlingStandardEmpty
+  id: NFStationaryGeneratorStirlingStandardLiquidEmpty
+  suffix: Liquid, Empty
   components:
   - type: ItemSlots
     slots:

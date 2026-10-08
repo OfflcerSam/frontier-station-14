@@ -3,7 +3,8 @@
 
 - type: entity
   parent: PortableGeneratorSwitchableBase
-  id: NFStationaryGeneratorSteamStandard
+  id: NFStationaryGeneratorSteamStandardEmpty
+  suffix: Empty
   name: standard steam turbine
   description: A stationary boiler and turbine with a removable fuel module and internal water reservoir.
   components:
@@ -122,9 +123,9 @@
         acts: [Destruction]
 
 - type: entity
-  parent: NFStationaryGeneratorSteamStandard
-  id: NFStationaryGeneratorSteamStandardSolid
-  suffix: Solid
+  parent: NFStationaryGeneratorSteamStandardEmpty
+  id: NFStationaryGeneratorSteamStandardSolidEmpty
+  suffix: Solid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -138,9 +139,9 @@
           components: [FuelModule]
 
 - type: entity
-  parent: NFStationaryGeneratorSteamStandard
-  id: NFStationaryGeneratorSteamStandardLiquid
-  suffix: Liquid
+  parent: NFStationaryGeneratorSteamStandardEmpty
+  id: NFStationaryGeneratorSteamStandardLiquidEmpty
+  suffix: Liquid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -161,7 +162,7 @@
   - type: Sprite
     state: engineering
   - type: MachineBoard
-    prototype: NFStationaryGeneratorSteamStandard
+    prototype: NFStationaryGeneratorSteamStandardEmpty
     requirements:
       Capacitor: 2
       Manipulator: 1
@@ -172,10 +173,11 @@
       Glass: 10
 
 - type: entity
-  parent: NFStationaryGeneratorSteamStandard
-  id: NFStationaryGeneratorSteamCommercial
+  parent: NFStationaryGeneratorSteamStandardEmpty
+  id: NFStationaryGeneratorSteamCommercialEmpty
+  suffix: Empty
   name: commercial steam turbine
-  description: A high-pressure boiler and turbine with required piped exhaust and optional piped air. The west exhaust and south intake connect at its origin tile and rotate with the machine.
+  description: A high-pressure boiler and turbine with required piped exhaust and optional piped air. Red north ports exhaust gas; blue south ports draw air. Either or both ports on each edge can be piped.
   components:
   - type: Machine
     board: NFStationaryGeneratorSteamCommercialMachineCircuitboard
@@ -203,11 +205,37 @@
     burstIntensitySlope: 10
     burstMaximumIntensity: 60
     canBreachHull: true
+    releaseOffset: 0.5, 1
   - type: FuelModuleHost
     moduleSize: Commercial
+  - type: Construction
+    graph: NFMachine2x3
+    node: machine
+  - type: MachineFootprint
+    tiles: ["0, 0", "1, 0", "0, 1", "1, 1", "0, 2", "1, 2"]
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,1.45,2.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+  - type: Sprite
+    sprite: _NF/Structures/Power/Generation/commercial_steam_generator_placeholder.rsi
+    offset: 0.5, 1
+  - type: PowerMonitoringDevice
+    sprite: _NF/Structures/Power/Generation/commercial_steam_generator_placeholder.rsi
   - type: GeneratorPiping
+    exhaustNodes: [exhaust, exhaust_right]
+    intakeNodes: [intake, intake_right]
+    portOffsets:
+      exhaust: 0, 3
+      exhaust_right: 1, 3
+      intake: 0, -1
+      intake_right: 1, -1
   - type: Occluder
-    boundingBox: "-0.5,-0.5,1.5,1.5"
+    boundingBox: "-0.5,-0.5,1.5,2.5"
   - type: NodeContainer
     # Node dictionaries replace inherited values; retain the switchable electrical outputs.
     nodes:
@@ -221,13 +249,23 @@
       exhaust:
         !type:PipeNode
         nodeGroupID: Pipe
-        pipeDirection: West
-        volume: 200
+        pipeDirection: None
+        volume: 100
+      exhaust_right:
+        !type:PipeNode
+        nodeGroupID: Pipe
+        pipeDirection: None
+        volume: 100
       intake:
         !type:PipeNode
         nodeGroupID: Pipe
-        pipeDirection: South
-        volume: 200
+        pipeDirection: None
+        volume: 100
+      intake_right:
+        !type:PipeNode
+        nodeGroupID: Pipe
+        pipeDirection: None
+        volume: 100
   - type: SolutionContainerManager
     solutions:
       water:
@@ -249,9 +287,9 @@
         acts: [Destruction]
 
 - type: entity
-  parent: NFStationaryGeneratorSteamCommercial
-  id: NFStationaryGeneratorSteamCommercialSolid
-  suffix: Solid
+  parent: NFStationaryGeneratorSteamCommercialEmpty
+  id: NFStationaryGeneratorSteamCommercialSolidEmpty
+  suffix: Solid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -265,9 +303,9 @@
           components: [FuelModule]
 
 - type: entity
-  parent: NFStationaryGeneratorSteamCommercial
-  id: NFStationaryGeneratorSteamCommercialLiquid
-  suffix: Liquid
+  parent: NFStationaryGeneratorSteamCommercialEmpty
+  id: NFStationaryGeneratorSteamCommercialLiquidEmpty
+  suffix: Liquid, Empty
   components:
   - type: ItemSlots
     slots:
@@ -288,7 +326,7 @@
   - type: Sprite
     state: engineering
   - type: MachineBoard
-    prototype: NFStationaryGeneratorSteamCommercial
+    prototype: NFStationaryGeneratorSteamCommercialEmpty
     requirements:
       Capacitor: 2
       Manipulator: 2

@@ -28,11 +28,11 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class CommercialSteamTests : InteractionTest
 {
-    [TestCase("NFStationaryGeneratorSteamStandard", 24, 1f, false)]
-    [TestCase("NFStationaryGeneratorSteamStandard", 25, 1f, true)]
-    [TestCase("NFStationaryGeneratorSteamCommercial", 44, 1f, false)]
-    [TestCase("NFStationaryGeneratorSteamCommercial", 45, 1f, true)]
-    [TestCase("NFStationaryGeneratorSteamStandard", 25, 0f, false)]
+    [TestCase("NFStationaryGeneratorSteamStandardEmpty", 24, 1f, false)]
+    [TestCase("NFStationaryGeneratorSteamStandardEmpty", 25, 1f, true)]
+    [TestCase("NFStationaryGeneratorSteamCommercialEmpty", 44, 1f, false)]
+    [TestCase("NFStationaryGeneratorSteamCommercialEmpty", 45, 1f, true)]
+    [TestCase("NFStationaryGeneratorSteamStandardEmpty", 25, 0f, false)]
     public async Task SingleHitRupture(string prototype, int damageAmount, float pressure, bool ruptures)
     {
         await SpawnTarget(prototype);
@@ -60,7 +60,7 @@ public sealed class CommercialSteamTests : InteractionTest
     [Test]
     public async Task GradualDamageAndRetainedPressure()
     {
-        await SpawnTarget("NFStationaryGeneratorSteamStandard");
+        await SpawnTarget("NFStationaryGeneratorSteamStandardEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = STarget!.Value;
@@ -111,10 +111,10 @@ public sealed class CommercialSteamTests : InteractionTest
             for (var x = -2; x <= 6; x++)
             for (var y = -2; y <= 6; y++)
                 MapSystem.SetTile(MapData.Grid, new Vector2i(x, y), new Tile(TileMan[Plating].TileId));
-            entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamCommercialLiquid",
+            entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamCommercialLiquidEmpty",
                 new EntityCoordinates(MapData.Grid.Owner, new Vector2(2.5f, 2.5f)));
             exhaustPipe = SEntMan.SpawnEntity("GasPipeFourway",
-                new EntityCoordinates(MapData.Grid.Owner, new Vector2(1.5f, 2.5f)));
+                new EntityCoordinates(MapData.Grid.Owner, new Vector2(2.5f, 5.5f)));
             intakePipe = SEntMan.SpawnEntity("GasPipeFourway",
                 new EntityCoordinates(MapData.Grid.Owner, new Vector2(2.5f, 1.5f)));
         });
@@ -142,9 +142,9 @@ public sealed class CommercialSteamTests : InteractionTest
             var steamSystem = SEntMan.System<SteamTurbineSystem>();
             Assert.That(steam.CanBreachHull, Is.True);
             Assert.That(SEntMan.GetComponent<OccluderComponent>(entity).BoundingBox,
-                Is.EqualTo(new Box2(-0.5f, -0.5f, 1.5f, 1.5f)));
+                Is.EqualTo(new Box2(-0.5f, -0.5f, 1.5f, 2.5f)));
             Assert.That(SEntMan.HasComponent<OccluderComponent>(SEntMan.SpawnEntity(
-                "NFStationaryGeneratorSteamStandard", new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)))), Is.False);
+                "NFStationaryGeneratorSteamStandardEmpty", new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)))), Is.False);
             var burn = new GeneratorBeforeFuelBurnEvent(1f);
             SEntMan.EventBus.RaiseLocalEvent(entity, ref burn);
             Assert.That(burn.Cancelled, Is.False);
@@ -187,8 +187,8 @@ public sealed class CommercialSteamTests : InteractionTest
         });
     }
 
-    [TestCase("NFStationaryGeneratorSteamStandard", false)]
-    [TestCase("NFStationaryGeneratorSteamCommercial", true)]
+    [TestCase("NFStationaryGeneratorSteamStandardEmpty", false)]
+    [TestCase("NFStationaryGeneratorSteamCommercialEmpty", true)]
     public async Task CentralHullBreach(string prototype, bool breaches)
     {
         EntityUid entity = default;
@@ -231,11 +231,11 @@ public sealed class CommercialSteamTests : InteractionTest
                 MapSystem.SetTile(MapData.Grid, new Vector2i(x, y), new Tile(TileMan[Plating].TileId));
             var origin = new Vector2(0.5f, 0.5f);
             var rotation = Angle.FromDegrees(degrees);
-            entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamCommercial",
+            entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamCommercialEmpty",
                 new EntityCoordinates(MapData.Grid.Owner, origin));
             Transform.SetLocalRotation(entity, rotation);
             SEntMan.SpawnEntity("GasPipeFourway", new EntityCoordinates(MapData.Grid.Owner,
-                origin + rotation.RotateVec(new Vector2(-1, 0))));
+                origin + rotation.RotateVec(new Vector2(0, 3))));
             SEntMan.SpawnEntity("GasPipeFourway", new EntityCoordinates(MapData.Grid.Owner,
                 origin + rotation.RotateVec(new Vector2(0, -1))));
         });

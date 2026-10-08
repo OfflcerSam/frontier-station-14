@@ -56,9 +56,8 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
         if (entity.Comp.OxygenMolesPerFuelUnit <= 0f)
             return null;
 
-        var atmosphere = _piping.GetIntakeMixture(entity.Owner);
         var oxygenRequired = FuelUsed * entity.Comp.OxygenMolesPerFuelUnit;
-        return atmosphere == null || atmosphere.Immutable || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired
+        return _piping.GetAvailableOxygen(entity.Owner) < oxygenRequired
             ? "stationary-generator-no-oxygen"
             : null;
     }
@@ -69,15 +68,13 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
             return;
 
         var oxygenRequired = arguments.FuelUsed * entity.Comp.OxygenMolesPerFuelUnit;
-        var atmosphere = _piping.GetIntakeMixture(entity.Owner);
-        if (atmosphere == null || atmosphere.Immutable || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired)
+        if (!_piping.TryConsumeIntake(entity.Owner, oxygenRequired))
         {
             arguments.Cancelled = true;
             _popup.PopupEntity(Loc.GetString("stationary-generator-no-oxygen"), entity.Owner);
             return;
         }
 
-        atmosphere.AdjustMoles(Gas.Oxygen, -oxygenRequired);
     }
 
     private void OnRefreshParts(Entity<StationaryGeneratorComponent> entity, ref RefreshPartsEvent arguments)

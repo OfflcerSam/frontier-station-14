@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 OfflcerSam
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using System.Numerics;
 using Content.Shared.Chemistry.Reagent;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
@@ -11,6 +12,12 @@ namespace Content.Server._NF.Power.Steam;
 [RegisterComponent]
 public sealed partial class SteamTurbineComponent : Component
 {
+    // Finite release energy per unit of lost water, separate from routine exhaust.
+    // Tunable gameplay approximation of stored thermal energy; never heats air above the boiler.
+    [DataField] public float SteamReleaseHeat = 120000f;
+    [DataField] public float SteamLeakRadius = 1.75f;
+    [DataField] public float SteamRuptureRadius = 2.5f;
+    [DataField] public Vector2 ReleaseOffset = new(0.5f, 0.5f);
     [DataField] public string WaterSolution = "water";
     [DataField] public float WaterCapacity = 250f;
     [DataField] public float WaterLossRate = 250f / 14400f;
@@ -32,7 +39,6 @@ public sealed partial class SteamTurbineComponent : Component
     [DataField] public float PressureLeakRate = 0.15f;
     [DataField] public float CasingHeatPower = 1000f;
     [DataField] public float VaporMolesPerUnit = 2.88f;
-    [DataField] public float VentHeatMultiplier = 2f;
     [DataField] public SoundSpecifier VaporReleaseSound = new SoundCollectionSpecifier("NFSteamVaporRelease");
     [DataField] public SoundSpecifier LeakSound = new SoundCollectionSpecifier("NFSteamDamageLeak");
     [DataField] public float MinimumStartingWaterFraction = 0.1f;

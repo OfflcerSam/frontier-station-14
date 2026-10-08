@@ -3,7 +3,8 @@
 
 - type: entity
   parent: PortableGeneratorSwitchableBase
-  id: NFStationaryGeneratorCombustionStandard
+  id: NFStationaryGeneratorCombustionStandardEmpty
+  suffix: Empty
   name: standard combustion generator
   description: A stationary liquid-fuel engine. Requires oxygen and ventilation. Its electrical connection is at the base tile.
   components:
@@ -140,7 +141,7 @@
   - type: Sprite
     state: engineering
   - type: MachineBoard
-    prototype: NFStationaryGeneratorCombustionStandard
+    prototype: NFStationaryGeneratorCombustionStandardEmpty
     requirements:
       Capacitor: 2
       Manipulator: 1

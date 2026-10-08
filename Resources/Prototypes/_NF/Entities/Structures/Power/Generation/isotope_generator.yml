@@ -2,7 +2,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 - type: entity
   parent: [BaseMachine, SmallConstructibleMachine]
-  id: NFStationaryGeneratorIsotopeCompact
+  id: NFStationaryGeneratorIsotopeCompactEmpty
+  suffix: Empty
   name: compact radioisotope thermoelectric generator
   description: A compact auxiliary generator with a single isotope-cell bay.
   components:
@@ -117,8 +118,9 @@
         acts: [Destruction]
 
 - type: entity
-  parent: NFStationaryGeneratorIsotopeCompact
-  id: NFStationaryGeneratorIsotopeStandard
+  parent: NFStationaryGeneratorIsotopeCompactEmpty
+  id: NFStationaryGeneratorIsotopeStandardEmpty
+  suffix: Empty
   name: standard radioisotope thermoelectric generator
   description: An auxiliary generator with two isotope-cell bays.
   components:
@@ -189,7 +191,7 @@
   - type: Sprite
     state: engineering
   - type: MachineBoard
-    prototype: NFStationaryGeneratorIsotopeCompact
+    prototype: NFStationaryGeneratorIsotopeCompactEmpty
     requirements:
       Capacitor: 1
     stackRequirements:
@@ -205,7 +207,7 @@
   - type: Sprite
     state: engineering
   - type: MachineBoard
-    prototype: NFStationaryGeneratorIsotopeStandard
+    prototype: NFStationaryGeneratorIsotopeStandardEmpty
     requirements:
       Capacitor: 2
     stackRequirements:
