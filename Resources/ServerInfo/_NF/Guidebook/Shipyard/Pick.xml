@@ -3,6 +3,7 @@
 
   <Box>
     <GuideEntityEmbed Entity="OreProcessor" Caption="Ore Processing"/>
+	<GuideEntityEmbed Entity="SalvageTechfabNF" Caption="Fabrication"/>
   </Box>
   
   Add image later
