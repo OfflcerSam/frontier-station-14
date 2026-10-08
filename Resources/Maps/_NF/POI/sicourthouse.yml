@@ -4,7 +4,7 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/08/2026 18:49:15
+  time: 10/08/2026 23:03:08
   entityCount: 5826
 maps: []
 grids:
@@ -30190,27 +30190,6 @@ entities:
     - type: Transform
       pos: 4.5,-8.5
       parent: 1
-- proto: LockableButtonSecurity
-  entities:
-  - uid: 464
-    components:
-    - type: Transform
-      rot: 1.5707963267948966 rad
-      pos: 2.5,-9.5
-      parent: 1
-    - type: DeviceLinkSource
-      linkedPorts:
-        610:
-        - - Pressed
-          - Toggle
-        607:
-        - - Pressed
-          - Toggle
-        618:
-        - - Pressed
-          - Toggle
-    - type: Fixtures
-      fixtures: {}
 - proto: LockerNfsdEvidence
   entities:
   - uid: 317
@@ -33161,6 +33140,38 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 28.5,-5.5
       parent: 1
+    - type: Fixtures
+      fixtures: {}
+- proto: SignalSwitchDirectional
+  entities:
+  - uid: 464
+    components:
+    - type: Transform
+      rot: 1.5707963267948966 rad
+      pos: 2.5,-9.5
+      parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        469:
+        - - On
+          - On
+        - - Off
+          - Off
+        618:
+        - - On
+          - Open
+        - - Off
+          - Close
+        607:
+        - - On
+          - Open
+        - - Off
+          - Close
+        610:
+        - - On
+          - Open
+        - - Off
+          - Close
     - type: Fixtures
       fixtures: {}
 - proto: SignAtmos
