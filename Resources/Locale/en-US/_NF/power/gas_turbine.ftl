@@ -1,0 +1,9 @@
+piped-gas-fuel-unavailable = The turbine needs separate plasma, air and exhaust supplies with sufficient fuel and oxygen.
+piped-gas-fuel-gauge = The fuel gauge reads {$amount} mol of plasma in the connected supply.
+turbine-rotor-gauge = The tachometer reads {$rpm} RPM.
+turbine-rotor-restart-denied = The turbine is still spinning down or needs further repairs.
+turbine-rotor-tripped = The turbine safety trip indicator is lit.
+turbine-rotor-overspeed = The overspeed warning lamp is lit.
+turbine-rotor-damaged = The turbine condition warning lamp is lit.
+piped-gas-fuel-ui = {$amount} mol plasma (supply)
+guide-entry-stationary-gas-turbines = Gas Turbines

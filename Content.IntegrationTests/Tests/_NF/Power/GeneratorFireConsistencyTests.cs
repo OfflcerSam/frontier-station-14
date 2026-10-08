@@ -13,6 +13,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
+using Content.Shared.Examine;
 using Content.Shared.Fluids.Components;
 using Content.Shared.IgnitionSource;
 using Content.Shared.Throwing;
@@ -26,6 +27,7 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class GeneratorFireConsistencyTests : InteractionTest
 {
+    [TestCase("NFStationaryGeneratorGasTurbineCommercialEmpty", 6)]
     [TestCase("NFStationaryGeneratorCombustionStandardEmpty", 2)]
     [TestCase("NFStationaryGeneratorCombustionCommercialEmpty", 3)]
     [TestCase("NFStationaryGeneratorStirlingCompactEmpty", 1)]
@@ -163,6 +165,27 @@ public sealed class GeneratorFireConsistencyTests : InteractionTest
             status.UpdateFire(host, SEntMan.GetComponent<AppearanceComponent>(host));
             SEntMan.System<SharedAppearanceSystem>().TryGetData<bool>(host, FireVisuals.OnFire, out burning);
             Assert.That(burning, Is.False);
+        });
+    }
+
+    [TestCase(350f, "The flames look hot.")]
+    [TestCase(500f, "The flames look very hot.")]
+    [TestCase(900f, "The flames look extremely hot.")]
+    public async Task BurningPuddleExamineDescribesIntensity(float temperature, string description)
+    {
+        await Server.WaitAssertion(() =>
+        {
+            var grid = OxygenGrid();
+            var puddle = Puddle(grid, 0);
+            Transform.SetCoordinates(SPlayer, new EntityCoordinates(grid, new Vector2(0.5f, 0.5f)));
+            SEntMan.System<AtmosphereSystem>().GetContainingMixture(puddle, false, true)!.Temperature = temperature;
+            SEntMan.System<FuelPuddleFireSystem>().IgniteAt(puddle);
+            var examine = SEntMan.System<ExamineSystemShared>();
+            var text = examine.GetExamineText(puddle, SPlayer).ToString();
+            Assert.That(text, Does.Contain("on fire"));
+            Assert.That(text, Does.Contain(description));
+            SEntMan.System<FlammableSystem>().Extinguish(puddle);
+            Assert.That(examine.GetExamineText(puddle, SPlayer).ToString(), Does.Not.Contain("on fire"));
         });
     }
 }

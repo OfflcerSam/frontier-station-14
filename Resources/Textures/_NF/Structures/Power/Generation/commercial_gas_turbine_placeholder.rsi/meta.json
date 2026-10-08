@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Created by OfflcerSam for Frontier Station.",
+  "size": {
+    "x": 64,
+    "y": 96
+  },
+  "states": [
+    {
+      "name": "generator"
+    },
+    {
+      "name": "generator_on"
+    },
+    {
+      "name": "panel_open"
+    },
+    {
+      "name": "damaged"
+    },
+    {
+      "name": "fuel_gas"
+    },
+    {
+      "name": "fuel_solid"
+    },
+    {
+      "name": "fuel_panel"
+    },
+    {
+      "name": "fuel_lamp"
+    }
+  ]
+}

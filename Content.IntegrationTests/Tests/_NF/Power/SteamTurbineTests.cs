@@ -81,6 +81,7 @@ public sealed class SteamTurbineTests : InteractionTest
         });
     }
 
+    [TestCase("NFStationaryGeneratorGasTurbineCommercialEmpty", "NFMachineFrame2x3")]
     [TestCase("NFStationaryGeneratorCombustionStandardEmpty", "NFMachineFrame1x2")]
     [TestCase("NFStationaryGeneratorCombustionCommercialEmpty", "NFMachineFrame1x3")]
     [TestCase("NFStationaryGeneratorStirlingStandardEmpty", "NFMachineFrame1x2")]

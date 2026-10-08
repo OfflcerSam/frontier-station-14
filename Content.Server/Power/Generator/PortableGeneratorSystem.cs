@@ -284,6 +284,8 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
             GeneratorComponentUiKey.Key,
             new PortableGeneratorComponentBuiState(fuelComp, fuel, clogged, networkStats)
             {
+                // Frontier: describe real network supply without a fictional internal tank.
+                PipedGasFuel = HasComp<Content.Server._NF.Power.Generator.PipedGasFuelComponent>(uid),
                 FuelVolume = fuelVolume,
                 FuelCapacity = fuelCapacity,
             });

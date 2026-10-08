@@ -38,4 +38,10 @@
 
   A pressure rupture damages the machine and its immediate surroundings. Commercial blast damage reaches about 2.25 metres at rated pressure and 3 metres at maximum pressure. Only tiles directly beneath the Commercial chassis can lose plating, and each has a chance to remain intact. Standard blasts preserve plating and reach about 1.5 to 2 metres. The initial flash can look larger than the damaging blast; lingering fires follow actual spilled fuel. Escaped burner fuel can also burn in oxygen. Switching off does not instantly remove pressure: a cooling boiler remains dangerous until its gauge falls.
   The casing warms the room, including while a stopped boiler cools. Keep ventilation and gas scrubbing available. Standard requires a 2×2 machine frame; Commercial requires a 2×3 frame. A normal machine frame is too small.
+
+  # Rotor Safety
+
+  The tachometer reaches 3000 RPM at the current maximum target; lower targets run slower. Spin-up and coast-down take about five seconds across the normal speed range. A sudden electrical load loss can cause overspeed. A warning appears above 3300 RPM, the governor cuts fuel at 3600 RPM, and 3900 RPM trips the turbine. Wait for speed below 300 RPM before manually restarting after a trip.
+
+  Chassis damage warns at 20 percent, limits output to 70 percent of the efficient rating at 40 percent, and trips at 60 percent. A tripped turbine needs repair below 20 percent damage and a manual restart. Repairing does not replace lost supplies.
 </Document>

@@ -182,6 +182,7 @@
       Capacitor: 1
       Manipulator: 1
     stackRequirements:
+      Glass: 2
       CableHV: 5
       Steel: 2
 
@@ -245,6 +246,7 @@
       Capacitor: 2
       Manipulator: 1
     stackRequirements:
+      Glass: 2
       CableHV: 5
       Steel: 3
 

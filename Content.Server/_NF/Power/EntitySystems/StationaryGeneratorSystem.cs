@@ -123,7 +123,8 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
             1f + 0.15f * (entity.Comp.CapacitorRating - 1f));
         arguments.AddPercentageUpgrade("stationary-generator-upgrade-fuel",
             1f - 0.05f * (entity.Comp.ManipulatorRating - 1f));
-        if (!HasComp<Content.Shared._NF.Power.FuelModules.FuelModuleHostComponent>(entity))
+        if (!HasComp<Content.Shared._NF.Power.FuelModules.FuelModuleHostComponent>(entity) &&
+            !HasComp<Content.Server._NF.Power.Generator.PipedGasFuelComponent>(entity))
             arguments.AddPercentageUpgrade("stationary-generator-upgrade-capacity",
             1f + 0.20f * (entity.Comp.MatterBinRating - 1f));
     }

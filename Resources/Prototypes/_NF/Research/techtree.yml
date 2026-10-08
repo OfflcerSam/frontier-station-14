@@ -1362,6 +1362,7 @@
   - NFStationaryGeneratorSteamStandardMachineCircuitboard
   - NFStationaryGeneratorSteamCommercialMachineCircuitboard
   - NFStationaryGeneratorCombustionCommercialMachineCircuitboard
+  - NFStationaryGeneratorGasTurbineCommercialMachineCircuitboard
   technologyPrerequisites:
   - NFBasicPowerGeneration
   position: 3, 28

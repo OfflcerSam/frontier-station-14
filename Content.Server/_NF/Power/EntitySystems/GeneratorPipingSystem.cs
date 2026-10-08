@@ -60,7 +60,8 @@ public sealed class GeneratorPipingSystem : EntitySystem
                     continue;
                 var rotated = transform.LocalRotation.RotateVec(new Vector2(offset.X, offset.Y));
                 var tile = origin + new Vector2i((int) MathF.Round(rotated.X), (int) MathF.Round(rotated.Y));
-                var direction = (entity.Comp.ExhaustNodes.Contains(name) ? PipeDirection.South : PipeDirection.North)
+                var direction = (entity.Comp.PortDirections.TryGetValue(name, out var facing) ? facing :
+                    entity.Comp.ExhaustNodes.Contains(name) ? PipeDirection.South : PipeDirection.North)
                     .RotatePipeDirection(transform.LocalRotation);
                 foreach (var adjacent in grid.GetAnchoredEntities(tile))
                 {
@@ -106,11 +107,14 @@ public sealed class GeneratorPipingSystem : EntitySystem
         entity.Comp.Connections.Clear();
     }
 
-    public List<GasMixture> GetConnectedPorts(Entity<GeneratorPipingComponent> entity, bool exhaust)
+    public List<GasMixture> GetConnectedPorts(Entity<GeneratorPipingComponent> entity, bool exhaust) =>
+        GetConnectedPorts(entity, exhaust ? entity.Comp.ExhaustNodes : entity.Comp.IntakeNodes);
+
+    public List<GasMixture> GetConnectedPorts(Entity<GeneratorPipingComponent> entity, string[] names)
     {
         UpdatePipePorts(entity);
         var mixtures = new List<GasMixture>();
-        foreach (var name in exhaust ? entity.Comp.ExhaustNodes : entity.Comp.IntakeNodes)
+        foreach (var name in names)
         {
             if (!_nodes.TryGetNode(entity.Owner, name, out PipeNode? port) || port.Air.Immutable ||
                 !entity.Comp.Connections.Any(connection => connection.Port == port &&
@@ -223,9 +227,10 @@ public sealed class GeneratorPipingSystem : EntitySystem
                 $"{ToPrettyString(entity.Owner):subject} shut down because its exhaust was disconnected or above {entity.Comp.ExhaustShutdownPressure} kPa.");
             return;
         }
-        arguments.PowerMultiplier = Math.Clamp((entity.Comp.ExhaustShutdownPressure - mixture.Pressure) /
+        var throttle = Math.Clamp((entity.Comp.ExhaustShutdownPressure - mixture.Pressure) /
             (entity.Comp.ExhaustShutdownPressure - entity.Comp.ExhaustThrottlePressure), 0.1f, 1f);
-        arguments.FuelUsed *= arguments.PowerMultiplier;
+        arguments.PowerMultiplier *= throttle;
+        arguments.FuelUsed *= throttle;
     }
 
     private void OnExamined(Entity<GeneratorPipingComponent> entity, ref ExaminedEvent arguments)

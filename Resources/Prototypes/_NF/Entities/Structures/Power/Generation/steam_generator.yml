@@ -145,6 +145,7 @@
     maxTargetPower: 60000
     optimalBurnRate: 0.16666667
     fuelEfficiencyConstant: 1.3
+  - type: TurbineRotor
   - type: SteamTurbine
   - type: FuelModuleHost
     moduleSize: Standard
@@ -251,7 +252,7 @@
     stackRequirements:
       CableHV: 15
       Steel: 15
-      Glass: 10
+      Glass: 12
 
 - type: entity
   parent: NFStationaryGeneratorSteamStandardEmpty
@@ -422,6 +423,8 @@
       Manipulator: 2
       MatterBin: 2
     stackRequirements:
+      Plasteel: 10
+      ReinforcedGlass: 5
       CableHV: 20
-      Steel: 25
+      Steel: 10
       Glass: 15

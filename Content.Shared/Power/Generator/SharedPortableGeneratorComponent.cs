@@ -103,6 +103,8 @@ public sealed class PortableGeneratorEjectFuelMessage : BoundUserInterfaceMessag
 public sealed class PortableGeneratorComponentBuiState : BoundUserInterfaceState
 {
     public float RemainingFuel;
+    // Frontier: externally piped fuel uses mol and cannot be ejected.
+    public bool PipedGasFuel;
     // Frontier: liquid volume is distinct from fuel-equivalent energy.
     public float? FuelVolume;
     public float? FuelCapacity;

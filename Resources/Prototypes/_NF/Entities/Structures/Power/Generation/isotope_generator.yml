@@ -245,7 +245,7 @@
     stackRequirements:
       CableHV: 5
       Steel: 5
-      Glass: 5
+      Glass: 7
 
 - type: entity
   parent: BaseMachineCircuitboard
@@ -261,6 +261,6 @@
     stackRequirements:
       CableHV: 10
       Steel: 10
-      Glass: 10
+      Glass: 12
 
 

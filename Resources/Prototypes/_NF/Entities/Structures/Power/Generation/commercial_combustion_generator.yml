@@ -109,8 +109,10 @@
       Manipulator: 2
       MatterBin: 2
     stackRequirements:
+      Plasteel: 5
+      ReinforcedGlass: 5
       CableHV: 15
-      Steel: 10
+      Steel: 5
 
 - type: entity
   parent: NFStationaryGeneratorCombustionCommercialLiquidEmpty

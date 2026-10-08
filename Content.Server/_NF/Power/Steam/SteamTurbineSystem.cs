@@ -458,10 +458,8 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             return;
         var previousDamageFraction = (arguments.Damageable.TotalDamage - arguments.DamageDelta.GetTotal()).Float() /
             destructionThreshold.Value.Float();
-        var leakCount = Math.Max(0, 1 + Math.Floor(Math.Round(
-            (damageFraction - entity.Comp.SteamLeakDamageFraction) / entity.Comp.SteamLeakDamageStep, 5))) -
-            Math.Max(0, 1 + Math.Floor(Math.Round(
-            (previousDamageFraction - entity.Comp.SteamLeakDamageFraction) / entity.Comp.SteamLeakDamageStep, 5)));
+        var leakCount = DamageLeakSteps.Count(previousDamageFraction, damageFraction,
+            entity.Comp.SteamLeakDamageFraction, entity.Comp.SteamLeakDamageStep);
         if (leakCount <= 0)
             return;
         if (previousDamageFraction < entity.Comp.SteamLeakDamageFraction)

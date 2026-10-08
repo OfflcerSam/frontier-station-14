@@ -80,6 +80,10 @@ public sealed partial class GeneratorWindow : FancyWindow
             ? Loc.GetString("stationary-generator-liquid-volume",
                 ("volume", fuelVolume.ToString("0.#")), ("capacity", fuelCapacity.ToString("0.#")))
             : ((int) MathF.Floor(state.RemainingFuel)).ToString();
+        // Frontier: gas is externally supplied and measured in moles.
+        if (state.PipedGasFuel)
+            FuelLeft.Text = Loc.GetString("piped-gas-fuel-ui", ("amount", state.RemainingFuel.ToString("0.##")));
+        FuelEject.Visible = !state.PipedGasFuel;
         TargetPower.ToolTip = Loc.GetString("stationary-generator-maximum-target", ("power", state.MaximumPower / 1000f));
 
         var progress = 0f;

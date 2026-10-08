@@ -34,10 +34,10 @@ public sealed class FuelLeakSystem : EntitySystem
         var damageable = arguments.Damageable;
         // The first loss occurs at the starting threshold; larger hits count every crossed mark.
         // Round away floating-point noise so exact 20%, 22%, ... boundaries remain stable.
-        var quantity = Math.Max(0, 1 + Math.Floor(Math.Round(
-            (Math.Min(damageable.TotalDamage.Float() / destructionThreshold.Value.Float(), 1f) - entity.Comp.LeakDamageFraction) / entity.Comp.LeakDamageStep, 5)))
-            - Math.Max(0, 1 + Math.Floor(Math.Round(
-            ((damageable.TotalDamage - arguments.DamageDelta.GetTotal()).Float() / destructionThreshold.Value.Float() - entity.Comp.LeakDamageFraction) / entity.Comp.LeakDamageStep, 5)));
+        var quantity = DamageLeakSteps.Count(
+            (damageable.TotalDamage - arguments.DamageDelta.GetTotal()).Float() / destructionThreshold.Value.Float(),
+            damageable.TotalDamage.Float() / destructionThreshold.Value.Float(),
+            entity.Comp.LeakDamageFraction, entity.Comp.LeakDamageStep);
         if (quantity <= 0)
             return;
         var module = EntityManager.System<FuelModuleSystem>().GetInstalledModule(entity) ?? entity.Owner;

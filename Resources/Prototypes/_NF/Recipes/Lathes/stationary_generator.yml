@@ -10,3 +10,8 @@
   parent: PortableGeneratorPacmanMachineCircuitboard
   id: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
   result: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
+
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorGasTurbineCommercialMachineCircuitboard
+  result: NFStationaryGeneratorGasTurbineCommercialMachineCircuitboard

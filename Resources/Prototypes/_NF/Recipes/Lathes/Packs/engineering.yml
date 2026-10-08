@@ -93,6 +93,7 @@
   - NFStationaryGeneratorSteamStandardMachineCircuitboard
   - NFStationaryGeneratorSteamCommercialMachineCircuitboard
   - NFStationaryGeneratorCombustionCommercialMachineCircuitboard
+  - NFStationaryGeneratorGasTurbineCommercialMachineCircuitboard
   - NFStationaryGeneratorIsotopeCompactMachineCircuitboard
   - NFStationaryGeneratorIsotopeStandardMachineCircuitboard
 

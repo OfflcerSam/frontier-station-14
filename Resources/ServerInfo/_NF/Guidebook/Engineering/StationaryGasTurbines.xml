@@ -1,0 +1,22 @@
+<!-- SPDX-FileCopyrightText: 2026 OfflcerSam -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<Document>
+  # Gas Turbines
+  <GuideEntityEmbed Entity="NFStationaryGeneratorGasTurbineCommercial" Caption="Commercial: 2 by 3 tiles, 110 kW rated" />
+
+  Connect plasma gas to the purple west inlet and exhaust to the red north outlet. The blue south inlet accepts oxygen-bearing air; without an air pipe the machine uses room air. Ports rotate with the chassis and use the primary pipe layer. Keep fuel, air and exhaust on separate networks. There is no inserted tank or internal fuel module.
+
+  The efficient rating is 110 kW, with a 165 kW basic ceiling and 198 kW ceiling using R4 capacitors. The base electrical ramp is 44 kW/s. At rating it consumes 1 mol of plasma and 1 mol of oxygen per second, producing 1 mol of carbon dioxide. A native full plasma canister lasts about 46 minutes at rating if this machine is its only consumer. Above rating, fuel use rises faster than output. Manipulators improve fuel efficiency; matter bins do not create gas storage.
+
+  Exhaust leaves at least 600 K and unused supply gases pass through to exhaust. The casing also heats its room. Exhaust pressure throttles output above 300 kPa and trips at 600 kPa. A disconnected exhaust or insufficient plasma or oxygen stops the machine; recovery requires manual restart. The fuel gauge reports plasma in the connected network, not fuel reserved for this machine. The supply lamp is green with plasma available and red without it.
+
+  Damage releases gas at 20 percent chassis damage and every additional 2 percent damage. Each step vents a 2 L equivalent parcel from the actual supply at its current pressure and composition. Destruction vents at most a 100 L equivalent parcel. Running damage can ignite leaked plasma in oxygen. Isolate the fuel pipe before servicing a damaged machine. There is no shrapnel or separate pressure-blast effect.
+
+  Build it on a 2 by 3 frame. Construction provides no free fuel; the Ship mapping variant needs working external supplies too.
+
+  # Rotor Safety
+
+  The tachometer reaches 3000 RPM at the current maximum target; lower targets run slower. Spin-up and coast-down take about five seconds across the normal speed range. A sudden electrical load loss can cause overspeed. A warning appears above 3300 RPM, the governor cuts fuel at 3600 RPM, and 3900 RPM trips the turbine. Wait for speed below 300 RPM before manually restarting after a trip.
+
+  Chassis damage warns at 20 percent, limits output to 70 percent of the efficient rating at 40 percent, and trips at 60 percent. A tripped turbine needs repair below 20 percent damage and a manual restart. Repairing does not replace lost supplies.
+</Document>

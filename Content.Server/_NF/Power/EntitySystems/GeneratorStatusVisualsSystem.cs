@@ -92,6 +92,11 @@ public sealed class GeneratorStatusVisualsSystem : EntitySystem
                 ? fuel.FractionalFuel.Values.Sum() / Math.Max(1f, fuel.BaseCapacity * (1f + 0.2f * (fuel.MatterBinRating - 1f)))
                 : GetLiquidFuelFraction(module);
         }
+        else if (HasComp<Content.Server._NF.Power.Generator.PipedGasFuelComponent>(uid))
+        {
+            kind = "gas";
+            fraction = EntityManager.System<Content.Server._NF.Power.Generator.PipedGasFuelSystem>().GetFuel(uid) > 0f ? 1f : 0f;
+        }
         else if (HasComp<ChemicalFuelGeneratorAdapterComponent>(uid))
         {
             kind = "liquid";

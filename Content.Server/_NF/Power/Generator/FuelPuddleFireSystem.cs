@@ -7,6 +7,7 @@ using Content.Shared.Atmos.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Fluids.Components;
+using Content.Shared.Examine;
 using Content.Shared.Temperature;
 using Content.Shared.Throwing;
 using Robust.Shared.Physics.Events;
@@ -27,8 +28,20 @@ public sealed class FuelPuddleFireSystem : EntitySystem
     {
         UpdatesBefore.Add(typeof(FlammableSystem));
         SubscribeLocalEvent<PuddleComponent, IgnitedEvent>(OnIgnited);
+        SubscribeLocalEvent<FlammableComponent, ExaminedEvent>(OnExamined);
         SubscribeLocalEvent<PuddleComponent, StartCollideEvent>(OnContact);
         SubscribeLocalEvent<ThrownItemComponent, LandEvent>(OnLand);
+    }
+
+    private void OnExamined(Entity<FlammableComponent> ent, ref ExaminedEvent args)
+    {
+        if (!args.IsInDetailsRange || !ent.Comp.OnFire || !HasComp<PuddleComponent>(ent))
+            return;
+        // Sensory descriptions follow local fire heat; these thresholds do not change burning or damage.
+        var temperature = _atmosphere.GetContainingMixture(ent.Owner, false)?.Temperature ?? 0f;
+        var key = temperature >= 773.15f ? "fuel-puddle-fire-extremely-hot" :
+            temperature >= 473.15f ? "fuel-puddle-fire-very-hot" : "fuel-puddle-fire-hot";
+        args.PushMarkup(Loc.GetString(key));
     }
 
     private void OnIgnited(Entity<PuddleComponent> ent, ref IgnitedEvent args)
