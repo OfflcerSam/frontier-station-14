@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Default damage/floor response, but use the existing full explosion sound even
+# for this small pressure burst. Playback and lifetime belong to ExplosionSystem.
+- type: explosion
+  id: NFSteamPressureBurst
+  damagePerIntensity:
+    types:
+      Heat: 5
+      Blunt: 5
+      Piercing: 5
+  tileBreakChance: [0, 0.5, 1]
+  tileBreakIntensity: [0, 10, 30]
+  tileBreakRerollReduction: 20
+  smallSoundIterationThreshold: 0
+  sound:
+    collection: Explosion
+  soundFar:
+    collection: ExplosionFar
+    params:
+      volume: 2

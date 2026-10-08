@@ -320,7 +320,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         var running = TryComp<FuelGeneratorComponent>(entity, out var generator) && generator.On;
         var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, new Vector2(0.5f, 0.5f)));
         if (running && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold)
-            _explosion.QueueExplosion(burstPosition, "Default", Math.Min(entity.Comp.MaximumBurstIntensity,
+            _explosion.QueueExplosion(burstPosition, "NFSteamPressureBurst", Math.Min(entity.Comp.MaximumBurstIntensity,
                 entity.Comp.SteamPressure <= 1f
                     ? entity.Comp.RatedBurstIntensity * entity.Comp.SteamPressure
                     : entity.Comp.RatedBurstIntensity + (entity.Comp.MaximumBurstIntensity - entity.Comp.RatedBurstIntensity) *

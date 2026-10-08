@@ -168,6 +168,7 @@ public sealed class SteamTurbineTests : InteractionTest
                     SEntMan.SpawnEntity("WallSolid", new EntityCoordinates(gridUid, new Vector2(tileX + 0.5f, tileY + 0.5f)));
             }
             nearby = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(gridUid, new Vector2(-0.5f, 0.5f)));
+            Transform.SetCoordinates(SPlayer, new EntityCoordinates(gridUid, new Vector2(-0.5f, -0.5f)));
         });
         await RunTicks(100);
         await Server.WaitAssertion(() =>
@@ -194,11 +195,20 @@ public sealed class SteamTurbineTests : InteractionTest
             Assert.That(SEntMan.HasComponent<Content.Shared.Stunnable.KnockedDownComponent>(nearby), Is.True);
             Assert.That(SEntMan.System<AtmosphereSystem>().IsHotspotActive(gridUid, new Robust.Shared.Maths.Vector2i(-1, 0)), Is.True);
             Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(entity), Is.LessThan(100f));
+            SEntMan.DeleteEntity(entity);
         });
         await RunTicks(5);
         await Server.WaitAssertion(() =>
         {
             Assert.That(SEntMan.GetComponent<DamageableComponent>(nearby).TotalDamage, Is.GreaterThan(FixedPoint2.Zero));
+            var explosionAudioCount = 0;
+            var query = SEntMan.EntityQueryEnumerator<Robust.Shared.Audio.Components.AudioComponent>();
+            while (query.MoveNext(out var explosionAudio))
+            {
+                if (System.Text.RegularExpressions.Regex.IsMatch(explosionAudio.FileName, @"/Audio/Effects/explosion[1-6]\.ogg$"))
+                    explosionAudioCount++;
+            }
+            Assert.That(explosionAudioCount, Is.EqualTo(1), "The existing explosion system must play one normal explosion clip after the turbine is deleted.");
             for (var tileX = -1; tileX <= 1; tileX++)
             for (var tileY = -1; tileY <= 1; tileY++)
             {
