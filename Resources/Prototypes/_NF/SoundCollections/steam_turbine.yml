@@ -1,0 +1,11 @@
+- type: soundCollection
+  id: NFSteamVaporRelease
+  files:
+  - /Audio/_NF/Machines/StationaryGenerators/steam-release.ogg
+  - /Audio/Magic/Cults/ClockCult/steam_whoosh.ogg
+
+- type: soundCollection
+  id: NFSteamDamageLeak
+  files:
+  - /Audio/_NF/Machines/StationaryGenerators/steam-leak.ogg
+  - /Audio/Ambience/Objects/gas_hiss.ogg

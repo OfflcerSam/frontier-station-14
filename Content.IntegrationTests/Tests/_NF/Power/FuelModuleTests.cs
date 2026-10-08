@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: 2026 OfflcerSam
 // SPDX-License-Identifier: AGPL-3.0-or-later
+using System.Numerics;
 using Content.IntegrationTests.Tests.Interaction;
 using Content.Server._NF.Power.FuelModules;
 using Content.Server.Power.Generator;
 using Content.Shared._NF.Power.FuelModules;
+using Content.Shared.Atmos.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Examine;
@@ -13,11 +15,51 @@ using Content.Shared.Damage.Systems;
 using Content.Shared.Power.Generator;
 using Content.Shared.Wires;
 using Robust.Shared.GameObjects;
+using Robust.Shared.EntitySerialization.Systems;
+using Robust.Shared.Map;
+using Robust.Shared.Utility;
 
 namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class FuelModuleTests : InteractionTest
 {
+    [TestCase("NFStationaryGeneratorCombustionStandard", false, 20f)]
+    [TestCase("NFStationaryGeneratorStirlingCompactLiquid", false, 20f)]
+    [TestCase("NFStationaryGeneratorStirlingCompactSolid", true, 40f)]
+    public async Task DamageIgnitesFueledGenerators(string prototypeId, bool solid, float threshold)
+    {
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
+                new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
+            var coordinates = new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f));
+            var entity = SEntMan.SpawnEntity(prototypeId, coordinates);
+            var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(entity) ?? entity;
+            if (solid)
+                SEntMan.GetComponent<FuelModuleComponent>(module).FractionalFuel["Plasma"] = 100f;
+            else
+            {
+                var solution = SEntMan.System<SharedSolutionContainerSystem>();
+                Assert.That(solution.TryGetSolution(module, "tank", out var fuelSolution, out _), Is.True);
+                solution.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(100), out _);
+            }
+            SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true);
+            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(entity), Is.GreaterThan(0f));
+            var flammable = SEntMan.GetComponent<FlammableComponent>(entity);
+            var damage = SEntMan.System<DamageableSystem>();
+            damage.TryChangeDamage(entity, new DamageSpecifier
+            {
+                DamageDict = new() { ["Blunt"] = FixedPoint2.New(threshold - 1f) },
+            }, true);
+            Assert.That(flammable.OnFire, Is.False);
+            damage.TryChangeDamage(entity, new DamageSpecifier
+            {
+                DamageDict = new() { ["Blunt"] = FixedPoint2.New(1f) },
+            }, true);
+            Assert.That(flammable.OnFire, Is.True);
+        });
+    }
+
     [Test]
     public async Task ModuleRetainsFuel()
     {
@@ -76,6 +118,8 @@ public sealed class FuelModuleTests : InteractionTest
     [TestCase("NFStationaryGeneratorStirlingCompactLiquid", FuelModuleKind.Liquid, FuelModuleSize.Compact)]
     [TestCase("NFStationaryGeneratorStirlingStandardSolid", FuelModuleKind.Solid, FuelModuleSize.Standard)]
     [TestCase("NFStationaryGeneratorStirlingStandardLiquid", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorSteamStandardSolid", FuelModuleKind.Solid, FuelModuleSize.Standard)]
+    [TestCase("NFStationaryGeneratorSteamStandardLiquid", FuelModuleKind.Liquid, FuelModuleSize.Standard)]
     public async Task MappingVariantsIncludeModules(string prototypeId, FuelModuleKind fuel, FuelModuleSize state)
     {
         await SpawnTarget(prototypeId);

@@ -31,6 +31,14 @@
         hard: false
         layer: [BulletImpassable]
   - type: Appearance
+  - type: Flammable
+    fireSpread: false
+    damage:
+      types:
+        Heat: 1
+  - type: FireVisuals
+    sprite: Effects/fire.rsi
+    normalState: 1
   - type: ItemSlots
     slots:
       matter_bin:

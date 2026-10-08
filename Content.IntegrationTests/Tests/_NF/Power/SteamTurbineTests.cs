@@ -11,6 +11,7 @@ using Content.Server.Power.Generator;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared._NF.Power.FuelModules;
 using Content.Shared.Atmos;
+using Content.Shared.Atmos.Components;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
@@ -18,6 +19,7 @@ using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
 using Content.Shared.Power.Generator;
 using Robust.Shared.EntitySerialization.Systems;
+using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Utility;
 
@@ -25,6 +27,40 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class SteamTurbineTests : InteractionTest
 {
+    [Test]
+    public async Task PressurizedRuptureIgnitesFuel()
+    {
+        EntityUid target = default;
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.System<MapLoaderSystem>().TryLoadGrid(MapId,
+                new ResPath("Maps/Test/Breathing/3by3-20oxy-80nit.yml"), out var grid), Is.True);
+            var coordinates = new EntityCoordinates(grid!.Value.Owner, new Vector2(0.5f, 0.5f));
+            var entity = SEntMan.SpawnEntity("NFStationaryGeneratorSteamStandardLiquid", coordinates);
+            target = SEntMan.SpawnEntity("NFStationaryGeneratorStirlingCompact",
+                new EntityCoordinates(grid.Value.Owner, new Vector2(1.5f, 0.5f)));
+            var module = SEntMan.System<FuelModuleSystem>().GetInstalledModule(entity);
+            Assert.That(module, Is.Not.Null);
+            var solution = SEntMan.System<SharedSolutionContainerSystem>();
+            Assert.That(solution.TryGetSolution(module!.Value, "tank", out var fuelSolution, out _), Is.True);
+            Assert.That(solution.TryGetSolution(entity, "water", out var waterSolution, out _), Is.True);
+            solution.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(100), out _);
+            solution.TryAddReagent(waterSolution!.Value, "Water", FixedPoint2.New(100), out _);
+            SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true);
+            var steam = SEntMan.GetComponent<SteamTurbineComponent>(entity);
+            steam.BoilerTemperature = 650f;
+            steam.SteamPressure = 1f;
+            SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));
+            Assert.That(SEntMan.GetComponent<FlammableComponent>(module.Value).OnFire, Is.True);
+            Assert.That(steam.Ruptured, Is.True);
+        });
+        await RunTicks(3);
+        await Server.WaitAssertion(() =>
+            Assert.That(!SEntMan.HasComponent<DamageableComponent>(target) ||
+                        SEntMan.GetComponent<DamageableComponent>(target).TotalDamage > FixedPoint2.Zero,
+                Is.True));
+    }
+
     [Test]
     public async Task WaterFillingAndWarmup()
     {
@@ -56,13 +92,21 @@ public sealed class SteamTurbineTests : InteractionTest
             SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true, generator);
             for (var second = 0; second < 60; second++)
                 steamSystem.UpdateSteam((entity, steam), 1f / 6f, 1f);
-            Assert.That(steam.BoilerTemperature, Is.GreaterThan(530f));
+            Assert.That(steam.BoilerTemperature, Is.GreaterThan(625f));
             Assert.That(steam.SteamPressure, Is.GreaterThan(0.85f));
             Assert.That(supplier.MaxSupply, Is.GreaterThan(30000f));
             Assert.That(steamSystem.GetWaterLevel((entity, steam)), Is.LessThan(250f));
             var markup = SEntMan.System<ExamineSystemShared>().GetExamineText(entity, SPlayer).ToString();
             Assert.That(markup, Does.Contain("water gauge"));
             Assert.That(markup, Does.Contain("steam pressure gauge"));
+            SEntMan.EventBus.RaiseLocalEvent(entity, new PortableGeneratorSetTargetPowerMessage(60f));
+            for (var second = 0; second < 35; second++)
+                steamSystem.UpdateSteam((entity, steam), MathF.Pow(1.5f, generator.FuelEfficiencyConstant) / 6f, 1f);
+            Assert.That(steam.BoilerTemperature, Is.GreaterThan(800f));
+            Assert.That(steam.SteamPressure, Is.GreaterThan(1.5f));
+            Assert.That(supplier.MaxSupply, Is.GreaterThan(55000f));
+            SEntMan.EventBus.RaiseLocalEvent(entity, new PortableGeneratorSetTargetPowerMessage(40f));
+            steam.BoilerTemperature = 650f;
             solutions.RemoveReagent(waterSolution.Value, "Water",
                 FixedPoint2.New(steamSystem.GetWaterLevel((entity, steam)) - 20f));
             steamSystem.UpdateSteam((entity, steam), 1f / 6f, 1f);
@@ -108,6 +152,12 @@ public sealed class SteamTurbineTests : InteractionTest
             Assert.That(steam.LiquidHeatFactors["Ethanol"], Is.EqualTo(0.85f));
             Assert.That(steamSystem.GetWaterLevel((entity, steam)), Is.Zero);
             Assert.That(SEntMan.GetComponent<FuelGeneratorComponent>(entity).TargetPower, Is.EqualTo(40000f));
+            var generator = SEntMan.GetComponent<FuelGeneratorComponent>(entity);
+            Assert.That(generator.MaxTargetPower, Is.EqualTo(60000f));
+            SEntMan.EventBus.RaiseLocalEvent(entity, new PortableGeneratorSetTargetPowerMessage(60f));
+            steamSystem.Update(1f);
+            Assert.That(generator.OptimalBurnRate * MathF.Pow(1.5f, generator.FuelEfficiencyConstant),
+                Is.GreaterThan(weldingBurnRate * 1.9f));
         });
         await Server.WaitAssertion(() =>
         {
@@ -163,8 +213,15 @@ public sealed class SteamTurbineTests : InteractionTest
             damage.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(1) } }, true);
             Assert.That(steamSystem.GetWaterLevel((entity, steam)), Is.EqualTo(245f).Within(0.01f));
             Assert.That(steam.SteamPressure, Is.LessThan(1f));
+            Assert.That(steam.VaporSinceReleaseSound, Is.Zero);
+            Assert.That(steam.VaporReleaseAudio, Is.Not.Null);
+            Assert.That(steam.LeakAudio, Is.Not.Null);
             damage.TryChangeDamage(entity, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(6) } }, true);
             Assert.That(steamSystem.GetWaterLevel((entity, steam)), Is.EqualTo(230f).Within(0.01f));
+            Assert.That(steam.VaporSinceReleaseSound, Is.GreaterThan(14f));
+            SEntMan.RemoveComponent<SteamTurbineComponent>(entity);
+            Assert.That(steam.VaporReleaseAudio, Is.Null);
+            Assert.That(steam.LeakAudio, Is.Null);
         });
     }
 
@@ -184,7 +241,11 @@ public sealed class SteamTurbineTests : InteractionTest
             SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true, generator);
             steam.BoilerTemperature = 550f;
             steam.SteamPressure = 0f;
+            steamSystem.EmitSteam((entity, steam), 5f);
+            Assert.That(steam.VaporReleaseAudio, Is.Not.Null);
             steamSystem.RuptureSteam((entity, steam));
+            Assert.That(steam.VaporReleaseAudio, Is.Null);
+            Assert.That(steam.LeakAudio, Is.Null);
             Assert.That(steam.Ruptured, Is.True);
             Assert.That(generator.On, Is.False);
             Assert.That(steamSystem.GetWaterLevel((entity, steam)), Is.Zero);

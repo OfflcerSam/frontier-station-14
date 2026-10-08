@@ -2,3 +2,13 @@
   license: "Pixabay Content License"
   copyright: "Eponn (Freesound)"
   source: "https://pixabay.com/sound-effects/film-special-effects-engine-47745/"
+
+- files: ["steam-release.ogg"]
+  license: "Pixabay Content License"
+  copyright: "DRAGON-STUDIO"
+  source: "https://pixabay.com/sound-effects/film-special-effects-steam-hissing-386157/"
+
+- files: ["steam-leak.ogg"]
+  license: "Pixabay Content License"
+  copyright: "JustineOu (Freesound)"
+  source: "https://pixabay.com/sound-effects/film-special-effects-steam-2-36231/"

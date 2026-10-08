@@ -15,7 +15,9 @@
 
   The basic 250u reservoir lasts about four hours at rated output. The water gauge reaches its low range near 10 percent; falling pressure throttles power and eventually trips the turbine. Refill and restart it manually. A basic 1500u tank of Welding Fuel lasts about two and a half hours at rated output. Wood, coal, plasma and fuel-grade plasma use the same Standard hopper as the Stirling generator. Weaker fuels require more stoking to hold boiler temperature.
 
+  Its efficient rating is 40 kW. The basic target ceiling is 60 kW; better capacitors can raise it to 72 kW. Higher targets need hotter steam and greater pressure, and above 40 kW fuel consumption grows faster than electrical output. Extra burning also releases more carbon dioxide and hot water vapor. The hotter boiler increases rupture risk.
+
   # Damage
 
-  At 20 percent chassis damage, the boiler begins venting hot water vapor on damage steps. Further hits vent more water and lower pressure. A pressurized machine can burst if destroyed while running; its pressure blast cannot break floor tiles. Repairing the chassis restores its pressure sealing, but does not replace lost water.
+  At 20 percent chassis damage, the boiler begins venting hot water vapor on damage steps. Further hits vent more water and lower pressure. A running pressurized machine can burst if destroyed; its pressure blast cannot break floor tiles. A running machine with fuel can ignite the ejected fuel module even without pressure. Repairing the chassis restores its pressure sealing, but does not replace lost water.
 </Document>

@@ -137,10 +137,27 @@ public sealed class FuelModuleSystem : EntitySystem
             arguments.Handled = true;
             _popup.PopupEntity(Loc.GetString("fuel-module-loaded", ("material", arguments.Used), ("target", entity.Owner)), entity, arguments.User);
         }
+        else if (Comp<FuelModuleComponent>(module).Kind == FuelModuleKind.Solid &&
+                 TryComp<PhysicalCompositionComponent>(arguments.Used, out var composition) &&
+                 composition.MaterialComposition.Count == 1 &&
+                 Comp<FuelModuleComponent>(module).MaterialFuelValues.ContainsKey(composition.MaterialComposition.Keys.First()) &&
+                 Comp<FuelModuleComponent>(module).FractionalFuel.Values.Sum() >=
+                 Comp<FuelModuleComponent>(module).BaseCapacity *
+                 (1f + 0.2f * (Comp<FuelModuleComponent>(module).MatterBinRating - 1f)))
+        {
+            arguments.Handled = true;
+            _popup.PopupEntity(Loc.GetString("fuel-module-full"), entity, arguments.User);
+        }
         else if (Comp<FuelModuleComponent>(module).Kind == FuelModuleKind.Liquid &&
                  _solutionContainers.TryGetDrainableSolution(arguments.Used, out var fuelSolution, out var solution) &&
                  _solutionContainers.TryGetSolution((EntityUid) module, "tank", out var fuelCapacity, out var fuelVolume))
         {
+            if (fuelVolume.AvailableVolume <= FixedPoint2.Zero)
+            {
+                arguments.Handled = true;
+                _popup.PopupEntity(Loc.GetString("fuel-module-full"), entity, arguments.User);
+                return;
+            }
             // Use the existing pouring interaction on the actual tank, including transfer amount and source lid checks.
             var fuelAmount = fuelVolume.Volume;
             var startAttempt = new AfterInteractEvent(arguments.User, arguments.Used, module, arguments.ClickLocation, true);
@@ -158,6 +175,15 @@ public sealed class FuelModuleSystem : EntitySystem
             arguments.Handled = TryLoadSolidFuel(entity, arguments.Used, arguments.User);
             if (arguments.Handled)
                 _popup.PopupEntity(Loc.GetString("fuel-module-loaded", ("material", arguments.Used), ("target", entity.Owner)), entity, arguments.User);
+            else if (TryComp<PhysicalCompositionComponent>(arguments.Used, out var composition) &&
+                     composition.MaterialComposition.Count == 1 &&
+                     entity.Comp.MaterialFuelValues.ContainsKey(composition.MaterialComposition.Keys.First()) &&
+                     entity.Comp.FractionalFuel.Values.Sum() >=
+                     entity.Comp.BaseCapacity * (1f + 0.2f * (entity.Comp.MatterBinRating - 1f)))
+            {
+                arguments.Handled = true;
+                _popup.PopupEntity(Loc.GetString("fuel-module-full"), entity, arguments.User);
+            }
         }
     }
 

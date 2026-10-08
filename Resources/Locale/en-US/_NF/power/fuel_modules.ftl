@@ -16,4 +16,5 @@ fuel-module-solid-units = material units
 fuel-module-material = It has approximately {$amount} pieces of {$material} inside.
 fuel-module-loaded = You place {THE($material)} into {THE($target)}.
 fuel-module-poured = You pour fuel into {THE($target)}.
+fuel-module-full = The fuel module is full.
 

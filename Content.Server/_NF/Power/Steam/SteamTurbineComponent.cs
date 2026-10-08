@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using Content.Shared.Chemistry.Reagent;
+using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server._NF.Power.Steam;
@@ -13,10 +14,17 @@ public sealed partial class SteamTurbineComponent : Component
     [DataField] public string WaterSolution = "water";
     [DataField] public float WaterCapacity = 250f;
     [DataField] public float WaterLossRate = 250f / 14400f;
-    [DataField] public float RatedSteamTemperature = 550f;
+    [DataField] public float RatedSteamTemperature = 650f;
     [DataField] public float BoilingTemperature = 373.15f;
     [DataField] public float CoolingRate = 0.05f;
-    [DataField] public float HeatPerFuelUnit = 77f;
+    [DataField] public float HeatPerFuelUnit = 107f;
+    [DataField] public float MaximumSteamPressure = 1.8f;
+    [DataField] public float MaximumBoilerTemperature = 1000f;
+    [DataField] public float RatedBurstIntensity = 35f;
+    [DataField] public float MaximumBurstIntensity = 60f;
+    [DataField] public float VentHeatMultiplier = 2f;
+    [DataField] public SoundSpecifier VaporReleaseSound = new SoundCollectionSpecifier("NFSteamVaporRelease");
+    [DataField] public SoundSpecifier LeakSound = new SoundCollectionSpecifier("NFSteamDamageLeak");
     [DataField] public float MinimumStartingWaterFraction = 0.1f;
     [DataField] public float PressureTripThreshold = 0.2f;
     [DataField] public float SteamLeakDamageFraction = 0.2f;
@@ -40,5 +48,9 @@ public sealed partial class SteamTurbineComponent : Component
     [DataField] public float SteamPressure;
     [DataField] public bool WasPressurized;
     [DataField] public float WaterLossRemainder;
+    [DataField] public float VaporSinceReleaseSound;
+    [DataField] public double LastReleaseSoundTime = -10d;
+    public EntityUid? VaporReleaseAudio;
+    public EntityUid? LeakAudio;
     [DataField] public bool Ruptured;
 }
