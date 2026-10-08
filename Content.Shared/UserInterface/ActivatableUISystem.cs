@@ -103,11 +103,15 @@ public sealed partial class ActivatableUISystem : EntitySystem
 
         if (component.RequiresComplex)
         {
-            if (args.Hands == null)
+            // Frontier: stationary controls are usable by interacting admin ghosts without hands.
+            if (args.Hands == null && !(HasComp<Content.Shared._NF.Power.GeneratorStatusVisualsComponent>(uid) &&
+                TryComp<GhostComponent>(args.User, out var ghost) && ghost.CanGhostInteract && !component.InHandsOnly))
                 return false;
 
             if (component.InHandsOnly)
             {
+                if (args.Hands == null)
+                    return false;
                 if (!_hands.IsHolding((args.User, args.Hands), uid, out var hand ))
                     return false;
 

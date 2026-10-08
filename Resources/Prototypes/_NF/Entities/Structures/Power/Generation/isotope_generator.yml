@@ -30,13 +30,20 @@
   - type: MachineFootprint
     tiles: ["0, 0"]
   - type: Sprite
-    sprite: _NF/Structures/Power/Generation/isotope_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_isotopecompact_placeholder.rsi
     noRot: false
     snapCardinals: false
-    scale: 0.5, 0.5
+    scale: 1, 1
+    offset: 0, 0
     layers:
-    - state: generator
+    - sprite: _NF/Structures/Power/Generation/stationary_placeholder_base.rsi
+      state: base
+      scale: 1, 1
+      color: "#9AB890"
       map: ["enum.GeneratorVisualLayers.Body"]
+    - state: text
+    - state: power_off
+      map: ["enum.GeneratorStatusLayers.Power"]
     - state: panel_open
       visible: false
       map: ["enum.GeneratorStatusLayers.Panel"]
@@ -46,14 +53,16 @@
     - state: bays_empty1
       visible: false
       map: ["enum.GeneratorStatusLayers.IsotopeBays"]
+    - state: arrows
+    - state: border
   - type: Appearance
   - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:
       enum.GeneratorVisuals.Running:
-        enum.GeneratorVisualLayers.Body:
-          True: { state: generator_on }
-          False: { state: generator }
+        enum.GeneratorStatusLayers.Power:
+          True: { state: power_on }
+          False: { state: power_off }
       enum.GeneratorStatusVisuals.PanelOpen:
         enum.GeneratorStatusLayers.Panel:
           True: { visible: true }
@@ -137,7 +146,7 @@
   - type: PowerMonitoringDevice
     group: Generator
     loadNode: output_hv
-    sprite: _NF/Structures/Power/Generation/isotope_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_isotopecompact_placeholder.rsi
     state: generator
   - type: AmbientSound
     enabled: false
@@ -188,8 +197,31 @@
     graph: NFMachine1x2
     node: machine
   - type: Sprite
+    sprite: _NF/Structures/Power/Generation/stationary_isotopestandard_placeholder.rsi
+    noRot: false
+    snapCardinals: false
+    scale: 1, 1
     offset: 0, 0.5
-    scale: 0.5, 1
+    layers:
+    - sprite: _NF/Structures/Power/Generation/stationary_placeholder_base.rsi
+      state: base
+      scale: 1, 2
+      color: "#9AB890"
+      map: ["enum.GeneratorVisualLayers.Body"]
+    - state: text
+    - state: power_off
+      map: ["enum.GeneratorStatusLayers.Power"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+    - state: bays_empty1
+      visible: false
+      map: ["enum.GeneratorStatusLayers.IsotopeBays"]
+    - state: arrows
+    - state: border
   - type: IsotopeGenerator
     cellSlots: [cell1, cell2]
   - type: RadiationShielding
@@ -230,7 +262,30 @@
       machine_board: !type:Container
       machine_parts: !type:Container
       cell2: !type:ContainerSlot
-
+  - type: GenericVisualizer
+    visuals:
+      enum.GeneratorVisuals.Running:
+        enum.GeneratorStatusLayers.Power:
+          True: { state: power_on }
+          False: { state: power_off }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.IsotopeBays:
+        enum.GeneratorStatusLayers.IsotopeBays:
+          closed: { visible: false }
+          empty1: { visible: true, state: bays_empty1 }
+          full1: { visible: true, state: bays_full1 }
+          empty2: { visible: true, state: bays_empty2 }
+          left2: { visible: true, state: bays_left2 }
+          right2: { visible: true, state: bays_right2 }
+          full2: { visible: true, state: bays_full2 }
+          shielded: { visible: true, state: bays_shielded }
 - type: entity
   parent: BaseMachineCircuitboard
   id: NFStationaryGeneratorIsotopeCompactMachineCircuitboard

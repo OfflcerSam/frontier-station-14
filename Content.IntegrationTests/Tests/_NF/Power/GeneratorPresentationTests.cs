@@ -79,9 +79,12 @@ public sealed class GeneratorPresentationTests : InteractionTest
         {
             var sprite = CEntMan.GetComponent<SpriteComponent>(CTarget!.Value);
             var layers = sprite.AllLayers.ToArray();
-            Assert.That(layers[0].RsiState.ToString(), Is.EqualTo(running ? "generator_on" : "generator"));
-            Assert.That(layers[1].Visible, Is.EqualTo(panel));
-            Assert.That(layers[2].Visible, Is.EqualTo(damaged));
+            var sprites = CEntMan.System<SpriteSystem>();
+            Assert.That(layers[sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.Power)].RsiState.ToString(),
+                Is.EqualTo(running ? "power_on" : "power_off"));
+            Assert.That(layers[sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.Panel)].Visible, Is.EqualTo(panel));
+            Assert.That(layers[sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.Damage)].Visible, Is.EqualTo(damaged));
+            Assert.That(layers.Last().RsiState.ToString(), Is.EqualTo("border"));
         });
     }
 

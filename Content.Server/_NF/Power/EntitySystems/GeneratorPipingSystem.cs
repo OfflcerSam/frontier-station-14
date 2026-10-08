@@ -158,6 +158,7 @@ public sealed class GeneratorPipingSystem : EntitySystem
         {
             if (_atmosphere.GetContainingMixture(entity, false, true) is not { Immutable: false } room)
                 return false;
+            EntityManager.System<GeneratorTelemetrySystem>().Record(entity, exhaust: exhaust.TotalMoles);
             _atmosphere.Merge(room, exhaust);
             return true;
         }
@@ -171,6 +172,7 @@ public sealed class GeneratorPipingSystem : EntitySystem
                 return false;
             outlets.Add(connected);
         }
+        EntityManager.System<GeneratorTelemetrySystem>().Record(entity, exhaust: exhaust.TotalMoles);
         var remaining = outlets.Count;
         foreach (var outlet in outlets)
             _atmosphere.Merge(outlet, exhaust.RemoveRatio(1f / remaining--));
@@ -186,6 +188,7 @@ public sealed class GeneratorPipingSystem : EntitySystem
         if (!HasComp<GeneratorPipingComponent>(entity))
         {
             intakes[0].AdjustMoles(Gas.Oxygen, -oxygenRequired);
+            EntityManager.System<GeneratorTelemetrySystem>().Record(entity, oxygen: oxygenRequired);
             return true;
         }
         if (!TryGetExhaustMixture(entity, out var exhaust) ||
@@ -202,6 +205,7 @@ public sealed class GeneratorPipingSystem : EntitySystem
         }
         if (TryComp<GeneratorExhaustGasComponent>(entity, out var generatorExhaust))
             unused.Temperature = Math.Max(unused.Temperature, generatorExhaust.Temperature);
+        EntityManager.System<GeneratorTelemetrySystem>().Record(entity, oxygen: oxygenRequired);
         ReleaseExhaust(entity, unused);
         return true;
     }

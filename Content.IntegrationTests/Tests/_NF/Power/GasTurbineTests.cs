@@ -79,6 +79,10 @@ public sealed class GasTurbineTests : InteractionTest
             Assert.That(exhaust.GetMoles(Gas.CarbonDioxide), Is.EqualTo(1f).Within(0.001));
             Assert.That(exhaust.GetMoles(Gas.Nitrogen), Is.EqualTo(1.5f).Within(0.001));
             Assert.That(exhaust.Temperature, Is.GreaterThanOrEqualTo(599.9f));
+            var telemetry = SEntMan.GetComponent<GeneratorTelemetryComponent>(uid);
+            Assert.That(telemetry.FuelPending, Is.EqualTo(1f).Within(0.001));
+            Assert.That(telemetry.OxygenPending, Is.EqualTo(1f).Within(0.001));
+            Assert.That(telemetry.ExhaustPending, Is.EqualTo(2.5f).Within(0.001), "Exhaust includes actual carrier gases.");
             air.SetMoles(Gas.Oxygen, 0f);
             var before = source.TotalMoles;
             Assert.That(gas.TryBurn((uid, adapter), 1f), Is.False);
@@ -165,6 +169,7 @@ public sealed class GasTurbineTests : InteractionTest
                     SEntMan.DeleteEntity(meta.Owner);
             uid = SEntMan.SpawnEntity("NFStationaryGeneratorGasTurbineCommercialEmpty", new EntityCoordinates(grid, new Vector2(0.5f, 0.5f)));
             SEntMan.SpawnEntity("GasPipeFourway", new EntityCoordinates(grid, new Vector2(-0.5f, 1.5f)));
+            SEntMan.SpawnEntity("GasPipeFourway", new EntityCoordinates(grid, new Vector2(0.5f, -0.5f)));
         });
         await RunTicks(10);
         await Server.WaitAssertion(() =>
@@ -174,6 +179,10 @@ public sealed class GasTurbineTests : InteractionTest
             supply.Clear(); supply.SetMoles(Gas.Plasma, 100); supply.SetMoles(Gas.Nitrogen, 50);
             var room = SEntMan.System<AtmosphereSystem>().GetContainingMixture(uid, false, true)!;
             Assert.That(room.Immutable, Is.False);
+            var intake = SEntMan.System<GeneratorPipingSystem>().GetIntakeMixture(uid)!;
+            intake.Clear(); intake.SetMoles(Gas.Oxygen, 80); intake.SetMoles(Gas.Nitrogen, 20);
+            var oxygen = room.GetMoles(Gas.Oxygen);
+            var nitrogen = room.GetMoles(Gas.Nitrogen);
             var plasma = room.GetMoles(Gas.Plasma);
             var damage = SEntMan.System<DamageableSystem>();
             void Hit(float amount) => damage.TryChangeDamage(uid,
@@ -181,6 +190,10 @@ public sealed class GasTurbineTests : InteractionTest
             Hit(39);
             Assert.That(supply.GetMoles(Gas.Plasma), Is.EqualTo(100));
             Hit(1);
+            Assert.That(room.GetMoles(Gas.Oxygen) - oxygen, Is.EqualTo(80f * 2f / intake.Volume).Within(0.001));
+            Assert.That(room.GetMoles(Gas.Oxygen) + intake.GetMoles(Gas.Oxygen), Is.EqualTo(oxygen + 80f).Within(0.001));
+            Assert.That(room.GetMoles(Gas.Nitrogen) + intake.GetMoles(Gas.Nitrogen) + supply.GetMoles(Gas.Nitrogen),
+                Is.EqualTo(nitrogen + 70f).Within(0.001));
             var leaked = 100f * 2f / supply.Volume;
             Assert.That(room.GetMoles(Gas.Plasma) - plasma, Is.EqualTo(leaked).Within(0.001));
             Assert.That(supply.GetMoles(Gas.Plasma), Is.EqualTo(100 - leaked).Within(0.001));

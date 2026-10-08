@@ -31,11 +31,36 @@
   - type: Occluder
     boundingBox: "-0.5,-0.5,0.5,2.5"
   - type: Sprite
-    sprite: _NF/Structures/Power/Generation/commercial_combustion_generator_placeholder.rsi
-    scale: 0.5, 1
+    sprite: _NF/Structures/Power/Generation/stationary_combustioncommercial_placeholder.rsi
+    noRot: false
+    snapCardinals: false
+    scale: 1, 1
     offset: 0, 1
+    layers:
+    - sprite: _NF/Structures/Power/Generation/stationary_placeholder_base.rsi
+      state: base
+      scale: 1, 3
+      color: "#DE9C62"
+      map: ["enum.GeneratorVisualLayers.Body"]
+    - state: text
+    - state: power_off
+      map: ["enum.GeneratorStatusLayers.Power"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+    - state: fuel_liquid
+      visible: false
+      map: ["enum.GeneratorStatusLayers.FuelLabel"]
+    - state: fuel_lamp
+      visible: false
+      map: ["enum.GeneratorStatusLayers.FuelLamp"]
+    - state: arrows
+    - state: border
   - type: PowerMonitoringDevice
-    sprite: _NF/Structures/Power/Generation/commercial_combustion_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_combustioncommercial_placeholder.rsi
   - type: StationaryGenerator
     ratedPower: 70000
     ratedMaximumPower: 105000
@@ -94,7 +119,41 @@
         node: machineFrame
       - !type:DoActsBehavior
         acts: ["Destruction"]
-
+  - type: GenericVisualizer
+    visuals:
+      enum.GeneratorVisuals.Running:
+        enum.GeneratorStatusLayers.Power:
+          True: { state: power_on }
+          False: { state: power_off }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.FuelKind:
+        enum.GeneratorStatusLayers.FuelLabel:
+          none: { visible: true, state: fuel_panel }
+          solid: { visible: true, state: fuel_solid }
+          liquid: { visible: true, state: fuel_liquid }
+          gas: { visible: true, state: fuel_gas }
+        enum.GeneratorStatusLayers.FuelLamp:
+          none: { visible: false }
+          solid: { visible: true }
+          liquid: { visible: true }
+          gas: { visible: true }
+      enum.GeneratorStatusVisuals.FuelLevel:
+        enum.GeneratorStatusLayers.FuelLamp:
+          empty: { color: "#FF544A" }
+          low: { color: "#FFBA40" }
+          medium: { color: "#B3E77B" }
+          full: { color: "#51F28B" }
+  - type: UserInterface
+    interfaces:
+      enum.GeneratorComponentUiKey.Key:
+        type: StationaryGeneratorBoundUserInterface
 - type: entity
   parent: BaseMachineCircuitboard
   id: NFStationaryGeneratorCombustionCommercialMachineCircuitboard

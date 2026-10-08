@@ -56,10 +56,14 @@ public sealed class TurbineRotorSystem : EntitySystem
             }
         }
         rotor.PreviousLoad = fuel.On ? supplier.CurrentSupply : 0f;
-        var target = fuel.On && !rotor.Tripped ? rotor.MaximumOperatingRpm * Math.Clamp(fuel.TargetPower / maximum, 0f, 1f) : 0f;
+        var target = TargetRpm(rotor, fuel);
         var step = rotor.MaximumOperatingRpm / Math.Max(rotor.ResponseSeconds, 0.01f) * Math.Max(frameTime, 0f);
         rotor.Rpm += Math.Clamp(target - rotor.Rpm, -step, step);
     }
+
+    public static float TargetRpm(TurbineRotorComponent rotor, FuelGeneratorComponent fuel) =>
+        fuel.On && !rotor.Tripped
+            ? rotor.MaximumOperatingRpm * Math.Clamp(fuel.TargetPower / Math.Max(fuel.MaxTargetPower, 1f), 0f, 1f) : 0f;
 
     private void OnStart(Entity<TurbineRotorComponent> ent, ref GeneratorStartAttemptEvent args)
     {

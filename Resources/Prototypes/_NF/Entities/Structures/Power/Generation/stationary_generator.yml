@@ -37,14 +37,20 @@
     - 0, 0
     - 0, 1
   - type: Sprite
-    sprite: _NF/Structures/Power/Generation/fixed_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_combustionstandard_placeholder.rsi
     noRot: false
     snapCardinals: false
+    scale: 1, 1
     offset: 0, 0.5
-    scale: 0.5, 1
     layers:
-    - state: generator
+    - sprite: _NF/Structures/Power/Generation/stationary_placeholder_base.rsi
+      state: base
+      scale: 1, 2
+      color: "#DE9C62"
       map: ["enum.GeneratorVisualLayers.Body"]
+    - state: text
+    - state: power_off
+      map: ["enum.GeneratorStatusLayers.Power"]
     - state: panel_open
       visible: false
       map: ["enum.GeneratorStatusLayers.Panel"]
@@ -57,14 +63,16 @@
     - state: fuel_lamp
       visible: false
       map: ["enum.GeneratorStatusLayers.FuelLamp"]
+    - state: arrows
+    - state: border
   - type: Appearance
   - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:
       enum.GeneratorVisuals.Running:
-        enum.GeneratorVisualLayers.Body:
-          True: { state: generator_on }
-          False: { state: generator }
+        enum.GeneratorStatusLayers.Power:
+          True: { state: power_on }
+          False: { state: power_off }
       enum.GeneratorStatusVisuals.PanelOpen:
         enum.GeneratorStatusLayers.Panel:
           True: { visible: true }
@@ -78,10 +86,12 @@
           none: { visible: true, state: fuel_panel }
           solid: { visible: true, state: fuel_solid }
           liquid: { visible: true, state: fuel_liquid }
+          gas: { visible: true, state: fuel_gas }
         enum.GeneratorStatusLayers.FuelLamp:
           none: { visible: false }
           solid: { visible: true }
           liquid: { visible: true }
+          gas: { visible: true }
       enum.GeneratorStatusVisuals.FuelLevel:
         enum.GeneratorStatusLayers.FuelLamp:
           empty: { color: "#FF544A" }
@@ -135,7 +145,7 @@
   - type: PowerMonitoringDevice
     group: Generator
     loadNode: output_hv
-    sprite: _NF/Structures/Power/Generation/fixed_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_combustionstandard_placeholder.rsi
     state: generator
   - type: GeneratorExhaustGas
     gasType: CarbonDioxide
@@ -174,7 +184,10 @@
         node: machineFrame
       - !type:DoActsBehavior
         acts: ["Destruction"]
-
+  - type: UserInterface
+    interfaces:
+      enum.GeneratorComponentUiKey.Key:
+        type: StationaryGeneratorBoundUserInterface
 - type: entity
   parent: BaseMachineCircuitboard
   id: NFStationaryGeneratorCombustionStandardMachineCircuitboard

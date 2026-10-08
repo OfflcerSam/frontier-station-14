@@ -21,6 +21,10 @@ public enum GeneratorStatusVisuals : byte
     PressureLevel,
     TemperatureLevel,
     IsotopeBays,
+    Oxygen,
+    Exhaust,
+    Rotor,
+    Trip,
 }
 
 [Serializable, NetSerializable]
@@ -37,4 +41,9 @@ public enum GeneratorStatusLayers : byte
     TemperatureLabel,
     TemperatureLamp,
     IsotopeBays,
+    Power,
+    OxygenLamp,
+    ExhaustLamp,
+    RotorLamp,
+    TripLamp,
 }

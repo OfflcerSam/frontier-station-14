@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 using System.Linq;
 using Content.Server._NF.Power.FuelModules;
+using Content.Server._NF.Power.Components;
+using Content.Server._NF.Power.EntitySystems;
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Destructible;
 using Content.Shared.Atmos;
@@ -16,6 +18,7 @@ namespace Content.Server._NF.Power.Generator;
 public sealed class PipedGasLeakSystem : EntitySystem
 {
     [Dependency] private readonly PipedGasFuelSystem _fuel = default!;
+    [Dependency] private readonly GeneratorPipingSystem _piping = default!;
     [Dependency] private readonly AtmosphereSystem _atmos = default!;
     [Dependency] private readonly DestructibleSystem _destructible = default!;
     [Dependency] private readonly FlammableSystem _flammable = default!;
@@ -46,17 +49,13 @@ public sealed class PipedGasLeakSystem : EntitySystem
         var room = _atmos.GetContainingMixture(ent.Owner, false, true);
         if (room is not { Immutable: false })
             return;
-        var supplies = _fuel.GetFuelSupplies(ent);
-        var totalVolume = supplies.Sum(x => x.Volume);
-        if (totalVolume <= 0f)
-            return;
-        var plasma = 0f;
-        foreach (var supply in supplies)
-        {
-            var parcel = supply.RemoveRatio(Math.Clamp(volume / totalVolume, 0f, 1f));
-            plasma += parcel.GetMoles(Gas.Plasma);
-            _atmos.Merge(room, parcel);
-        }
+        var fuel = _fuel.GetFuelSupplies(ent);
+        var intake = TryComp<GeneratorPipingComponent>(ent, out var piping)
+            ? _piping.GetConnectedPorts((ent.Owner, piping), false) : new List<GasMixture>();
+        // Only connected intake pipes can vent. Room-air intake has no stored gas to leak.
+        // A mistakenly shared network gets one bounded release, not a duplicate draw.
+        intake.RemoveAll(fuel.Contains);
+        var plasma = Vent(fuel, room, volume) + Vent(intake, room, volume);
         var running = TryComp<FuelGeneratorComponent>(ent, out var generator) && generator.On;
         var burning = TryComp<FlammableComponent>(ent, out var flame) && flame.OnFire;
         if (plasma <= 0f || !(running || burning) || room.GetMoles(Gas.Oxygen) <= 0f)
@@ -70,4 +69,19 @@ public sealed class PipedGasLeakSystem : EntitySystem
             _flammable.Ignite(ent, ent, flame);
         }
     }
+    private float Vent(List<GasMixture> supplies, GasMixture room, float volume)
+    {
+        var totalVolume = supplies.Sum(x => x.Volume);
+        if (totalVolume <= 0f)
+            return 0f;
+        var plasma = 0f;
+        foreach (var supply in supplies)
+        {
+            var parcel = supply.RemoveRatio(Math.Clamp(volume / totalVolume, 0f, 1f));
+            plasma += parcel.GetMoles(Gas.Plasma);
+            _atmos.Merge(room, parcel);
+        }
+        return plasma;
+    }
+
 }

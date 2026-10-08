@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 OfflcerSam
 // SPDX-License-Identifier: AGPL-3.0-or-later
 using System.Linq;
+using Content.Server._NF.Power.EntitySystems;
 using Content.Server._NF.Construction.Components;
 using Content.Server.Materials;
 using Content.Server.Fluids.EntitySystems;
@@ -246,8 +247,21 @@ public sealed class FuelModuleSystem : EntitySystem
 
     private void OnUseFuel(Entity<FuelModuleHostComponent> entity, ref GeneratorUseFuel arguments)
     {
-        if (GetInstalledModule(entity) is { } module)
-            ConsumeModuleFuel((module, Comp<FuelModuleComponent>(module)), arguments.FuelUsed);
+        if (GetInstalledModule(entity) is not { } module)
+            return;
+        var before = GetPhysicalFuel(module);
+        ConsumeModuleFuel((module, Comp<FuelModuleComponent>(module)), arguments.FuelUsed);
+        EntityManager.System<GeneratorTelemetrySystem>().Record(entity, fuel: Math.Max(0f, before - GetPhysicalFuel(module)));
+    }
+
+    public float GetPhysicalFuel(EntityUid module)
+    {
+        if (!TryComp<FuelModuleComponent>(module, out var component))
+            return 0f;
+        if (component.Kind == FuelModuleKind.Solid)
+            return component.FractionalFuel.Values.Sum();
+        return _solutionContainers.TryGetSolution(module, "tank", out _, out var solution)
+            ? FuelGaugeSystem.UsableLiquid(solution) : 0f;
     }
 
     private void OnGetClogged(Entity<FuelModuleHostComponent> entity, ref GeneratorGetCloggedEvent arguments)

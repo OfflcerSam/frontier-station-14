@@ -83,21 +83,22 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
         if (fuelGenerator.On || !Transform(uid).Anchored)
             return;
 
-        if (!_actionBlocker.CanComplexInteract(user)) // Frontier
+        if (!_actionBlocker.CanComplexInteract(user) || !_actionBlocker.CanInteract(user, uid)) // Frontier
             return; // Frontier
 
         _doAfter.TryStartDoAfter(new DoAfterArgs(EntityManager, user, component.StartTime, new GeneratorStartedEvent(), uid, uid)
         {
             BreakOnDamage = true,
             BreakOnMove = true,
-            NeedHand = true,
+            // Frontier: interacting admin ghosts have no physical hand.
+            NeedHand = !(TryComp<Content.Shared.Ghost.GhostComponent>(user, out var ghost) && ghost.CanGhostInteract),
             BreakOnDropItem = false,
         });
     }
 
     private void StopGenerator(EntityUid uid, PortableGeneratorComponent component, EntityUid user)
     {
-        if (!_actionBlocker.CanComplexInteract(user)) // Frontier
+        if (!_actionBlocker.CanComplexInteract(user) || !_actionBlocker.CanInteract(user, uid)) // Frontier
             return; // Frontier
 
         // Frontier: avoid recording no-op stop requests.
@@ -286,6 +287,7 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
             {
                 // Frontier: describe real network supply without a fictional internal tank.
                 PipedGasFuel = HasComp<Content.Server._NF.Power.Generator.PipedGasFuelComponent>(uid),
+                Stationary = EntityManager.System<StationaryGeneratorDiagnosticsSystem>().GetData(uid),
                 FuelVolume = fuelVolume,
                 FuelCapacity = fuelCapacity,
             });

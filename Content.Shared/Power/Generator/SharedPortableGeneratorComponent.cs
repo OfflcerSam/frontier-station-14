@@ -105,6 +105,8 @@ public sealed class PortableGeneratorComponentBuiState : BoundUserInterfaceState
     public float RemainingFuel;
     // Frontier: externally piped fuel uses mol and cannot be ejected.
     public bool PipedGasFuel;
+    // Frontier: optional stationary-machine diagnostics, reused by a dedicated window.
+    public Content.Shared._NF.Power.StationaryGeneratorUiData? Stationary;
     // Frontier: liquid volume is distinct from fuel-equivalent energy.
     public float? FuelVolume;
     public float? FuelCapacity;

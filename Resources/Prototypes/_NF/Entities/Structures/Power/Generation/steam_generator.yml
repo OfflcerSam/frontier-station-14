@@ -33,13 +33,20 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
   - type: Sprite
-    sprite: _NF/Structures/Power/Generation/steam_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_steamstandard_placeholder.rsi
     noRot: false
     snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 0.5
     layers:
-    - state: generator
+    - sprite: _NF/Structures/Power/Generation/stationary_placeholder_base.rsi
+      state: base
+      scale: 2, 2
+      color: "#81ACCC"
       map: ["enum.GeneratorVisualLayers.Body"]
+    - state: text
+    - state: power_off
+      map: ["enum.GeneratorStatusLayers.Power"]
     - state: panel_open
       visible: false
       map: ["enum.GeneratorStatusLayers.Panel"]
@@ -70,15 +77,17 @@
     - state: temperature_lamp
       visible: true
       map: ["enum.GeneratorStatusLayers.TemperatureLamp"]
+    - state: arrows
+    - state: border
   - type: Appearance
   - type: MachineFireVisuals
   - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:
       enum.GeneratorVisuals.Running:
-        enum.GeneratorVisualLayers.Body:
-          True: { state: generator_on }
-          False: { state: generator }
+        enum.GeneratorStatusLayers.Power:
+          True: { state: power_on }
+          False: { state: power_off }
       enum.GeneratorStatusVisuals.PanelOpen:
         enum.GeneratorStatusLayers.Panel:
           True: { visible: true }
@@ -92,10 +101,12 @@
           none: { visible: true, state: fuel_panel }
           solid: { visible: true, state: fuel_solid }
           liquid: { visible: true, state: fuel_liquid }
+          gas: { visible: true, state: fuel_gas }
         enum.GeneratorStatusLayers.FuelLamp:
           none: { visible: false }
           solid: { visible: true }
           liquid: { visible: true }
+          gas: { visible: true }
       enum.GeneratorStatusVisuals.FuelLevel:
         enum.GeneratorStatusLayers.FuelLamp:
           empty: { color: "#FF544A" }
@@ -181,7 +192,7 @@
   - type: PowerMonitoringDevice
     group: Generator
     loadNode: output_hv
-    sprite: _NF/Structures/Power/Generation/steam_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_steamstandard_placeholder.rsi
     state: generator
   - type: GeneratorExhaustGas
     gasType: CarbonDioxide
@@ -201,7 +212,10 @@
         node: machineFrame
       - !type:DoActsBehavior
         acts: [Destruction]
-
+  - type: UserInterface
+    interfaces:
+      enum.GeneratorComponentUiKey.Key:
+        type: StationaryGeneratorBoundUserInterface
 - type: entity
   parent: NFStationaryGeneratorSteamStandardEmpty
   id: NFStationaryGeneratorSteamStandardSolidEmpty
@@ -311,10 +325,54 @@
         mask: [MachineMask]
         layer: [MachineLayer]
   - type: Sprite
-    sprite: _NF/Structures/Power/Generation/commercial_steam_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_steamcommercial_placeholder.rsi
+    noRot: false
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 1
+    layers:
+    - sprite: _NF/Structures/Power/Generation/stationary_placeholder_base.rsi
+      state: base
+      scale: 2, 3
+      color: "#81ACCC"
+      map: ["enum.GeneratorVisualLayers.Body"]
+    - state: text
+    - state: power_off
+      map: ["enum.GeneratorStatusLayers.Power"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+    - state: fuel_liquid
+      visible: false
+      map: ["enum.GeneratorStatusLayers.FuelLabel"]
+    - state: fuel_lamp
+      visible: false
+      map: ["enum.GeneratorStatusLayers.FuelLamp"]
+    - state: water_label
+      visible: true
+      map: ["enum.GeneratorStatusLayers.WaterLabel"]
+    - state: water_lamp
+      visible: true
+      map: ["enum.GeneratorStatusLayers.WaterLamp"]
+    - state: pressure_label
+      visible: true
+      map: ["enum.GeneratorStatusLayers.PressureLabel"]
+    - state: pressure_lamp
+      visible: true
+      map: ["enum.GeneratorStatusLayers.PressureLamp"]
+    - state: temperature_label
+      visible: true
+      map: ["enum.GeneratorStatusLayers.TemperatureLabel"]
+    - state: temperature_lamp
+      visible: true
+      map: ["enum.GeneratorStatusLayers.TemperatureLamp"]
+    - state: arrows
+    - state: border
   - type: PowerMonitoringDevice
-    sprite: _NF/Structures/Power/Generation/commercial_steam_generator_placeholder.rsi
+    sprite: _NF/Structures/Power/Generation/stationary_steamcommercial_placeholder.rsi
   - type: GeneratorPiping
     exhaustNodes: [exhaust, exhaust_right]
     intakeNodes: [intake, intake_right]
@@ -374,7 +432,59 @@
         node: machineFrame
       - !type:DoActsBehavior
         acts: [Destruction]
-
+  - type: GenericVisualizer
+    visuals:
+      enum.GeneratorVisuals.Running:
+        enum.GeneratorStatusLayers.Power:
+          True: { state: power_on }
+          False: { state: power_off }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.FuelKind:
+        enum.GeneratorStatusLayers.FuelLabel:
+          none: { visible: true, state: fuel_panel }
+          solid: { visible: true, state: fuel_solid }
+          liquid: { visible: true, state: fuel_liquid }
+          gas: { visible: true, state: fuel_gas }
+        enum.GeneratorStatusLayers.FuelLamp:
+          none: { visible: false }
+          solid: { visible: true }
+          liquid: { visible: true }
+          gas: { visible: true }
+      enum.GeneratorStatusVisuals.FuelLevel:
+        enum.GeneratorStatusLayers.FuelLamp:
+          empty: { color: "#FF544A" }
+          low: { color: "#FFBA40" }
+          medium: { color: "#B3E77B" }
+          full: { color: "#51F28B" }
+      enum.GeneratorStatusVisuals.WaterLevel:
+        enum.GeneratorStatusLayers.WaterLamp:
+          empty: { color: "#FF544A" }
+          low: { color: "#FFBA40" }
+          medium: { color: "#B3E77B" }
+          full: { color: "#51F28B" }
+      enum.GeneratorStatusVisuals.PressureLevel:
+        enum.GeneratorStatusLayers.PressureLamp:
+          cold: { color: "#4B5563" }
+          low: { color: "#FFBA40" }
+          normal: { color: "#51F28B" }
+          high: { color: "#FF544A" }
+      enum.GeneratorStatusVisuals.TemperatureLevel:
+        enum.GeneratorStatusLayers.TemperatureLamp:
+          cold: { color: "#4B5563" }
+          low: { color: "#FFBA40" }
+          normal: { color: "#51F28B" }
+          high: { color: "#FF544A" }
+  - type: UserInterface
+    interfaces:
+      enum.GeneratorComponentUiKey.Key:
+        type: StationaryGeneratorBoundUserInterface
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialEmpty
   id: NFStationaryGeneratorSteamCommercialSolidEmpty

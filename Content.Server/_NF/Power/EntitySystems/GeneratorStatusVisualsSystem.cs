@@ -54,6 +54,13 @@ public sealed class GeneratorStatusVisualsSystem : EntitySystem
                 TryComp<DamageableComponent>(uid, out var damage) && damage.TotalDamage > 0, appearance);
             UpdateSupplies(uid, appearance);
             UpdateFire(uid, appearance);
+            if (EntityManager.System<StationaryGeneratorDiagnosticsSystem>().GetData(uid) is { } diagnostics)
+            {
+                _appearance.SetData(uid, GeneratorStatusVisuals.Oxygen, diagnostics.OxygenState, appearance);
+                _appearance.SetData(uid, GeneratorStatusVisuals.Exhaust, diagnostics.ExhaustState, appearance);
+                _appearance.SetData(uid, GeneratorStatusVisuals.Rotor, diagnostics.RotorState, appearance);
+                _appearance.SetData(uid, GeneratorStatusVisuals.Trip, diagnostics.Tripped, appearance);
+            }
             if (TryComp<SteamTurbineComponent>(uid, out var steam))
             {
                 _appearance.SetData(uid, GeneratorStatusVisuals.WaterLevel,

@@ -38,5 +38,23 @@
 
   [textlink="Radioisotope Thermoelectric Generators" link="NFStationaryIsotopeGenerators"]
   Auxiliary generators that use finite isotope cells to generate power.
+
+  # Controls and Placeholder Indicators
+
+  Fuel-burning stationary machines use a resizable control window with Control and Gauge panels. Only applicable Fuel, Atmos, Boiler, Generator and Engine or Turbine sections appear. RTGs remain automatic and have no control window.
+
+  Consumption and exhaust readings use quantities per second. Liquid fuel and water use u, gas uses mol, and solid fuel retains partial material units. Piped plasma shows the available connected supply without a tank maximum. Fuel and water show Empty at zero and Low below a quarter full. Oxygen and piped fuel show Low when less than one second of running demand remains. Exhaust Low means backpressure is throttling output; Choked means the exhaust cannot flow.
+
+  Generator output shows delivered power beside its installed maximum output, plus a separate 60-second average. The RPM gauge similarly shows actual shaft speed beside its maximum operating speed. Generator load compares delivered power with the output currently available. Engine or turbine load compares the commanded output with its rating and can exceed 100% in overdrive.
+
+  Network load shows this generator's contribution beside total network demand. Network status is green Supplied with at least 10% spare supply, yellow Low when demand is met with less spare supply, red Insufficient below demand, and grey Disconnected without a network. Current Output shows orange HV or yellow MV, with its switch underneath.
+
+  Control status is green Running, yellow Starting Up or Shutting Off, and grey Off. Shutting Off follows the shaft coasting down. Generator, engine and turbine condition use Operational for their green status.
+
+  The engine or turbine shares its shaft speed with the generator. Engine speed takes five seconds across the normal 0–3000 RPM range; turbine speed also responds to load changes and its existing safeties. Working temperature rises towards the hot-gas temperature during burning and falls towards intake temperature after stopping.
+
+  Boiler status is green when Operational, yellow while Heating or Cooling, and red when Cold. All active warnings appear together below Generator status.
+
+  Temporary machine sprites share a coloured base, machine/tier text, power symbol, service and supply indicators, port arrows and a black outer border. Intake arrows point into the machine; exhaust arrows point out. Gas inlet arrows are purple, air intake arrows blue and exhaust arrows red.
 </Document>
 

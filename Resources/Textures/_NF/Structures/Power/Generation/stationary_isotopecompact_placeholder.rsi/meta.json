@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Created by OfflcerSam for Frontier Station using one shared base and layered overlays.",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "text"
+    },
+    {
+      "name": "power_off"
+    },
+    {
+      "name": "power_on"
+    },
+    {
+      "name": "panel_open"
+    },
+    {
+      "name": "damaged"
+    },
+    {
+      "name": "arrows"
+    },
+    {
+      "name": "border"
+    },
+    {
+      "name": "fuel_solid"
+    },
+    {
+      "name": "fuel_liquid"
+    },
+    {
+      "name": "fuel_gas"
+    },
+    {
+      "name": "fuel_panel"
+    },
+    {
+      "name": "fuel_lamp"
+    },
+    {
+      "name": "water_label"
+    },
+    {
+      "name": "water_lamp"
+    },
+    {
+      "name": "pressure_label"
+    },
+    {
+      "name": "pressure_lamp"
+    },
+    {
+      "name": "temperature_label"
+    },
+    {
+      "name": "temperature_lamp"
+    },
+    {
+      "name": "oxygen_lamp"
+    },
+    {
+      "name": "exhaust_lamp"
+    },
+    {
+      "name": "rotor_lamp"
+    },
+    {
+      "name": "trip_lamp"
+    },
+    {
+      "name": "indicator_labels"
+    },
+    {
+      "name": "bays_empty1"
+    },
+    {
+      "name": "bays_full1"
+    },
+    {
+      "name": "bays_empty2"
+    },
+    {
+      "name": "bays_left2"
+    },
+    {
+      "name": "bays_right2"
+    },
+    {
+      "name": "bays_full2"
+    },
+    {
+      "name": "bays_shielded"
+    },
+    {
+      "name": "generator"
+    }
+  ]
+}

@@ -274,7 +274,10 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         steamMixture.SetMoles(Gas.WaterVapor, removed.Float() * entity.Comp.VaporMolesPerUnit);
         steamMixture.Temperature = Math.Max(entity.Comp.BoilingTemperature, entity.Comp.BoilerTemperature);
         if (routineExhaust)
+        {
+            EntityManager.System<GeneratorTelemetrySystem>().Record(entity, water: removed.Float());
             _piping.ReleaseExhaust(entity, steamMixture);
+        }
         else
             ReleaseHotSteam(entity, steamMixture, removed.Float());
         entity.Comp.VaporSinceReleaseSound += removed.Float();

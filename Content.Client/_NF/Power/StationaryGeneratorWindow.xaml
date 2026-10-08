@@ -1,0 +1,157 @@
+<controls:FancyWindow xmlns="https://spacestation14.io"
+    xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    MinSize="640 560" SetSize="700 680" Resizable="True"
+    Title="{Loc 'stationary-ui-title'}">
+  <ScrollContainer VerticalExpand="True" HorizontalExpand="True">
+    <BoxContainer Orientation="Vertical" Margin="12" HorizontalExpand="True">
+      <Label Text="{Loc 'stationary-ui-electrical'}" Margin="0 12 0 3"/>
+      <BoxContainer Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-control-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="StatusLabel" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <Control MinSize="220 30" HorizontalExpand="True" Margin="0 0 0 6">
+        <Button Name="StartButton" Text="{Loc 'portable-generator-ui-start'}"/>
+        <Button Name="StopButton" Text="{Loc 'portable-generator-ui-stop'}"/>
+        <ProgressBar Name="StartProgress" MaxValue="1"/>
+        <Label Name="LabelUnanchored" Text="{Loc 'portable-generator-ui-unanchored'}"/>
+      </Control>
+      <BoxContainer Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'portable-generator-ui-efficiency-label'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="Efficiency" MinWidth="100"/><Label Name="Eta" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'portable-generator-ui-target-power-label'}" MinWidth="260" MaxWidth="260"/>
+        <FloatSpinBox Name="TargetPower" HorizontalExpand="True"/>
+      </BoxContainer>
+      <BoxContainer Name="OutputSwitchRow" Orientation="Vertical" Margin="0 3">
+        <BoxContainer Orientation="Horizontal">
+          <Label Name="OutputSwitchLabel" Text="{Loc 'stationary-ui-voltage'}" MinWidth="260" MaxWidth="260"/>
+          <Label Name="OutputVoltage" HorizontalExpand="True" ClipText="True"/>
+        </BoxContainer>
+        <Button Name="OutputSwitchButton" HorizontalExpand="True" Margin="0 3 0 6"/>
+      </BoxContainer>
+      <BoxContainer Name="NetworkRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-network-load'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="NetworkStats" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-network-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="NetworkStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <Label Text="{Loc 'stationary-ui-supplies'}" Margin="0 12 0 3"/>
+      <Label Text="{Loc 'stationary-ui-fuel-panel'}" Margin="0 12 0 3"/>
+      <BoxContainer Name="FuelUseRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-fuel-use'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="FuelUse" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="FuelLeftRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'portable-generator-ui-fuel-left-label'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="FuelLeft" HorizontalExpand="True" ClipText="True"/>
+        <Button Name="FuelEject" Text="{Loc 'portable-generator-ui-eject'}"/>
+      </BoxContainer>
+      <BoxContainer Name="FuelStatusRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-fuel-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="FuelStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="FuelTypeRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-fuel-type'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="FuelType" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="AtmosPanel" Orientation="Vertical" Visible="False">
+      <Label Text="{Loc 'stationary-ui-atmos-panel'}" Margin="0 12 0 3"/>
+      <BoxContainer Name="OxygenUseRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-oxygen-use'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="OxygenUse" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="OxygenStatusRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-oxygen-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="OxygenStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="ExhaustOutputRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-exhaust-output'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="ExhaustOutput" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="ExhaustStatusRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-exhaust-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="ExhaustStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      </BoxContainer>
+      <BoxContainer Name="BoilerPanel" Orientation="Vertical" Visible="False">
+      <Label Text="{Loc 'stationary-ui-boiler-panel'}" Margin="0 12 0 3"/>
+      <BoxContainer Name="BoilerTemperatureRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-boiler-temperature'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="BoilerTemperature" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="BoilerPressureRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-boiler-pressure'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="BoilerPressure" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="BoilerStatusRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-boiler-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="BoilerStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="WaterUseRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-water-use'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="WaterUse" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="WaterRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-water'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="Water" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="WaterStatusRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-water-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="WaterStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      </BoxContainer>
+      <Label Text="{Loc 'stationary-ui-rotor'}" Margin="0 12 0 3"/>
+      <BoxContainer Name="RpmRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-rpm'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="Rpm" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="CurrentOutputRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-current-output'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="CurrentOutput" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="AverageOutputRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-average-output'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="AverageOutput" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="ElectricalLoadRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-generator-load'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="ElectricalLoad" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="RampRateRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-ramp-rate'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="RampRate" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="GeneratorStatusRow" Orientation="Horizontal" Margin="0 3">
+        <Label Text="{Loc 'stationary-ui-generator-status'}" MinWidth="260" MaxWidth="260"/>
+        <Label Name="GeneratorStatus" HorizontalExpand="True" ClipText="True"/>
+      </BoxContainer>
+      <BoxContainer Name="WarningsPanel" Orientation="Vertical" Visible="False">
+        <Label Text="{Loc 'stationary-ui-safety'}" Margin="0 6 0 3"/>
+        <Label Name="Safety" HorizontalExpand="True" ClipText="True" Margin="12 0 0 0"/>
+      </BoxContainer>
+      <BoxContainer Name="DrivePanel" Orientation="Vertical" Visible="False">
+        <Label Name="DriveHeading" Margin="0 12 0 3"/>
+        <BoxContainer Orientation="Horizontal" Margin="0 3">
+          <Label Name="DriveRpmLabel" MinWidth="260" MaxWidth="260"/>
+          <Label Name="DriveRpm" HorizontalExpand="True" ClipText="True"/>
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" Margin="0 3">
+          <Label Name="DriveTemperatureLabel" MinWidth="260" MaxWidth="260"/>
+          <Label Name="DriveTemperature" HorizontalExpand="True" ClipText="True"/>
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" Margin="0 3">
+          <Label Name="DriveLoadLabel" MinWidth="260" MaxWidth="260"/>
+          <Label Name="DriveLoad" HorizontalExpand="True" ClipText="True"/>
+        </BoxContainer>
+        <BoxContainer Orientation="Horizontal" Margin="0 3">
+          <Label Name="DriveStatusLabel" MinWidth="260" MaxWidth="260"/>
+          <Label Name="DriveStatus" HorizontalExpand="True" ClipText="True"/>
+        </BoxContainer>
+      </BoxContainer>
+      <SpriteView Name="EntityView" SetSize="64 64" Scale="1 1" OverrideDirection="South" HorizontalAlignment="Right"/>
+    </BoxContainer>
+  </ScrollContainer>
+</controls:FancyWindow>

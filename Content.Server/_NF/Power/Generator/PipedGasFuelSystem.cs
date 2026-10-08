@@ -86,6 +86,7 @@ public sealed class PipedGasFuelSystem : EntitySystem
             parcel.SetMoles(Gas.Oxygen, 0f);
             _atmos.Merge(products, parcel);
         }
+        EntityManager.System<GeneratorTelemetrySystem>().Record(ent, fuel: amount, oxygen: amount * ent.Comp.OxygenPerMole);
         products.AdjustMoles(Gas.CarbonDioxide, amount);
         products.Temperature = Math.Max(products.Temperature, ent.Comp.ExhaustTemperature);
         _piping.ReleaseExhaust(ent, products);
