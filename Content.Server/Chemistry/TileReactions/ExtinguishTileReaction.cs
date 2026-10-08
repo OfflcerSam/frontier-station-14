@@ -23,6 +23,9 @@ namespace Content.Server.Chemistry.TileReactions
             if (reactVolume <= FixedPoint2.Zero || tile.Tile.IsEmpty)
                 return FixedPoint2.Zero;
 
+            // Frontier: liquid puddle flames also extinguish without an atmospheric plasma hotspot.
+            entityManager.System<Content.Server._NF.Power.Generator.FuelPuddleFireSystem>().ExtinguishTile(tile);
+
             var atmosphereSystem = entityManager.System<AtmosphereSystem>();
 
             var environment = atmosphereSystem.GetTileMixture(tile.GridUid, null, tile.GridIndices, true);

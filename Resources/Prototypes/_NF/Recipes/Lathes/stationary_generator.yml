@@ -10,3 +10,13 @@
   parent: PortableGeneratorPacmanMachineCircuitboard
   id: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
   result: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
+
+- type: latheRecipe
+  parent: NFLiquidFuelTankStandard
+  id: NFLiquidFuelTankCombustionStandard
+  result: NFLiquidFuelTankCombustionStandard
+
+- type: latheRecipe
+  parent: NFLiquidFuelTankCommercial
+  id: NFLiquidFuelTankCombustionCommercial
+  result: NFLiquidFuelTankCombustionCommercial

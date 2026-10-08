@@ -22,6 +22,10 @@ namespace Content.Server.Chemistry.TileReactions
             if (reactVolume <= FixedPoint2.Zero || tile.Tile.IsEmpty)
                 return FixedPoint2.Zero;
 
+            // Frontier: these liquids burn from the real puddle over time, not all at once during pouring.
+            if (Content.Server._NF.Power.Generator.FuelPuddleFireSystem.IsFuel(reagent.ID))
+                return FixedPoint2.Zero;
+
             var atmosphereSystem = entityManager.System<AtmosphereSystem>();
 
             var environment = atmosphereSystem.GetTileMixture(tile.GridUid, null, tile.GridIndices, true);

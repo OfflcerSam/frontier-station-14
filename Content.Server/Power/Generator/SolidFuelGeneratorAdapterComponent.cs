@@ -1,4 +1,4 @@
-﻿using Content.Shared.Materials;
+using Content.Shared.Materials;
 using Content.Shared.Power.Generator;
 using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype;
 using Robust.Shared.Prototypes; // Frontier
@@ -17,7 +17,7 @@ namespace Content.Server.Power.Generator;
 /// The component itself stores a "fractional" fuel value to allow stack materials to be gradually consumed.
 /// </para>
 /// </remarks>
-[RegisterComponent, Access(typeof(GeneratorSystem))]
+[RegisterComponent, Access(typeof(GeneratorSystem), typeof(Content.Server._NF.Power.EntitySystems.FuelGaugeSystem))] // Frontier: physical fuel gauge
 public sealed partial class SolidFuelGeneratorAdapterComponent : Component
 {
     /// <summary>

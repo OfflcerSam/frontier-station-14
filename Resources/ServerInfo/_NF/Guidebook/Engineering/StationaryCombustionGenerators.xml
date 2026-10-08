@@ -14,19 +14,27 @@
 
   The standard model occupies [color=orange]two tiles[/color] and produces up to [color=orange][protodata="NFStationaryGeneratorCombustionStandard" comp="FuelGenerator" member="MaxTargetPower" format="N0"/] W[/color] with standard parts. Its 1800u tank lasts about 3 hours on Welding Fuel, 2 hours 24 minutes on Ethanol, or 3 hours 36 minutes on Plasma reagent at its rated 35 kW target.
 
-  Pour Welding Fuel, Ethanol or Plasma reagent into the tank. Juice granatapfel to make Welding Fuel, or grind plasma ore and sheets to obtain Plasma reagent. Solid materials cannot be inserted directly. Other reagents contaminate the tank and prevent starting; empty the fuel and refill with an accepted liquid.
+  Combustion engines accept size-matched liquid fuel modules only. The combustion tanks hold 1800u Standard or 4800u Commercial. Stop the engine and open its maintenance panel to install a tank; close the panel before refueling. With the panel open, Eject removes the tank intact and stops the engine. Fuel and tank upgrades remain in the removed module. A crowbar also removes a tank while the engine is stopped. Solid hoppers cannot be installed.
+
+  Pour Welding Fuel, Ethanol or Plasma reagent into the tank. Juice granatapfel to make Welding Fuel, or grind plasma ore and sheets to obtain Plasma reagent. Solid materials cannot be inserted directly. Other reagents contaminate the tank and prevent starting; remove and drain the tank, then refill with an accepted liquid.
 
   At 80 percent remaining integrity, the tank leaks 2 percent of capacity. Each further 2 percent integrity lost releases another 2 percent of capacity. Leakage occurs on damage events, including while switched off.
 
   # Commercial Engine
 
-  The commercial engine occupies three tiles and blocks sight across its chassis. It is rated for 70 kW, with a basic maximum of 105 kW. Its 4800u internal tank lasts about 4 hours on Welding Fuel at the rated target (3 hours 12 minutes on Ethanol or 4 hours 48 minutes on Plasma reagent). It uses the same liquid-fuel and damage-leak rules as the standard engine.
+  The commercial engine occupies three tiles and blocks sight across its chassis. It is rated for 70 kW, with a basic maximum of 105 kW. Its 4800u removable combustion tank lasts about 4 hours on Welding Fuel at the rated target (3 hours 12 minutes on Ethanol or 4 hours 48 minutes on Plasma reagent). It uses the same liquid-fuel and damage-leak rules as the standard engine.
 
   Connect the red north exhaust port to a primary-layer pipe. The blue south intake optionally draws air from a pipe; without a connected intake it uses room air. Ports rotate with the machine. Other pipe layers require manifolds. Exhaust above 300 kPa throttles output and fuel burn; 600 kPa or a disconnected exhaust shuts the engine down. Fix the supply or exhaust and restart manually. An empty connected intake cannot draw room air instead.
 
-  Use a 1×3 machine frame (15 steel, then 3 LV cable) and the commercial board. The board also requires 2 capacitors, 2 manipulators, 2 matter bins, 15 HV cable and 10 steel. Construction and rebuilding produce an empty, stopped engine. The Ship mapping variant starts supplied and requires its exhaust connection to keep running.
+  Use a 1×3 machine frame (15 steel, then 3 LV cable) and the commercial board. The board also requires 2 capacitors, 2 manipulators, 2 matter bins, 15 HV cable and 10 steel. Construction and rebuilding produce a stopped engine without a fuel module. Print and install a matching tank. The Ship mapping variant starts supplied and requires its exhaust connection to keep running.
 
-  Commercial capacitor ceilings are 105 / 112 / 119 / 126 kW. Full rating-4 upgrades provide 7680u tank capacity and reduce rated fuel use to 1020u/hour. Overdrive increases fuel and oxygen use, reducing endurance. Damage starts leaking fuel at 30 damage; a running fueled engine can ignite at that threshold in oxygen. Destruction at 150 damage spills the remaining fuel without a steam-pressure explosion.
+  Commercial capacitor ceilings are 105 / 112 / 119 / 126 kW. Full rating-4 upgrades provide 7680u tank capacity and reduce rated fuel use to 1020u/hour. Overdrive increases fuel and oxygen use, reducing endurance. Damage starts leaking fuel at 30 damage; a running fueled engine can ignite at that threshold in oxygen. Destruction at 150 damage spills the remaining fuel and releases 10 fragments.
+
+  # Damage and Fuel Fires
+
+  The first single hit of at least 25 percent chassis durability while running releases 3 fragments from Standard or 5 from Commercial. Destruction releases 6 or 10 fragments instead of adding a second burst on the killing hit. Each fragment deals 5 piercing damage and travels at most 3 tiles. Mechanical breakup adds no pressure blast or stun.
+
+  Spilled Welding Fuel, Ethanol and Plasma reagent can ignite wherever they form puddles. Burning requires oxygen and consumes the actual fuel. Water and extinguisher sprays put out the puddle fire. Ordinary fuel-puddle slipping still applies. Examine tanks, generators and fuel containers for their fuel gauge.
 
   # Stock Parts
 
@@ -38,7 +46,7 @@
 
   The standard engine retains its 35 kW efficiency reference at every tier. Its maximum targets are 52.5 / 56 / 59.5 / 63 kW for capacitor ratings 1 / 2 / 3 / 4. Overdrive increases fuel consumption through the existing power curve, reducing endurance above the rated target.
 
-  Capacitors increase the target ceiling and ramp rate. Manipulators reduce fuel use. Matter Bins increase tank capacity. Examine the machine upgrades to check the installed bonuses. The parts inside the RPED determine the resulting rating.
+  Capacitors increase the target ceiling and ramp rate. Manipulators reduce fuel use. Remove the tank and upgrade its own Matter Bin with an RPED to increase capacity. Chassis Matter Bins do not resize the removable tank. Examine the machine upgrades to check the installed bonuses. The parts inside the RPED determine the resulting rating.
 
   With every part at rating 4, standard combustion reaches a 63 kW ceiling and 2880u capacity. Raising the target beyond its rated output uses more fuel and oxygen; keeping the rated target gives longer endurance. Different models may use different parts and support different upgrades.
 </Document>

@@ -81,7 +81,7 @@
     remainingLifetime: 14400
 
 - type: entity
-  parent: NFStationaryGeneratorCombustionStandardEmpty
+  parent: NFStationaryGeneratorCombustionStandardLiquidEmpty
   id: NFStationaryGeneratorCombustionStandard
   suffix: Welding Fuel, 35 kW
   components:
@@ -93,20 +93,12 @@
     startOnMapInit: false
 
 - type: entity
-  parent: NFStationaryGeneratorCombustionStandardEmpty
+  parent: NFStationaryGeneratorCombustionStandardLiquidFull
   id: NFStationaryGeneratorCombustionStandardShip
   suffix: Welding Fuel, 35 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 1800
-        reagents:
-        - ReagentId: WeldingFuel
-          Quantity: 1800
-
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactEmpty
   id: NFStationaryGeneratorStirlingCompact

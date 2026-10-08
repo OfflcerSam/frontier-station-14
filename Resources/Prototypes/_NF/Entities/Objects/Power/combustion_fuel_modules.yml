@@ -1,0 +1,116 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+- type: entity
+  parent: NFLiquidFuelTankStandard
+  id: NFLiquidFuelTankCombustionStandard
+  name: basic standard combustion fuel tank
+  components:
+  - type: FuelModule
+    baseCapacity: 1800
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 1800
+
+- type: entity
+  parent: NFLiquidFuelTankCombustionStandard
+  id: NFLiquidFuelTankCombustionStandardFull
+  categories: [HideSpawnMenu]
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 1800
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 1800
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionStandardEmpty
+  id: NFStationaryGeneratorCombustionStandardLiquidEmpty
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCombustionStandard
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionStandardEmpty
+  id: NFStationaryGeneratorCombustionStandardLiquidFull
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCombustionStandardFull
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFLiquidFuelTankCommercial
+  id: NFLiquidFuelTankCombustionCommercial
+  name: basic commercial combustion fuel tank
+  components:
+  - type: FuelModule
+    baseCapacity: 4800
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 4800
+
+- type: entity
+  parent: NFLiquidFuelTankCombustionCommercial
+  id: NFLiquidFuelTankCombustionCommercialFull
+  categories: [HideSpawnMenu]
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 4800
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 4800
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionCommercialEmpty
+  id: NFStationaryGeneratorCombustionCommercialLiquidEmpty
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCombustionCommercial
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionCommercialEmpty
+  id: NFStationaryGeneratorCombustionCommercialLiquidFull
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCombustionCommercialFull
+        whitelist:
+          components: [FuelModule]

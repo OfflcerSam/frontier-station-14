@@ -71,7 +71,7 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
     {
         // Frontier: report only an actual fuel removal.
         var fuelBefore = GetFuel(uid);
-        EmptyGenerator(uid);
+        EmptyGenerator(uid, args.Actor); // Frontier: preserve actor for intact liquid-module ejection.
         if (GetFuel(uid) < fuelBefore)
             _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Medium,
                 $"{ToPrettyString(args.Actor):actor} emptied fuel from {ToPrettyString(uid):subject}.");
@@ -333,9 +333,9 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
         return getCloggedEvent.Clogged;
     }
 
-    public void EmptyGenerator(EntityUid generator)
+    public void EmptyGenerator(EntityUid generator, EntityUid? user = null) // Frontier: module servicing actor.
     {
-        RaiseLocalEvent(generator, GeneratorEmpty.Instance);
+        RaiseLocalEvent(generator, new GeneratorEmpty { User = user });
     }
 
     private void UpdateState(EntityUid generator, FuelGeneratorComponent component)
@@ -374,6 +374,7 @@ public record struct GeneratorUseFuel(float FuelUsed);
 public sealed class GeneratorEmpty
 {
     public static readonly GeneratorEmpty Instance = new();
+    public EntityUid? User; // Frontier: liquid-module ejection recipient.
 }
 
 

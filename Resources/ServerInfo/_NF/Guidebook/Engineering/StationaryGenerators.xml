@@ -19,7 +19,11 @@
 
   Examine a machine for visible condition and readable labels. Open its maintenance hatch to inspect accessible internal parts. Use an appropriate tool for measured diagnostics. Follow the generator's guide for fuel handling and servicing.
 
-  Fuel-module generators have a black solid-fuel or green liquid-fuel indicator beside the service panel. Its lamp is red when empty, amber below a quarter full, and green as fuel level rises. Removing the module removes its indicator.
+  Fuel-module generators have a black solid-fuel or green liquid-fuel indicator beside the service panel. Its lamp is red when empty, amber below a quarter full, and green as fuel level rises. With no module, the indicator is a solid grey panel.
+
+  Eject removes an installed liquid tank intact only while the maintenance panel is open, stopping the machine. For a solid hopper, Eject releases whole fuel pieces and keeps the hopper installed; partial pieces remain stored. Examine the fuel gauge for the remaining quantity.
+
+  Spilled Welding Fuel, Ethanol and Plasma reagent burn when ignited in oxygen. Water and extinguisher sprays extinguish these puddle fires.
 
   # Generator Families
 

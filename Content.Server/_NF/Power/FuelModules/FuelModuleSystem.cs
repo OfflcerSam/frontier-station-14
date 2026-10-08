@@ -82,6 +82,7 @@ public sealed class FuelModuleSystem : EntitySystem
         if (!TryComp<FuelModuleHostComponent>(host, out var hostComponent) ||
             !TryComp<FuelModuleComponent>(module, out var moduleComponent) ||
             moduleComponent.ModuleSize != hostComponent.ModuleSize ||
+            hostComponent.AllowedKind is { } allowed && moduleComponent.Kind != allowed ||
             !CanService(host) || GetInstalledModule(host) != null ||
             !_itemSlots.TryGetSlot(host, hostComponent.ModuleSlot, out var moduleSlot))
             return false;
@@ -93,9 +94,10 @@ public sealed class FuelModuleSystem : EntitySystem
         finally { _itemSlots.SetLock(host, hostComponent.ModuleSlot, true); }
     }
 
-    public bool TryRemoveModule(EntityUid host, EntityUid user)
+    public bool TryRemoveModule(EntityUid host, EntityUid? user, bool requireStopped = true)
     {
-        if (!CanService(host) || !TryComp<FuelModuleHostComponent>(host, out var hostComponent))
+        if (!TryComp<WiresPanelComponent>(host, out var panel) || !panel.Open ||
+            requireStopped && !CanService(host) || !TryComp<FuelModuleHostComponent>(host, out var hostComponent))
             return false;
         _itemSlots.SetLock(host, hostComponent.ModuleSlot, false);
         try { return _itemSlots.TryEject(host, hostComponent.ModuleSlot, user, out _); }
@@ -256,8 +258,16 @@ public sealed class FuelModuleSystem : EntitySystem
 
     private void OnEmptyFuel(Entity<FuelModuleHostComponent> entity, ref GeneratorEmpty arguments)
     {
-        if (CanService(entity) && GetInstalledModule(entity) is { } module)
+        if (GetInstalledModule(entity) is not { } module)
+            return;
+        if (Comp<FuelModuleComponent>(module).Kind == FuelModuleKind.Solid)
+        {
             EmptyModule((module, Comp<FuelModuleComponent>(module)));
+            return;
+        }
+        // Liquid ejection removes the intact tank; removal stops the host via its slot event.
+        if (!TryRemoveModule(entity, arguments.User, requireStopped: false) && arguments.User is { } user)
+            _popup.PopupEntity(Loc.GetString("fuel-module-panel-closed"), entity, user);
     }
 
     public void EmptyModule(Entity<FuelModuleComponent> module)
@@ -326,6 +336,8 @@ public sealed class FuelModuleSystem : EntitySystem
         if (!arguments.IsInDetailsRange)
             return;
         var module = GetInstalledModule(entity);
+        if (module is { } installed)
+            EntityManager.System<Content.Server._NF.Power.EntitySystems.FuelGaugeSystem>().ModuleGauge((installed, Comp<FuelModuleComponent>(installed)), ref arguments);
         if (TryComp<WiresPanelComponent>(entity, out var panel) && panel.Open)
         {
             arguments.PushMarkup(module is { } ? Loc.GetString("fuel-module-installed", ("module", Name(module.Value))) : Loc.GetString("fuel-module-none"));
@@ -343,6 +355,7 @@ public sealed class FuelModuleSystem : EntitySystem
     {
         if (!arguments.IsInDetailsRange)
             return;
+        EntityManager.System<Content.Server._NF.Power.EntitySystems.FuelGaugeSystem>().ModuleGauge(entity, ref arguments);
         arguments.PushMarkup(Loc.GetString("fuel-module-capacity", ("capacity",
             entity.Comp.BaseCapacity * (1f + 0.2f * (entity.Comp.MatterBinRating - 1f))),
             ("units", Loc.GetString(entity.Comp.Kind == FuelModuleKind.Liquid ? "fuel-module-liquid-units" : "fuel-module-solid-units"))));

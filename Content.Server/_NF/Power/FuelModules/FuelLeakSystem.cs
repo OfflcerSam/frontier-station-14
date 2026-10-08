@@ -17,7 +17,7 @@ public sealed class FuelLeakSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<FuelLeakComponent, DamageChangedEvent>(OnDamageChanged, before: new[] { typeof(DestructibleSystem) });
+        SubscribeLocalEvent<FuelLeakComponent, DamageChangedEvent>(OnDamageChanged, before: new[] { typeof(DestructibleSystem), typeof(Content.Server._NF.Power.Generator.GeneratorFireSystem) });
     }
 
     private void OnDamageChanged(Entity<FuelLeakComponent> entity, ref DamageChangedEvent arguments)
@@ -49,6 +49,8 @@ public sealed class FuelLeakSystem : EntitySystem
             return;
         var fuel = _solutionContainers.SplitSolution(fuelSolution.Value, leakVolume);
         _puddles.TrySpillAt(Transform(entity).Coordinates, fuel, out _);
+        if (TryComp<Content.Shared.Atmos.Components.FlammableComponent>(entity, out var flame) && flame.OnFire)
+            EntityManager.System<Content.Server._NF.Power.Generator.FuelPuddleFireSystem>().IgniteAt(entity.Owner);
     }
 }
 

@@ -99,6 +99,7 @@
     active: false
   - type: ExaminableDamage
     messages: NFStationaryGeneratorDamageMessages
+  - type: CombustionShrapnel
   - type: GeneratorFire
   - type: Flammable
     fireSpread: false
@@ -113,7 +114,7 @@
     ratedMaximumPower: 52500
     ratedBurnRate: 0.16666667
     ratedRampRate: 8750
-    ratedFuelCapacity: 1800
+    ratedFuelCapacity: 0
     oxygenMolesPerFuelUnit: 0.5
   - type: FuelGenerator
     targetPower: 35000
@@ -122,20 +123,6 @@
     maxTargetPower: 52500
     optimalBurnRate: 0.16666667
     fuelEfficiencyConstant: 1.3
-  - type: ChemicalFuelGeneratorAdapter
-    solution: tank
-    reagents:
-      WeldingFuel: 1
-      Ethanol: 0.8
-      Plasma: 1.2
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 1800
-  - type: RefillableSolution
-    solution: tank
-  - type: ExaminableSolution
-    solution: tank
   - type: AmbientSound
     sound:
       path: /Audio/_NF/Machines/StationaryGenerators/engine-loop.ogg
@@ -159,14 +146,29 @@
   - type: GuideHelp
     guides:
     - NFStationaryCombustionGenerators
+  - type: FuelModuleHost
+    moduleSize: Standard
+    allowedKind: Liquid
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [FuelModule]
+  - type: ContainerContainer
+    containers:
+      fuel_module: !type:ContainerSlot
+      machine_board: !type:Container
+      machine_parts: !type:Container
   - type: FuelLeak
   - type: Destructible
     thresholds:
     - trigger: !type:DamageTrigger
         damage: 100
       behaviors:
-      - !type:SpillBehavior
-        solution: tank
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak

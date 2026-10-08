@@ -59,5 +59,6 @@ public sealed class GeneratorFireSystem : EntitySystem
             return;
         _flammable.AdjustFireStacks(entity.Owner, 2f, flammable);
         _flammable.Ignite(entity.Owner, entity.Owner, flammable);
+        EntityManager.System<FuelPuddleFireSystem>().IgniteAt(entity.Owner);
     }
 }

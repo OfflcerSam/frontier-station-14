@@ -41,7 +41,7 @@
     ratedMaximumPower: 105000
     ratedBurnRate: 0.33333333
     ratedRampRate: 17500
-    ratedFuelCapacity: 4800
+    ratedFuelCapacity: 0
   - type: FuelGenerator
     targetPower: 70000
     minTargetPower: 1000
@@ -51,10 +51,13 @@
   - type: PowerSupplier
     supplyRate: 70000
     supplyRampRate: 17500
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 4800
+  - type: FuelModuleHost
+    moduleSize: Commercial
+    allowedKind: Liquid
+  - type: CombustionShrapnel
+    hitFragments: 5
+    destructionFragments: 10
+    releaseOffset: 0, 1
   - type: GeneratorPiping
     portOffsets:
       exhaust: 0, 3
@@ -84,8 +87,6 @@
     - trigger: !type:DamageTrigger
         damage: 150
       behaviors:
-      - !type:SpillBehavior
-        solution: tank
       - !type:PlaySoundBehavior
         sound:
           collection: MetalBreak
@@ -112,7 +113,7 @@
       Steel: 10
 
 - type: entity
-  parent: NFStationaryGeneratorCombustionCommercialEmpty
+  parent: NFStationaryGeneratorCombustionCommercialLiquidEmpty
   id: NFStationaryGeneratorCombustionCommercial
   suffix: Welding Fuel, 70 kW
   components:
@@ -124,16 +125,9 @@
     startOnMapInit: false
 
 - type: entity
-  parent: NFStationaryGeneratorCombustionCommercialEmpty
+  parent: NFStationaryGeneratorCombustionCommercialLiquidFull
   id: NFStationaryGeneratorCombustionCommercialShip
   suffix: Welding Fuel, 70 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 4800
-        reagents:
-        - ReagentId: WeldingFuel
-          Quantity: 4800

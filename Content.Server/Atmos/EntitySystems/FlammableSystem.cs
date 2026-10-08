@@ -321,7 +321,14 @@ namespace Content.Server.Atmos.EntitySystems
             }
             else
             {
-                flammable.OnFire |= ignite;
+                // Frontier: contact ignition must notify fuel puddles too, allowing nonfuel/oxygen checks.
+                if (ignite && !flammable.OnFire)
+                {
+                    flammable.OnFire = true;
+                    var ignited = new IgnitedEvent();
+                    RaiseLocalEvent(uid, ref ignited);
+                }
+                // End Frontier
                 UpdateAppearance(uid, flammable);
             }
         }

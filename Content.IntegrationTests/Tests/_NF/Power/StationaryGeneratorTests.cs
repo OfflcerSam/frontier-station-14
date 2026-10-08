@@ -35,7 +35,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
     [Test]
     public async Task RatedFuelAndPartUpgrades()
     {
-        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardLiquidEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -60,6 +60,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
             Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(600f).Within(0.01f));
         });
         await Interact(Screw, "RPEDT4Filled");
+        await UpgradeFuelModule();
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -78,7 +79,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
             Assert.That(supplier.SupplyRampRate, Is.EqualTo(12687.5f).Within(0.01f));
 
             var solution = SEntMan.System<SharedSolutionContainerSystem>();
-            Assert.That(solution.TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            Assert.That(solution.TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
             Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2880)));
             solution.TryAddReagent(fuelSolution.Value, "WeldingFuel", FixedPoint2.New(10), out _);
             solution.TryAddReagent(fuelSolution.Value, "Ethanol", FixedPoint2.New(10), out _);
@@ -112,8 +113,9 @@ public sealed class StationaryGeneratorTests : InteractionTest
     [Test]
     public async Task UpgradeThroughRPED()
     {
-        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardLiquidEmpty");
         await Interact(Screw, "RPEDT2Filled");
+        await UpgradeFuelModule();
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -121,10 +123,11 @@ public sealed class StationaryGeneratorTests : InteractionTest
             Assert.That(generator.OptimalPower, Is.EqualTo(35000f));
             Assert.That(generator.MaxTargetPower, Is.EqualTo(56000f).Within(0.01f));
             Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(570f).Within(0.01f));
-            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
             Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2160)));
         });
         await InteractUsing("RPEDT4Filled");
+        await UpgradeFuelModule();
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -132,7 +135,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
             Assert.That(generator.OptimalPower, Is.EqualTo(35000f));
             Assert.That(generator.MaxTargetPower, Is.EqualTo(63000f).Within(0.01f));
             Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(510f).Within(0.01f));
-            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
             Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2880)));
         });
     }
@@ -168,7 +171,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
     [Test]
     public async Task StartFailureReportsCause()
     {
-        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardLiquidEmpty");
         await Server.WaitAssertion(() =>
         {
             var entity = SEntMan.GetEntity(Target!.Value);
@@ -176,7 +179,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
             SEntMan.EventBus.RaiseLocalEvent(entity, ref startAttempt);
             Assert.That(startAttempt.FailureMessage, Is.EqualTo("stationary-generator-empty"));
             var solution = SEntMan.System<SharedSolutionContainerSystem>();
-            Assert.That(solution.TryGetSolution(entity, "tank", out var fuelSolution), Is.True);
+            Assert.That(solution.TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
             solution.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(10), out _);
             startAttempt = new GeneratorStartAttemptEvent();
             SEntMan.EventBus.RaiseLocalEvent(entity, ref startAttempt);
@@ -230,6 +233,20 @@ public sealed class StationaryGeneratorTests : InteractionTest
                 .GetMachineBoardMaterialCost((entity, machineBoard)).GetValueOrDefault("Steel"), Is.EqualTo(200));
             Assert.That(materialCosts["Plastic"] - SEntMan.System<MachinePartSystem>()
                 .GetMachineBoardMaterialCost((entity, machineBoard)).GetValueOrDefault("Plastic"), Is.EqualTo(200));
+        });
+    }
+
+    private EntityUid FuelContainer(EntityUid host) =>
+        SEntMan.System<Content.Server._NF.Power.FuelModules.FuelModuleSystem>().GetInstalledModule(host) ?? host;
+
+    private async Task UpgradeFuelModule()
+    {
+        await Server.WaitAssertion(() =>
+        {
+            var module = FuelContainer(STarget!.Value);
+            Assert.That(SEntMan.System<Content.Server._NF.Power.FuelModules.FuelModuleSystem>().TryExchangeModulePart(
+                (module, SEntMan.GetComponent<Content.Shared._NF.Power.FuelModules.FuelModuleComponent>(module)),
+                HandSys.GetActiveItem((SPlayer, Hands))!.Value), Is.True);
         });
     }
 }

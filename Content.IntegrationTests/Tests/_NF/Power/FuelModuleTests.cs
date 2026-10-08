@@ -23,7 +23,8 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class FuelModuleTests : InteractionTest
 {
-    [TestCase("NFStationaryGeneratorCombustionStandardEmpty", false, 20f)]
+    [TestCase("NFStationaryGeneratorCombustionStandardLiquidEmpty", false, 20f)]
+    [TestCase("NFStationaryGeneratorCombustionCommercialLiquidEmpty", false, 30f)]
     [TestCase("NFStationaryGeneratorStirlingCompactLiquidEmpty", false, 20f)]
     [TestCase("NFStationaryGeneratorStirlingCompactSolidEmpty", true, 40f)]
     public async Task DamageIgnitesFueledGenerators(string prototypeId, bool solid, float threshold)
@@ -196,7 +197,7 @@ public sealed class FuelModuleTests : InteractionTest
 
     [TestCase("NFStationaryGeneratorStirlingCompactLiquidEmpty", 500f, 100f)]
     [TestCase("NFStationaryGeneratorStirlingStandardLiquidEmpty", 1500f, 100f)]
-    [TestCase("NFStationaryGeneratorCombustionStandardEmpty", 1800f, 100f)]
+    [TestCase("NFStationaryGeneratorCombustionStandardLiquidEmpty", 1800f, 100f)]
     [TestCase("NFLiquidFuelTankCompact", 500f, 50f)]
     public async Task FuelLeaksAboveDamageThreshold(string prototypeId, float fuelCapacity, float destructionThreshold)
     {

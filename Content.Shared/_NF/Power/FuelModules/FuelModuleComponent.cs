@@ -20,6 +20,7 @@ public sealed partial class FuelModuleComponent : Component
 [RegisterComponent]
 public sealed partial class FuelModuleHostComponent : Component
 {
+    [DataField] public FuelModuleKind? AllowedKind;
     [DataField] public string ModuleSlot = "fuel_module";
     [DataField] public FuelModuleSize ModuleSize;
 }

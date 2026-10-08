@@ -125,8 +125,10 @@
   - NFFuelHopperStandard
   - NFLiquidFuelTankCompact
   - NFLiquidFuelTankStandard
+  - NFLiquidFuelTankCombustionStandard
   - NFFuelHopperCommercial
   - NFLiquidFuelTankCommercial
+  - NFLiquidFuelTankCombustionCommercial
   - NFRadiationShieldingInsertR2
   - NFRadiationShieldingInsertR3
   - NFRadiationShieldingInsertR4

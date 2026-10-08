@@ -18,3 +18,5 @@ fuel-module-loaded = You place {THE($material)} into {THE($target)}.
 fuel-module-poured = You pour fuel into {THE($target)}.
 fuel-module-full = The fuel module is full.
 
+
+fuel-gauge-reading = The fuel gauge reads [color=lightblue]{$amount} {$units}[/color].

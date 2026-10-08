@@ -193,6 +193,15 @@
     solutions:
       puddle:
         maxVol: 1000
+  # Frontier: native flame/contact visuals for actual fuel puddles; empty/nonfuel puddles have zero fire stacks.
+  - type: Flammable
+    damage: {}
+    fireSpread: true
+    firestackFade: 0
+  - type: FireVisuals
+    sprite: Effects/fire.rsi
+    normalState: 1
+  # End Frontier
   - type: Puddle
   - type: MixableSolution
     solution: puddle
