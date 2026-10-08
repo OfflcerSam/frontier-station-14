@@ -8,4 +8,5 @@ namespace Content.Server._NF.Power.EntitySystems;
 public record struct GeneratorBeforeFuelBurnEvent(float FuelUsed)
 {
     public bool Cancelled;
+    public float PowerMultiplier = 1f;
 }

@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2026 OfflcerSam
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+using Content.Server.Administration.Logs;
+using Content.Shared.Database;
+using Content.Shared.Damage.Systems;
 using Content.Server._NF.Power.Components;
 using Content.Server._NF.Power.EntitySystems;
 using Content.Server._NF.Power.FuelModules;
@@ -36,6 +39,9 @@ namespace Content.Server._NF.Power.Steam;
 /// <summary>Burns module fuel to maintain boiler heat and turns available steam pressure into power.</summary>
 public sealed class SteamTurbineSystem : SharedGeneratorSystem
 {
+    [Dependency] private readonly IAdminLogManager _adminLogger = default!;
+    [Dependency] private readonly DamageableSystem _damage = default!;
+    [Dependency] private readonly GeneratorPipingSystem _piping = default!;
     [Dependency] private readonly AtmosphereSystem _atmosphere = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
     [Dependency] private readonly DestructibleSystem _destructible = default!;
@@ -75,8 +81,9 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             if (!generator.On || steam.Ruptured)
             {
                 steam.BoilerTemperature += (293.15f - steam.BoilerTemperature) * Math.Clamp(steam.CoolingRate * frameTime, 0f, 1f);
-                steam.SteamPressure = 0f;
-                steam.WasPressurized = false;
+                UpdateSteamPressure((entity, steam), 0f, frameTime);
+                if (steam.SteamPressure < steam.PressureTripThreshold)
+                    steam.WasPressurized = false;
                 continue;
             }
 
@@ -117,7 +124,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         entity.Comp.WaterLossRemainder += thermalFuel * entity.Comp.WaterLossRate / stationary.RatedBurnRate;
         var waterLoss = MathF.Floor(entity.Comp.WaterLossRemainder * 100f) / 100f;
         entity.Comp.WaterLossRemainder -= waterLoss;
-        EmitSteam(entity, waterLoss);
+        EmitSteam(entity, waterLoss, true);
 
         var waterFraction = 0f;
         if (_solutionContainers.TryGetSolution(entity.Owner, entity.Comp.WaterSolution, out _, out var water))
@@ -134,16 +141,45 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
                 targetPressure *= 0.9f - 0.4f * (damageFraction - entity.Comp.SteamLeakDamageFraction) /
                     (1f - entity.Comp.SteamLeakDamageFraction);
         }
-        entity.Comp.SteamPressure = targetPressure;
-        if (targetPressure >= entity.Comp.PressureTripThreshold)
+        UpdateSteamPressure(entity, targetPressure, frameTime);
+        if (entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold)
             entity.Comp.WasPressurized = true;
-        if (GetWaterLevel(entity) <= 0f ||
-            entity.Comp.WasPressurized && targetPressure < entity.Comp.PressureTripThreshold)
+        if (waterFraction <= 0.02f ||
+            entity.Comp.WasPressurized && entity.Comp.SteamPressure < entity.Comp.PressureTripThreshold)
         {
             _generator.SetFuelGeneratorOn(entity, false, generator);
             return;
         }
-        supplier.MaxSupply = Math.Min(generator.TargetPower, stationary.RatedPower * targetPressure);
+        supplier.MaxSupply = Math.Min(generator.TargetPower, stationary.RatedPower * Math.Min(targetPressure, entity.Comp.SteamPressure));
+    }
+
+    public void UpdateSteamPressure(Entity<SteamTurbineComponent> entity, float targetPressure, float frameTime)
+    {
+        var steam = entity.Comp;
+        if (steam.Ruptured || GetWaterLevel(entity) <= 0f)
+        {
+            steam.SteamPressure = 0f;
+            return;
+        }
+        steam.SteamPressure += (targetPressure - steam.SteamPressure) *
+            (1f - MathF.Exp(-steam.PressureRecoveryRate * frameTime));
+        if (TryComp<DamageableComponent>(entity, out var damageable) &&
+            _destructible.TryGetDestroyedAt(entity.Owner, out var destructionThreshold) &&
+            destructionThreshold > FixedPoint2.Zero)
+        {
+            var damageFraction = damageable.TotalDamage.Float() / destructionThreshold.Value.Float();
+            if (damageFraction >= steam.SteamLeakDamageFraction)
+                steam.SteamPressure *= MathF.Exp(-steam.PressureLeakRate * damageFraction * frameTime);
+        }
+        steam.SteamPressure = Math.Clamp(steam.SteamPressure, 0f, steam.MaximumSteamPressure);
+    }
+
+    public float GetBurstIntensity(Entity<SteamTurbineComponent> entity)
+    {
+        var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
+        return pressure <= 1f ? entity.Comp.RatedBurstIntensity * pressure :
+            entity.Comp.RatedBurstIntensity + (entity.Comp.MaximumBurstIntensity - entity.Comp.RatedBurstIntensity) *
+            (pressure - 1f) / (entity.Comp.MaximumSteamPressure - 1f);
     }
 
     public float GetFuelHeatFactor(Entity<FuelModuleComponent> fuelModule, SteamTurbineComponent steam)
@@ -179,7 +215,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             ? water.GetTotalPrototypeQuantity("Water").Float() : 0f;
     }
 
-    public float EmitSteam(Entity<SteamTurbineComponent> entity, float waterAmount)
+    public float EmitSteam(Entity<SteamTurbineComponent> entity, float waterAmount, bool routineExhaust = false)
     {
         if (waterAmount < 0.01f ||
             !_solutionContainers.TryGetSolution(entity.Owner, entity.Comp.WaterSolution, out var waterSolution, out _))
@@ -191,7 +227,10 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         var steamMixture = new GasMixture();
         steamMixture.SetMoles(Gas.WaterVapor, removed.Float() * entity.Comp.VaporMolesPerUnit);
         steamMixture.Temperature = Math.Max(entity.Comp.BoilingTemperature, entity.Comp.BoilerTemperature);
-        if (_atmosphere.GetContainingMixture(entity.Owner, false, true) is { Immutable: false } environment)
+        var exhaustEnvironment = routineExhaust && HasComp<GeneratorPipingComponent>(entity)
+            ? (_piping.TryGetExhaustMixture(entity, out var pipeMixture) ? pipeMixture : null)
+            : _atmosphere.GetContainingMixture(entity.Owner, false, true);
+        if (exhaustEnvironment is { Immutable: false } environment)
         {
             var ventHeat = Math.Max(0f, steamMixture.Temperature - environment.Temperature) *
                 steamMixture.GetMoles(Gas.WaterVapor) * _atmosphere.GasSpecificHeats[(int) Gas.WaterVapor] *
@@ -272,7 +311,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             ? water.MaxVolume.Float() : entity.Comp.WaterCapacity;
         arguments.PushMarkup(Loc.GetString("steam-turbine-water-gauge", ("water", Math.Floor(GetWaterLevel(entity))),
             ("capacity", Math.Floor(capacity))));
-        arguments.PushMarkup(Loc.GetString("steam-turbine-pressure-gauge", ("pressure", Math.Round(entity.Comp.SteamPressure * 100f))));
+        arguments.PushMarkup(Loc.GetString("steam-turbine-pressure-gauge", ("pressure", Math.Round(entity.Comp.SteamPressure * entity.Comp.RatedPressureKpa))));
         arguments.PushMarkup(Loc.GetString("steam-turbine-temperature-gauge", ("temperature", Math.Round(entity.Comp.BoilerTemperature - 273.15f))));
     }
 
@@ -284,12 +323,30 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             destructionThreshold <= FixedPoint2.Zero)
             return;
         var damageFraction = arguments.Damageable.TotalDamage.Float() / destructionThreshold.Value.Float();
-        if (damageFraction >= 1f)
+        // Read retained pressure BEFORE this hit's leaks. Prior hits have already vented their share.
+        var catastrophic = arguments.DamageDelta.GetTotal().Float() >=
+            destructionThreshold.Value.Float() * entity.Comp.RuptureDamageFraction &&
+            entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold && GetWaterLevel(entity) > 0f;
+        if (catastrophic || damageFraction >= 1f)
         {
-            RuptureSteam(entity);
+            _adminLogger.Add(LogType.Damaged, catastrophic ? LogImpact.High : LogImpact.Medium,
+                $"{ToPrettyString(arguments.Origin):actor} dealt {arguments.DamageDelta.GetTotal()} damage to {ToPrettyString(entity.Owner):subject}; steam rupture catastrophic={catastrophic}, pressure={entity.Comp.SteamPressure * entity.Comp.RatedPressureKpa} kPa(g), temperature={entity.Comp.BoilerTemperature} K.");
+            RuptureSteam(entity, catastrophic, arguments.Origin);
+            if (catastrophic && damageFraction < 1f)
+            {
+                var damageOrigin = arguments.Origin;
+                // Run normal destruction/frame behaviors on the next update, outside this damage event.
+                Robust.Shared.Timing.Timer.Spawn(TimeSpan.Zero, () =>
+                {
+                    if (Exists(entity.Owner) && !TerminatingOrDeleted(entity.Owner))
+                        _damage.TryChangeDamage(entity.Owner,
+                            new DamageSpecifier { DamageDict = new() { ["Blunt"] = destructionThreshold.Value } },
+                            true, origin: damageOrigin);
+                });
+            }
             return;
         }
-        if (!TryComp<FuelGeneratorComponent>(entity, out var generator) || !generator.On || entity.Comp.SteamPressure <= 0f)
+        if (entity.Comp.SteamPressure <= 0f)
             return;
         var previousDamageFraction = (arguments.Damageable.TotalDamage - arguments.DamageDelta.GetTotal()).Float() /
             destructionThreshold.Value.Float();
@@ -307,11 +364,13 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             entity.Comp.LeakAudio = _audio.Stop(entity.Comp.LeakAudio);
             entity.Comp.LeakAudio = _audio.PlayPvs(entity.Comp.LeakSound, entity.Owner)?.Entity;
         }
+        _adminLogger.Add(LogType.Damaged, LogImpact.Medium,
+            $"{ToPrettyString(arguments.Origin):actor} caused {leakCount} steam leak steps on {ToPrettyString(entity.Owner):subject}.");
         entity.Comp.SteamPressure *= MathF.Pow(0.9f, (float) leakCount);
         entity.Comp.BoilerTemperature = Math.Max(293.15f, entity.Comp.BoilerTemperature - 4f * (float) leakCount);
     }
 
-    public void RuptureSteam(Entity<SteamTurbineComponent> entity)
+    public void RuptureSteam(Entity<SteamTurbineComponent> entity, bool catastrophic = true, EntityUid? origin = null)
     {
         if (entity.Comp.Ruptured)
             return;
@@ -319,15 +378,16 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         StopSteamAudio(entity);
         var running = TryComp<FuelGeneratorComponent>(entity, out var generator) && generator.On;
         var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, new Vector2(0.5f, 0.5f)));
-        if (running && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold)
-            _explosion.QueueExplosion(burstPosition, "NFSteamPressureBurst", Math.Min(entity.Comp.MaximumBurstIntensity,
-                entity.Comp.SteamPressure <= 1f
-                    ? entity.Comp.RatedBurstIntensity * entity.Comp.SteamPressure
-                    : entity.Comp.RatedBurstIntensity + (entity.Comp.MaximumBurstIntensity - entity.Comp.RatedBurstIntensity) *
-                      (entity.Comp.SteamPressure - 1f) / (entity.Comp.MaximumSteamPressure - 1f)),
-                0.5f, 1.5f, entity.Owner, tileBreakScale: 15f, maxTileBreak: 1, canCreateVacuum: false);
-        if (running && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold)
+        if (catastrophic && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold && GetWaterLevel(entity) > 0f)
+        {
+            _adminLogger.Add(LogType.Explosion, LogImpact.High,
+                $"{ToPrettyString(entity.Owner):subject} catastrophically ruptured at {entity.Comp.SteamPressure * entity.Comp.RatedPressureKpa} kPa(g), {entity.Comp.BoilerTemperature} K; source {ToPrettyString(origin):actor}.");
+            _explosion.QueueExplosion(burstPosition, "NFSteamPressureBurst", GetBurstIntensity(entity),
+                entity.Comp.BurstIntensitySlope, entity.Comp.BurstMaximumIntensity, origin ?? entity.Owner,
+                tileBreakScale: entity.Comp.CanBreachHull ? 1f : 15f,
+                maxTileBreak: entity.Comp.CanBreachHull ? 2 : 1, canCreateVacuum: entity.Comp.CanBreachHull);
             ApplyPressureKnockdown(entity);
+        }
         if (GetWaterLevel(entity) > 0f && entity.Comp.BoilerTemperature > entity.Comp.BoilingTemperature)
         {
             entity.Comp.LastReleaseSoundTime = _timing.CurTime.TotalSeconds - 10d;
@@ -351,6 +411,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
             var position = _transform.GetGridOrMapTilePosition(entity.Owner, Transform(entity));
             _atmosphere.HotspotExpose(grid, position, Math.Max(500f, entity.Comp.BoilerTemperature), 50f, entity.Owner, true);
         }
+        entity.Comp.SteamPressure = 0f;
         if (generator != null)
             _generator.SetFuelGeneratorOn(entity, false, generator);
     }
@@ -373,7 +434,8 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
     {
         var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, new Vector2(0.5f, 0.5f)));
         var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
-        var radius = pressure <= 1f ? 3f * MathF.Sqrt(pressure) : 3f + (pressure - 1f) / (entity.Comp.MaximumSteamPressure - 1f);
+        var radius = _explosion.IntensityToRadius(GetBurstIntensity(entity),
+            entity.Comp.BurstIntensitySlope, entity.Comp.BurstMaximumIntensity);
         foreach (var nearby in _lookup.GetEntitiesInRange<CrawlerComponent>(burstPosition, radius))
         {
             if (!EntityManager.System<SharedInteractionSystem>().InRangeUnobstructed(burstPosition,

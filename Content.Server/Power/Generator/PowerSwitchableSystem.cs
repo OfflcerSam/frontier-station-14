@@ -1,4 +1,4 @@
-﻿using Content.Server.NodeContainer.EntitySystems;
+using Content.Server.NodeContainer.EntitySystems;
 using Content.Server.Popups;
 using Content.Server.Power.Components;
 using Content.Server.Power.Nodes;
@@ -18,6 +18,7 @@ namespace Content.Server.Power.Generator;
 /// <seealso cref="GeneratorSystem"/>
 public sealed class PowerSwitchableSystem : SharedPowerSwitchableSystem
 {
+    [Dependency] private readonly Content.Server.Administration.Logs.IAdminLogManager _adminLogger = default!; // Frontier
     [Dependency] private readonly NodeGroupSystem _nodeGroup = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly SharedAudioSystem _audio = default!;
@@ -38,6 +39,9 @@ public sealed class PowerSwitchableSystem : SharedPowerSwitchableSystem
         Dirty(uid, comp);
 
         var voltage = GetVoltage(uid, comp);
+        // Frontier: log actual output switches after the interaction cooldown has passed.
+        _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Low,
+            $"{ToPrettyString(user):actor} switched {ToPrettyString(uid):subject} output to {voltage}.");
 
         if (TryComp<PowerSupplierComponent>(uid, out var supplier))
         {

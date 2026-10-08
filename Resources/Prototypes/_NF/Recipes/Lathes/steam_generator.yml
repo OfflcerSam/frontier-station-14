@@ -5,3 +5,27 @@
   parent: PortableGeneratorPacmanMachineCircuitboard
   id: NFStationaryGeneratorSteamStandardMachineCircuitboard
   result: NFStationaryGeneratorSteamStandardMachineCircuitboard
+
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorSteamCommercialMachineCircuitboard
+  result: NFStationaryGeneratorSteamCommercialMachineCircuitboard
+
+- type: latheRecipe
+  id: NFFuelHopperCommercial
+  result: NFFuelHopperCommercial
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 550
+    Plastic: 50
+
+- type: latheRecipe
+  id: NFLiquidFuelTankCommercial
+  result: NFLiquidFuelTankCommercial
+  completetime: 3
+  categories: [Parts]
+  materials:
+    Steel: 450
+    Glass: 200
+    Plastic: 50

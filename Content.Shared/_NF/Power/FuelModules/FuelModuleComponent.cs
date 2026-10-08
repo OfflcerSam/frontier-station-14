@@ -3,7 +3,7 @@
 namespace Content.Shared._NF.Power.FuelModules;
 
 public enum FuelModuleKind : byte { Solid, Liquid }
-public enum FuelModuleSize : byte { Compact, Standard }
+public enum FuelModuleSize : byte { Compact, Standard, Commercial }
 
 [RegisterComponent]
 public sealed partial class FuelModuleComponent : Component

@@ -1,4 +1,4 @@
-﻿using Content.Server.Atmos;
+using Content.Server.Atmos;
 using Content.Server.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Power.Generator;
@@ -9,6 +9,8 @@ namespace Content.Server.Power.Generator;
 /// <seealso cref="GeneratorExhaustGasComponent"/>
 public sealed class GeneratorExhaustGasSystem : EntitySystem
 {
+    // Frontier: route piped generators through the existing atmos network.
+    [Dependency] private readonly Content.Server._NF.Power.EntitySystems.GeneratorPipingSystem _piping = default!;
     [Dependency] private readonly AtmosphereSystem _atmosphere = default!;
 
     public override void Initialize()
@@ -22,7 +24,10 @@ public sealed class GeneratorExhaustGasSystem : EntitySystem
         exhaustMixture.SetMoles(component.GasType, args.FuelUsed * component.MoleRatio);
         exhaustMixture.Temperature = component.Temperature;
 
-        var environment = _atmosphere.GetContainingMixture(uid, false, true);
+        // Frontier: required exhaust must never fall back to room emissions.
+        var environment = HasComp<Content.Server._NF.Power.Components.GeneratorPipingComponent>(uid)
+            ? (_piping.TryGetExhaustMixture(uid, out var mixture) ? mixture : null)
+            : _atmosphere.GetContainingMixture(uid, false, true);
         if (environment != null)
             _atmosphere.Merge(environment, exhaustMixture);
     }

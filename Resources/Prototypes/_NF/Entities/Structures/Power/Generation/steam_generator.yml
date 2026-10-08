@@ -170,3 +170,130 @@
       CableHV: 15
       Steel: 15
       Glass: 10
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandard
+  id: NFStationaryGeneratorSteamCommercial
+  name: commercial steam turbine
+  description: A high-pressure boiler and turbine with required piped exhaust and optional piped air. The west exhaust and south intake connect at its origin tile and rotate with the machine.
+  components:
+  - type: Machine
+    board: NFStationaryGeneratorSteamCommercialMachineCircuitboard
+  - type: StationaryGenerator
+    ratedPower: 60000
+    ratedMaximumPower: 90000
+    ratedBurnRate: 0.20833333
+    ratedRampRate: 3000
+  - type: FuelGenerator
+    targetPower: 60000
+    minTargetPower: 15000
+    optimalPower: 60000
+    maxTargetPower: 90000
+    optimalBurnRate: 0.20833333
+  - type: SteamTurbine
+    waterCapacity: 500
+    waterLossRate: 0.027777778
+    ratedSteamTemperature: 700
+    ratedPressureKpa: 5000
+    maximumBoilerTemperature: 1100
+    heatPerFuelUnit: 97.644
+    casingHeatPower: 1500
+    ratedBurstIntensity: 2261.9468
+    maximumBurstIntensity: 9801.769
+    burstIntensitySlope: 10
+    burstMaximumIntensity: 60
+    canBreachHull: true
+  - type: FuelModuleHost
+    moduleSize: Commercial
+  - type: GeneratorPiping
+  - type: Occluder
+    boundingBox: "-0.5,-0.5,1.5,1.5"
+  - type: NodeContainer
+    # Node dictionaries replace inherited values; retain the switchable electrical outputs.
+    nodes:
+      output_hv:
+        !type:CableDeviceNode
+        nodeGroupID: HVPower
+      output_mv:
+        !type:CableDeviceNode
+        nodeGroupID: MVPower
+        enabled: false
+      exhaust:
+        !type:PipeNode
+        nodeGroupID: Pipe
+        pipeDirection: West
+        volume: 200
+      intake:
+        !type:PipeNode
+        nodeGroupID: Pipe
+        pipeDirection: South
+        volume: 200
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 500
+  - type: PowerSupplier
+    supplyRate: 60000
+    supplyRampRate: 3000
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 180
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:ChangeConstructionNodeBehavior
+        node: machineFrame
+      - !type:DoActsBehavior
+        acts: [Destruction]
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercial
+  id: NFStationaryGeneratorSteamCommercialSolid
+  suffix: Solid
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFFuelHopperCommercial
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercial
+  id: NFStationaryGeneratorSteamCommercialLiquid
+  suffix: Liquid
+  components:
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        startingItem: NFLiquidFuelTankCommercial
+        whitelist:
+          components: [FuelModule]
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: NFStationaryGeneratorSteamCommercialMachineCircuitboard
+  name: commercial steam turbine machine board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: NFStationaryGeneratorSteamCommercial
+    requirements:
+      Capacitor: 2
+      Manipulator: 2
+      MatterBin: 2
+    stackRequirements:
+      CableHV: 20
+      Steel: 25
+      Glass: 15

@@ -23,6 +23,8 @@ namespace Content.Server.Power.Generator;
 /// <seealso cref="SolidFuelGeneratorAdapterComponent"/>
 public sealed class GeneratorSystem : SharedGeneratorSystem
 {
+    // Frontier: record successful generator controls and fuel dumping.
+    [Dependency] private readonly Content.Server.Administration.Logs.IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly AppearanceSystem _appearance = default!;
     [Dependency] private readonly AmbientSoundSystem _ambientSound = default!;
     [Dependency] private readonly MaterialStorageSystem _materialStorage = default!;
@@ -65,7 +67,12 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
 
     private void OnEjectFuel(EntityUid uid, FuelGeneratorComponent component, PortableGeneratorEjectFuelMessage args)
     {
+        // Frontier: report only an actual fuel removal.
+        var fuelBefore = GetFuel(uid);
         EmptyGenerator(uid);
+        if (GetFuel(uid) < fuelBefore)
+            _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Medium,
+                $"{ToPrettyString(args.Actor):actor} emptied fuel from {ToPrettyString(uid):subject}.");
     }
 
     private void SolidEmpty(EntityUid uid, SolidFuelGeneratorAdapterComponent component, GeneratorEmpty args)
@@ -200,11 +207,16 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
         if (!float.IsFinite(args.TargetPower))
             return;
 
+        var previousTarget = component.TargetPower; // Frontier: log actual changes only.
         component.TargetPower = Math.Clamp(
             args.TargetPower,
             component.MinTargetPower / 1000,
             component.MaxTargetPower / 1000) * 1000;
 
+        // Frontier: admin audit of output and overdrive controls.
+        if (component.TargetPower != previousTarget)
+            _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Medium,
+                $"{ToPrettyString(args.Actor):actor} changed {ToPrettyString(uid):subject} target from {previousTarget} W to {component.TargetPower} W.");
         TryUpdateGeneratorRadiation(uid, component.On, component); // Frontier
     }
 
@@ -299,7 +311,9 @@ public sealed class GeneratorSystem : SharedGeneratorSystem
                 continue;
             }
 
-            RaiseLocalEvent(uid, new GeneratorUseFuel(consumption));
+            // Frontier: piping checks can throttle both burn and delivered output.
+            RaiseLocalEvent(uid, new GeneratorUseFuel(beforeFuelBurn.FuelUsed));
+            supplier.MaxSupply *= beforeFuelBurn.PowerMultiplier;
         }
     }
 

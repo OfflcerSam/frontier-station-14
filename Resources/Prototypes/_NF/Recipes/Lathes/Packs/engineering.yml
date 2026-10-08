@@ -91,6 +91,7 @@
   - NFStationaryGeneratorStirlingCompactMachineCircuitboard
   - NFStationaryGeneratorStirlingStandardMachineCircuitboard
   - NFStationaryGeneratorSteamStandardMachineCircuitboard
+  - NFStationaryGeneratorSteamCommercialMachineCircuitboard
   - NFStationaryGeneratorIsotopeCompactMachineCircuitboard
   - NFStationaryGeneratorIsotopeStandardMachineCircuitboard
 
@@ -123,6 +124,8 @@
   - NFFuelHopperStandard
   - NFLiquidFuelTankCompact
   - NFLiquidFuelTankStandard
+  - NFFuelHopperCommercial
+  - NFLiquidFuelTankCommercial
   - NFRadiationShieldingInsertR2
   - NFRadiationShieldingInsertR3
   - NFRadiationShieldingInsertR4

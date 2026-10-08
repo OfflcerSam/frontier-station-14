@@ -31,6 +31,7 @@ namespace Content.Server._NF.Power.FuelModules;
 /// <summary>Exclusive fuel routing to removable, size-matched containers.</summary>
 public sealed class FuelModuleSystem : EntitySystem
 {
+    [Dependency] private readonly Content.Server.Administration.Logs.IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
     [Dependency] private readonly ItemSlotsSystem _itemSlots = default!;
     [Dependency] private readonly Content.Server.Stack.StackSystem _stack = default!;
@@ -202,6 +203,8 @@ public sealed class FuelModuleSystem : EntitySystem
         var acceptedCount = Math.Min(quantity.Count, (int) (availableVolume / materialUnits));
         if (acceptedCount <= 0 || !_stack.Use(material, acceptedCount, quantity))
             return false;
+        _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Low,
+            $"{ToPrettyString(user):actor} loaded {acceptedCount} units of {materialId} into {ToPrettyString(module.Owner):subject}.");
         module.Comp.FractionalFuel[materialId] = module.Comp.FractionalFuel.GetValueOrDefault(materialId) + acceptedCount * materialUnits;
         return true;
     }

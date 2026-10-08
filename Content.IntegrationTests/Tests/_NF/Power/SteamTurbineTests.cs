@@ -85,6 +85,7 @@ public sealed class SteamTurbineTests : InteractionTest
     [TestCase("NFStationaryGeneratorStirlingStandard", "NFMachineFrame1x2")]
     [TestCase("NFStationaryGeneratorIsotopeStandard", "NFMachineFrame1x2")]
     [TestCase("NFStationaryGeneratorSteamStandard", "NFMachineFrame2x2")]
+    [TestCase("NFStationaryGeneratorSteamCommercial", "NFMachineFrame2x2")]
     public async Task LargeMachineFrames(string machine, string frame)
     {
         await Server.WaitAssertion(() =>
@@ -189,6 +190,8 @@ public sealed class SteamTurbineTests : InteractionTest
             solutions.TryAddReagent(fuelSolution!.Value, "WeldingFuel", FixedPoint2.New(100), out _);
             SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true);
             var steam = SEntMan.GetComponent<SteamTurbineComponent>(entity);
+            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(entity, "water", out var burstWater, out _), Is.True);
+            SEntMan.System<SharedSolutionContainerSystem>().TryAddReagent(burstWater!.Value, "Water", FixedPoint2.New(250), out _);
             steam.BoilerTemperature = 650f;
             steam.SteamPressure = 1f;
             SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));
@@ -245,6 +248,8 @@ public sealed class SteamTurbineTests : InteractionTest
             solution.TryAddReagent(waterSolution!.Value, "Water", FixedPoint2.New(100), out _);
             SEntMan.System<GeneratorSystem>().SetFuelGeneratorOn(entity, true);
             var steam = SEntMan.GetComponent<SteamTurbineComponent>(entity);
+            Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(entity, "water", out var burstWater, out _), Is.True);
+            SEntMan.System<SharedSolutionContainerSystem>().TryAddReagent(burstWater!.Value, "Water", FixedPoint2.New(250), out _);
             steam.BoilerTemperature = 650f;
             steam.SteamPressure = 1f;
             SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));

@@ -1360,6 +1360,7 @@
   recipeUnlocks:
   - PortableGeneratorSuperPacmanMachineCircuitboard
   - NFStationaryGeneratorSteamStandardMachineCircuitboard
+  - NFStationaryGeneratorSteamCommercialMachineCircuitboard
   technologyPrerequisites:
   - NFBasicPowerGeneration
   position: 3, 28

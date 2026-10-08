@@ -6,5 +6,9 @@ steam-turbine-pure-water = The reservoir accepts only pure water.
 steam-turbine-water-poured = You pour water into {THE($target)}.
 steam-turbine-water-full = The water reservoir is full.
 steam-turbine-water-gauge = The water gauge reads {$water} / {$capacity}u.
-steam-turbine-pressure-gauge = The steam pressure gauge reads {$pressure}%.
+steam-turbine-pressure-gauge = The steam pressure gauge reads {$pressure} kPa above ambient.
 steam-turbine-temperature-gauge = The boiler thermometer reads {$temperature}°C.
+
+generator-piping-disconnected = The exhaust pipe is disconnected.
+generator-piping-blocked = The exhaust pressure is too high to start.
+generator-piping-pressure = The exhaust gauge reads {$pressure} kPa.

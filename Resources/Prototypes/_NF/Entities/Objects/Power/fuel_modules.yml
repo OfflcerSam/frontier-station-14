@@ -134,3 +134,32 @@
 
 
 
+
+- type: entity
+  parent: NFFuelHopperStandard
+  id: NFFuelHopperCommercial
+  name: basic commercial fuel hopper
+  components:
+  - type: FuelModule
+    moduleSize: Commercial
+    baseCapacity: 18000
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 500
+
+- type: entity
+  parent: NFLiquidFuelTankStandard
+  id: NFLiquidFuelTankCommercial
+  name: basic commercial liquid fuel tank
+  components:
+  - type: FuelModule
+    moduleSize: Commercial
+    baseCapacity: 2250
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 2250
+  - type: PhysicalComposition
+    materialComposition:
+      Steel: 400
+      Glass: 200

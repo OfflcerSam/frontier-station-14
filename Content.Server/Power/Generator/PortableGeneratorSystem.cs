@@ -22,6 +22,7 @@ namespace Content.Server.Power.Generator;
 /// <seealso cref="PortableGeneratorComponent"/>
 public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
 {
+    [Dependency] private readonly Content.Server.Administration.Logs.IAdminLogManager _adminLogger = default!; // Frontier
     [Dependency] private readonly UserInterfaceSystem _uiSystem = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly DoAfterSystem _doAfter = default!;
@@ -99,7 +100,12 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
         if (!_actionBlocker.CanComplexInteract(user)) // Frontier
             return; // Frontier
 
+        // Frontier: avoid recording no-op stop requests.
+        if (!Comp<FuelGeneratorComponent>(uid).On)
+            return;
         _generator.SetFuelGeneratorOn(uid, false);
+        _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Medium,
+            $"{ToPrettyString(user):actor} stopped {ToPrettyString(uid):subject}.");
     }
 
     private void OnGeneratorStarted(EntityUid uid, PortableGeneratorComponent component, GeneratorStartedEvent args)
@@ -150,6 +156,9 @@ public sealed class PortableGeneratorSystem : SharedPortableGeneratorSystem
         if (!clogged && !empty && _random.Prob(component.StartChance))
         {
             _generator.SetFuelGeneratorOn(uid, true, fuelGenerator);
+            // Frontier: successful starts include their actor, or the automatic control source.
+            _adminLogger.Add(Content.Shared.Database.LogType.Action, Content.Shared.Database.LogImpact.Medium,
+                $"{ToPrettyString(user):actor} started {ToPrettyString(uid):subject}.");
 
             if (user is null)
                 return;

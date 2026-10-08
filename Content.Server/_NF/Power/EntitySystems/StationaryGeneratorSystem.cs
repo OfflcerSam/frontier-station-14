@@ -3,7 +3,6 @@
 
 using Content.Server._NF.Power.Components;
 using Content.Server.Power.Components;
-using Content.Server.Atmos.EntitySystems;
 using Content.Server.Popups;
 using Content.Shared.Atmos;
 using Content.Server.Power.Generator;
@@ -23,7 +22,7 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
 {
     [Dependency] private readonly SharedSolutionContainerSystem _solutionContainers = default!;
 
-    [Dependency] private readonly AtmosphereSystem _atmosphere = default!;
+    [Dependency] private readonly GeneratorPipingSystem _piping = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
     [Dependency] private readonly GeneratorSystem _generator = default!;
@@ -57,9 +56,9 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
         if (entity.Comp.OxygenMolesPerFuelUnit <= 0f)
             return null;
 
-        var atmosphere = _atmosphere.GetContainingMixture(entity.Owner, false, true);
+        var atmosphere = _piping.GetIntakeMixture(entity.Owner);
         var oxygenRequired = FuelUsed * entity.Comp.OxygenMolesPerFuelUnit;
-        return atmosphere == null || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired
+        return atmosphere == null || atmosphere.Immutable || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired
             ? "stationary-generator-no-oxygen"
             : null;
     }
@@ -70,8 +69,8 @@ public sealed class StationaryGeneratorSystem : SharedGeneratorSystem
             return;
 
         var oxygenRequired = arguments.FuelUsed * entity.Comp.OxygenMolesPerFuelUnit;
-        var atmosphere = _atmosphere.GetContainingMixture(entity.Owner, false, true);
-        if (atmosphere == null || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired)
+        var atmosphere = _piping.GetIntakeMixture(entity.Owner);
+        if (atmosphere == null || atmosphere.Immutable || atmosphere.GetMoles(Gas.Oxygen) < oxygenRequired)
         {
             arguments.Cancelled = true;
             _popup.PopupEntity(Loc.GetString("stationary-generator-no-oxygen"), entity.Owner);
