@@ -5,6 +5,7 @@
 
   <Box>
     <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionStandard" Caption="Standard Combustion" />
+    <GuideEntityEmbed Entity="NFStationaryGeneratorCombustionCommercial" Caption="Commercial Combustion" />
     <GuideEntityEmbed Entity="JerryCanWeldingFuel" />
     <GuideEntityEmbed Entity="SheetPlasma" />
   </Box>
@@ -16,6 +17,16 @@
   Pour Welding Fuel, Ethanol or Plasma reagent into the tank. Juice granatapfel to make Welding Fuel, or grind plasma ore and sheets to obtain Plasma reagent. Solid materials cannot be inserted directly. Other reagents contaminate the tank and prevent starting; empty the fuel and refill with an accepted liquid.
 
   At 80 percent remaining integrity, the tank leaks 2 percent of capacity. Each further 2 percent integrity lost releases another 2 percent of capacity. Leakage occurs on damage events, including while switched off.
+
+  # Commercial Engine
+
+  The commercial engine occupies three tiles and blocks sight across its chassis. It is rated for 70 kW, with a basic maximum of 105 kW. Its 4800u internal tank lasts about 4 hours on Welding Fuel at the rated target (3 hours 12 minutes on Ethanol or 4 hours 48 minutes on Plasma reagent). It uses the same liquid-fuel and damage-leak rules as the standard engine.
+
+  Connect the red north exhaust port to a primary-layer pipe. The blue south intake optionally draws air from a pipe; without a connected intake it uses room air. Ports rotate with the machine. Other pipe layers require manifolds. Exhaust above 300 kPa throttles output and fuel burn; 600 kPa or a disconnected exhaust shuts the engine down. Fix the supply or exhaust and restart manually. An empty connected intake cannot draw room air instead.
+
+  Use a 1×3 machine frame (15 steel, then 3 LV cable) and the commercial board. The board also requires 2 capacitors, 2 manipulators, 2 matter bins, 15 HV cable and 10 steel. Construction and rebuilding produce an empty, stopped engine. The Ship mapping variant starts supplied and requires its exhaust connection to keep running.
+
+  Commercial capacitor ceilings are 105 / 112 / 119 / 126 kW. Full rating-4 upgrades provide 7680u tank capacity and reduce rated fuel use to 1020u/hour. Overdrive increases fuel and oxygen use, reducing endurance. Damage starts leaking fuel at 30 damage; a running fueled engine can ignite at that threshold in oxygen. Destruction at 150 damage spills the remaining fuel without a steam-pressure explosion.
 
   # Stock Parts
 

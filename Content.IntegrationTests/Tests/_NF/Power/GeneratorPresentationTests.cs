@@ -86,6 +86,7 @@ public sealed class GeneratorPresentationTests : InteractionTest
     }
 
     [TestCase("1x2")]
+    [TestCase("1x3")]
     [TestCase("2x2")]
     [TestCase("2x3")]
     public async Task FrameSpritesRotateAndShowStages(string size)

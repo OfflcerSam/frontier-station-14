@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-4.0",
+  "copyright": "OfflcerSam",
+  "size": {
+    "x": 32,
+    "y": 96
+  },
+  "states": [
+    {
+      "name": "box_0"
+    },
+    {
+      "name": "box_1"
+    },
+    {
+      "name": "box_2"
+    },
+    {
+      "name": "box_3"
+    },
+    {
+      "name": "destroyed"
+    }
+  ]
+}

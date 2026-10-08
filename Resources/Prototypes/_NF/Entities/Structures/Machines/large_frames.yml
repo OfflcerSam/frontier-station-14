@@ -382,3 +382,132 @@
         density: 190
         mask: [MachineMask]
         layer: [MachineLayer]
+
+- type: entity
+  parent: UnfinishedMachineFrame
+  id: NFUnfinishedMachineFrame1x3
+  name: 1x3 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine1x3
+    node: missingWires
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1", "0, 2"]
+  - type: Sprite
+    sprite: _NF/Structures/Machines/frame_1x3_placeholder.rsi
+    state: box_0
+    noRot: false
+    snapCardinals: false
+    scale: 1, 1
+    offset: 0, 1
+    layers:
+    - state: box_0
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: unwired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,2.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: MachineFrame
+  id: NFMachineFrame1x3
+  name: 1x3 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine1x3
+    node: machineFrame
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1", "0, 2"]
+  - type: Sprite
+    sprite: _NF/Structures/Machines/frame_1x3_placeholder.rsi
+    state: box_1
+    noRot: false
+    snapCardinals: false
+    scale: 1, 1
+    offset: 0, 1
+    layers:
+    - state: box_1
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: ItemMapper
+    mapLayers: {}
+  - type: MachineFrameStatusVisuals
+    initialState: wired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,2.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+- type: entity
+  parent: MachineFrameDestroyed
+  id: NFMachineFrameDestroyed1x3
+  name: 1x3 machine frame
+  components:
+  - type: Transform
+    noRot: false
+  - type: Construction
+    graph: NFMachine1x3
+    node: destroyedMachineFrame
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1", "0, 2"]
+  - type: Sprite
+    sprite: _NF/Structures/Machines/frame_1x3_placeholder.rsi
+    state: destroyed
+    noRot: false
+    snapCardinals: false
+    scale: 1, 1
+    offset: 0, 1
+    layers:
+    - state: destroyed
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: destroyed
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,2.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]

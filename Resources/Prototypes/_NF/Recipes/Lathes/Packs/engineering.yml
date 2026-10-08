@@ -92,6 +92,7 @@
   - NFStationaryGeneratorStirlingStandardMachineCircuitboard
   - NFStationaryGeneratorSteamStandardMachineCircuitboard
   - NFStationaryGeneratorSteamCommercialMachineCircuitboard
+  - NFStationaryGeneratorCombustionCommercialMachineCircuitboard
   - NFStationaryGeneratorIsotopeCompactMachineCircuitboard
   - NFStationaryGeneratorIsotopeStandardMachineCircuitboard
 

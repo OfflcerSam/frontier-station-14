@@ -1361,6 +1361,7 @@
   - PortableGeneratorSuperPacmanMachineCircuitboard
   - NFStationaryGeneratorSteamStandardMachineCircuitboard
   - NFStationaryGeneratorSteamCommercialMachineCircuitboard
+  - NFStationaryGeneratorCombustionCommercialMachineCircuitboard
   technologyPrerequisites:
   - NFBasicPowerGeneration
   position: 3, 28

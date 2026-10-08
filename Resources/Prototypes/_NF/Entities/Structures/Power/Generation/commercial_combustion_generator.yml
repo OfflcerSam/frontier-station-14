@@ -1,0 +1,139 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionStandardEmpty
+  id: NFStationaryGeneratorCombustionCommercialEmpty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
+  name: commercial combustion generator
+  description: |-
+    A commercial combustion generator for ship power.
+    Runs off of Welding Fuel, Ethanol or Plasma reagent.
+    Rated for up to 105 kW with basic parts.
+    Requires piped exhaust. The red north port exhausts gas; the blue south port draws air.
+  components:
+  - type: Machine
+    board: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
+  - type: Construction
+    graph: NFMachine1x3
+    node: machine
+  - type: MachineFootprint
+    tiles: ["0, 0", "0, 1", "0, 2"]
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,2.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+  - type: Occluder
+    boundingBox: "-0.5,-0.5,0.5,2.5"
+  - type: Sprite
+    sprite: _NF/Structures/Power/Generation/commercial_combustion_generator_placeholder.rsi
+    scale: 0.5, 1
+    offset: 0, 1
+  - type: PowerMonitoringDevice
+    sprite: _NF/Structures/Power/Generation/commercial_combustion_generator_placeholder.rsi
+  - type: StationaryGenerator
+    ratedPower: 70000
+    ratedMaximumPower: 105000
+    ratedBurnRate: 0.33333333
+    ratedRampRate: 17500
+    ratedFuelCapacity: 4800
+  - type: FuelGenerator
+    targetPower: 70000
+    minTargetPower: 1000
+    optimalPower: 70000
+    maxTargetPower: 105000
+    optimalBurnRate: 0.33333333
+  - type: PowerSupplier
+    supplyRate: 70000
+    supplyRampRate: 17500
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 4800
+  - type: GeneratorPiping
+    portOffsets:
+      exhaust: 0, 3
+      intake: 0, -1
+  - type: NodeContainer
+    # Node dictionaries replace inherited values; preserve both electrical outputs.
+    nodes:
+      output_hv:
+        !type:CableDeviceNode
+        nodeGroupID: HVPower
+      output_mv:
+        !type:CableDeviceNode
+        nodeGroupID: MVPower
+        enabled: false
+      exhaust:
+        !type:PipeNode
+        nodeGroupID: Pipe
+        pipeDirection: None
+        volume: 100
+      intake:
+        !type:PipeNode
+        nodeGroupID: Pipe
+        pipeDirection: None
+        volume: 100
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 150
+      behaviors:
+      - !type:SpillBehavior
+        solution: tank
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:ChangeConstructionNodeBehavior
+        node: machineFrame
+      - !type:DoActsBehavior
+        acts: ["Destruction"]
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
+  name: commercial combustion generator machine board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: NFStationaryGeneratorCombustionCommercialEmpty
+    requirements:
+      Capacitor: 2
+      Manipulator: 2
+      MatterBin: 2
+    stackRequirements:
+      CableHV: 15
+      Steel: 10
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionCommercialEmpty
+  id: NFStationaryGeneratorCombustionCommercial
+  suffix: Welding Fuel, 70 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionCommercialEmpty
+  id: NFStationaryGeneratorCombustionCommercialShip
+  suffix: Welding Fuel, 70 kW, Ship
+  components:
+  - type: PortableGenerator
+    startOnMapInit: true
+  - type: SolutionContainerManager
+    solutions:
+      tank:
+        maxVol: 4800
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 4800

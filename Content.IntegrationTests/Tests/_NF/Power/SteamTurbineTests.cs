@@ -82,6 +82,7 @@ public sealed class SteamTurbineTests : InteractionTest
     }
 
     [TestCase("NFStationaryGeneratorCombustionStandardEmpty", "NFMachineFrame1x2")]
+    [TestCase("NFStationaryGeneratorCombustionCommercialEmpty", "NFMachineFrame1x3")]
     [TestCase("NFStationaryGeneratorStirlingStandardEmpty", "NFMachineFrame1x2")]
     [TestCase("NFStationaryGeneratorIsotopeStandardEmpty", "NFMachineFrame1x2")]
     [TestCase("NFStationaryGeneratorSteamStandardEmpty", "NFMachineFrame2x2")]
@@ -95,9 +96,9 @@ public sealed class SteamTurbineTests : InteractionTest
                 MapSystem.SetTile(MapData.Grid, new Robust.Shared.Maths.Vector2i(tileX, tileY), new Tile(TileMan[Plating].TileId));
         });
         await StartConstruction(frame);
-        await InteractUsing(Steel, frame == "NFMachineFrame2x3" ? 30 : frame == "NFMachineFrame2x2" ? 20 : 10);
+        await InteractUsing(Steel, frame == "NFMachineFrame2x3" ? 30 : frame == "NFMachineFrame2x2" ? 20 : frame == "NFMachineFrame1x3" ? 15 : 10);
         await Interact(Wrench);
-        await InteractUsing(Cable, frame == "NFMachineFrame2x3" ? 6 : frame == "NFMachineFrame2x2" ? 4 : 2);
+        await InteractUsing(Cable, frame == "NFMachineFrame2x3" ? 6 : frame == "NFMachineFrame2x2" ? 4 : frame == "NFMachineFrame1x3" ? 3 : 2);
         AssertPrototype(frame);
         await Server.WaitPost(() => SEntMan.DeleteEntity(STarget!.Value));
         await RunTicks(3);
@@ -118,7 +119,7 @@ public sealed class SteamTurbineTests : InteractionTest
             var board = SEntMan.SpawnEntity(machine.Replace("Empty", "") + "MachineCircuitboard", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
             var machineBoard = SEntMan.GetComponent<Content.Shared.Construction.Components.MachineBoardComponent>(board);
             var flatpacker = SEntMan.SpawnEntity("MachineFlatpacker", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
-            var frameArea = frame == "NFMachineFrame2x3" ? 5 : frame == "NFMachineFrame2x2" ? 3 : 1;
+            var frameArea = frame == "NFMachineFrame2x3" ? 5 : frame == "NFMachineFrame2x2" ? 3 : frame == "NFMachineFrame1x3" ? 2 : 1;
             var frameMaterialCost = SEntMan.System<Content.Shared.Construction.SharedFlatpackSystem>().GetFlatpackCreationCost(
                 (flatpacker, SEntMan.GetComponent<Content.Shared.Construction.Components.FlatpackCreatorComponent>(flatpacker)),
                 (board, machineBoard));
