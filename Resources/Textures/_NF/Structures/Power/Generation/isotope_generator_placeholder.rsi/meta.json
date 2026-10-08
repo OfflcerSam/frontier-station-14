@@ -18,6 +18,27 @@
     },
     {
       "name": "damaged"
+    },
+    {
+      "name": "bays_empty1"
+    },
+    {
+      "name": "bays_full1"
+    },
+    {
+      "name": "bays_empty2"
+    },
+    {
+      "name": "bays_left2"
+    },
+    {
+      "name": "bays_right2"
+    },
+    {
+      "name": "bays_full2"
+    },
+    {
+      "name": "bays_shielded"
     }
   ]
 }

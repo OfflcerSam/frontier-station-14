@@ -26,12 +26,16 @@
 
   Standard rated steam is 650 K at 3000 kPa above ambient; Commercial is 700 K at 5000 kPa above ambient. The pressure gauge represents the boiler, not the much lower-pressure exhaust pipe. The internal condenser and pressure behavior are simplified.
 
+  # Status Indicators
+
+  The fuel square is black for a solid hopper or green for a liquid tank. The blue W square shows water level; P shows boiler pressure and T shows temperature. Fuel and water lamps turn red when empty, amber when low, and green as supplies increase. Pressure and temperature lamps are grey while cold or depressurized, amber while rising, green around normal operation, and red in their high range. Examine the gauges for exact readings.
+
   # Damage
 
   At 20 percent chassis damage, the boiler begins venting hot water vapor on damage steps. Further hits vent more water and lower pressure. Damaged seals also lose retained pressure, and rebuilding pressure takes time. Escaping hot steam can scald exposed people near the casing; protective clothing reduces heat transfer. Repairing the chassis restores sealing but does not replace lost water.
 
   A single hit dealing at least 25 percent of maximum chassis durability after resistance can catastrophically rupture a pressurized boiler, even before the chassis would normally be destroyed. Standard needs 25 damage in one hit; Commercial needs 45. Separate small hits do not add together for this trigger. A depressurized boiler cannot produce a pressure blast; a small finishing hit breaks and vents it without the catastrophic explosion.
 
-  A normal-pressure rupture can devastate the engine room; maximum pressure can destroy a substantial section of a small ship. Commercial ruptures are stronger and can destroy plating near the center. Standard pressure blasts preserve plating, although floor finishes and walls may break. Escaped burner fuel can also burn in oxygen. Switching off does not instantly remove pressure: a cooling boiler remains dangerous until its gauge falls.
+  A pressure rupture damages the machine and its immediate surroundings. Commercial blast damage reaches about 2.25 metres at rated pressure and 3 metres at maximum pressure. Only tiles directly beneath the Commercial chassis can lose plating, and each has a chance to remain intact. Standard blasts preserve plating and reach about 1.5 to 2 metres. The initial flash can look larger than the damaging blast; lingering fires follow actual spilled fuel. Escaped burner fuel can also burn in oxygen. Switching off does not instantly remove pressure: a cooling boiler remains dangerous until its gauge falls.
   The casing warms the room, including while a stopped boiler cools. Keep ventilation and gas scrubbing available. Standard requires a 2×2 machine frame; Commercial requires a 2×3 frame. A normal machine frame is too small.
 </Document>

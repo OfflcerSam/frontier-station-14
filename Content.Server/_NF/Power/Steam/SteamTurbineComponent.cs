@@ -27,9 +27,13 @@ public sealed partial class SteamTurbineComponent : Component
     [DataField] public float HeatPerFuelUnit = 107f;
     [DataField] public float MaximumSteamPressure = 1.8f;
     [DataField] public float MaximumBoilerTemperature = 1000f;
-    // Unobstructed 5 / 8 metre radii, slope 8, capped peak 40. Gameplay values, not a vessel-energy simulation.
-    [DataField] public float RatedBurstIntensity = 1047.1976f;
-    [DataField] public float MaximumBurstIntensity = 4063.127f;
+    // Damage diameter is 1.5x / 2x the chassis' longest side; flash diameter is 2x / 3x.
+    [DataField] public float RatedBurstRadius = 1.5f;
+    [DataField] public float MaximumBurstRadius = 2f;
+    [DataField] public float RatedFlashRadius = 2f;
+    [DataField] public float MaximumFlashRadius = 3f;
+    [DataField] public float RatedBreachChance = 0.25f;
+    [DataField] public float MaximumBreachChance = 0.5f;
     [DataField] public float BurstIntensitySlope = 8f;
     [DataField] public float BurstMaximumIntensity = 40f;
     [DataField] public bool CanBreachHull;

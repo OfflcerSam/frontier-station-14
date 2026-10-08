@@ -1,3 +1,4 @@
+using Content.Server._NF.Explosion; // Frontier: footprint-limited machine ruptures
 using System.Linq;
 using System.Numerics;
 using Content.Server.Administration.Logs;
@@ -278,7 +279,8 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         float tileBreakScale = 1f,
         int maxTileBreak = int.MaxValue,
         bool canCreateVacuum = true,
-        bool addLog = true)
+        bool addLog = true,
+        ExplosionAreaRestriction? areaRestriction = null) // Frontier: optional machine damage/flash limits
     {
         if (totalIntensity <= 0 || slope <= 0)
             return;
@@ -295,6 +297,10 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         // try to combine explosions on the same tile if they are the same type
         foreach (var queued in _queuedExplosions)
         {
+            // Frontier: combining bounded ruptures could enlarge damage or reuse another machine's footprint.
+            if (areaRestriction != null || queued.AreaRestriction != null)
+                continue;
+
             // ignore different types or those on different maps
             if (queued.Proto.ID != type.ID || queued.Epicenter.MapId != epicenter.MapId)
                 continue;
@@ -318,7 +324,8 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
             TileBreakScale = tileBreakScale,
             MaxTileBreak = maxTileBreak,
             CanCreateVacuum = canCreateVacuum,
-            Cause = cause
+            Cause = cause,
+            AreaRestriction = areaRestriction, // Frontier
         };
         _explosionQueue.Enqueue(boom);
         _queuedExplosions.Add(boom);
@@ -359,7 +366,30 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         }
         // Frontier - Block explosions on safe zone
 
-        var visualEnt = CreateExplosionVisualEntity(pos, queued.Proto.ID, spaceMatrix, spaceData, gridData.Values, iterationIntensity);
+        // Frontier: a larger initial flash is visual-only; it adds neither damage nor atmos fuel.
+        var visualResults = queued.AreaRestriction is { } limits && limits.FlashRadius > limits.DamageRadius
+            ? GetExplosionTiles(pos, queued.Proto.ID,
+                RadiusToIntensity(limits.FlashRadius, queued.Slope, queued.MaxTileIntensity),
+                queued.Slope, queued.MaxTileIntensity)
+            : null;
+        if (visualResults is { } boundedFlash && queued.AreaRestriction is { } flashLimits)
+        {
+            var radiusSquared = flashLimits.FlashRadius * flashLimits.FlashRadius;
+            foreach (var grid in boundedFlash.Item4.Values)
+            foreach (var tiles in grid.TileLists.Values)
+                tiles.RemoveAll(tile => Vector2.DistanceSquared(pos.Position,
+                    _mapSystem.GridTileToWorldPos(grid.Grid.Owner, grid.Grid.Comp, tile)) > radiusSquared);
+            if (boundedFlash.Item3 is { } flashSpace)
+            {
+                foreach (var tiles in flashSpace.TileLists.Values)
+                    tiles.RemoveAll(tile => Vector2.DistanceSquared(pos.Position,
+                        Vector2.Transform(((Vector2) tile + new Vector2(0.5f)) * DefaultTileSize, boundedFlash.Item5)) > radiusSquared);
+            }
+        }
+        var visualEnt = visualResults is { } flash
+            ? CreateExplosionVisualEntity(pos, queued.Proto.ID, flash.Item5, flash.Item3, flash.Item4.Values, flash.Item2)
+            : CreateExplosionVisualEntity(pos, queued.Proto.ID, spaceMatrix, spaceData, gridData.Values, iterationIntensity);
+        // End Frontier
 
         // camera shake
         CameraShake(iterationIntensity.Count * 4f, pos, queued.TotalIntensity);
@@ -411,7 +441,8 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
             _mapManager,
             visualEnt,
             queued.Cause,
-            _map);
+            _map,
+            queued.AreaRestriction); // Frontier
     }
 
     private void CameraShake(float range, MapCoordinates epicenter, float totalIntensity)

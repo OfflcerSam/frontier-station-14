@@ -19,6 +19,8 @@
 
   Examine a machine for visible condition and readable labels. Open its maintenance hatch to inspect accessible internal parts. Use an appropriate tool for measured diagnostics. Follow the generator's guide for fuel handling and servicing.
 
+  Fuel-module generators have a black solid-fuel or green liquid-fuel indicator beside the service panel. Its lamp is red when empty, amber below a quarter full, and green as fuel level rises. Removing the module removes its indicator.
+
   # Generator Families
 
   [textlink="Stirling Generators" link="NFStationaryStirlingGenerators"]

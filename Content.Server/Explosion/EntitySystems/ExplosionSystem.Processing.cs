@@ -1,3 +1,4 @@
+using Content.Server._NF.Explosion; // Frontier: footprint-limited machine ruptures
 using System.Linq;
 using System.Numerics;
 using Content.Server.Atmos.EntitySystems;
@@ -664,6 +665,7 @@ sealed class Explosion
     ///     Whether this explosion can turn non-vacuum tiles into vacuum-tiles.
     /// </summary>
     private readonly bool _canCreateVacuum;
+    private readonly ExplosionAreaRestriction? _areaRestriction; // Frontier
 
     private readonly IEntityManager _entMan;
     private readonly ExplosionSystem _system;
@@ -691,7 +693,8 @@ sealed class Explosion
         IMapManager mapMan,
         EntityUid visualEnt,
         EntityUid? cause,
-        SharedMapSystem mapSystem)
+        SharedMapSystem mapSystem,
+        ExplosionAreaRestriction? areaRestriction = null) // Frontier
     {
         VisualEnt = visualEnt;
         Cause = cause;
@@ -705,6 +708,7 @@ sealed class Explosion
         _tileBreakScale = tileBreakScale;
         _maxTileBreak = maxTileBreak;
         _canCreateVacuum = canCreateVacuum;
+        _areaRestriction = areaRestriction; // Frontier
         _entMan = entMan;
 
         _xformQuery = entMan.GetEntityQuery<TransformComponent>();
@@ -838,6 +842,21 @@ sealed class Explosion
                 break;
             }
 
+            // Frontier: native flood fill is discrete; cap machine damage at tile centers explicitly.
+            if (_areaRestriction != null)
+            {
+                var center = _currentGrid is { } boundedGrid
+                    ? _mapSystem.GridTileToWorldPos(boundedGrid.Owner, boundedGrid.Comp, _currentEnumerator.Current)
+                    : Vector2.Transform(((Vector2) _currentEnumerator.Current + new Vector2(0.5f)) * ExplosionSystem.DefaultTileSize, _spaceMatrix);
+                if (!_areaRestriction.ContainsDamage(Epicenter.Position, center))
+                {
+                    if (!MoveNext())
+                        break;
+                    continue;
+                }
+            }
+            // End Frontier
+
             // Is the current tile on a grid (instead of in space)?
             if (_currentGrid is { } currentGrid &&
                 _mapSystem.TryGetTileRef(currentGrid, currentGrid.Comp, _currentEnumerator.Current, out var tileRef) &&
@@ -864,7 +883,10 @@ sealed class Explosion
 
                 // If the floor is not blocked by some dense object, damage the floor tiles.
                 if (canDamageFloor)
-                    _system.DamageFloorTile(tileRef, _currentIntensity * _tileBreakScale, _maxTileBreak, _canCreateVacuum, tileUpdateList, ExplosionType);
+                    // Frontier: spacing is allowed only on this rupture's selected footprint tiles.
+                    _system.DamageFloorTile(tileRef, _currentIntensity * _tileBreakScale, _maxTileBreak,
+                        _canCreateVacuum && (_areaRestriction == null || _areaRestriction.AllowsBreach(currentGrid.Owner, tileRef.GridIndices)),
+                        tileUpdateList, ExplosionType);
             }
             else
             {
@@ -920,5 +942,6 @@ public sealed class QueuedExplosion(ExplosionPrototype proto)
     public float TotalIntensity, Slope, MaxTileIntensity, TileBreakScale;
     public int MaxTileBreak;
     public bool CanCreateVacuum;
+    public ExplosionAreaRestriction? AreaRestriction; // Frontier
     public EntityUid? Cause; // The entity that exploded, for logging purposes.
 }

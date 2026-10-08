@@ -18,6 +18,33 @@
     },
     {
       "name": "damaged"
+    },
+    {
+      "name": "fuel_solid"
+    },
+    {
+      "name": "fuel_liquid"
+    },
+    {
+      "name": "water_label"
+    },
+    {
+      "name": "pressure_label"
+    },
+    {
+      "name": "temperature_label"
+    },
+    {
+      "name": "fuel_lamp"
+    },
+    {
+      "name": "water_lamp"
+    },
+    {
+      "name": "pressure_lamp"
+    },
+    {
+      "name": "temperature_lamp"
     }
   ]
 }

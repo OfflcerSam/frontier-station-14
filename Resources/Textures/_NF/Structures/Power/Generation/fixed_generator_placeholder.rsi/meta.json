@@ -18,6 +18,15 @@
     },
     {
       "name": "damaged"
+    },
+    {
+      "name": "fuel_solid"
+    },
+    {
+      "name": "fuel_liquid"
+    },
+    {
+      "name": "fuel_lamp"
     }
   ]
 }

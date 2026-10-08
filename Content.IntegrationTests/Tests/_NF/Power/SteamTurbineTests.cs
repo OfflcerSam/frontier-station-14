@@ -171,7 +171,7 @@ public sealed class SteamTurbineTests : InteractionTest
                 if (Math.Abs(tileX) == 4 || Math.Abs(tileY) == 4)
                     SEntMan.SpawnEntity("WallSolid", new EntityCoordinates(gridUid, new Vector2(tileX + 0.5f, tileY + 0.5f)));
             }
-            nearby = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(gridUid, new Vector2(-0.5f, 0.5f)));
+            nearby = SEntMan.SpawnEntity("MobHuman", new EntityCoordinates(gridUid, new Vector2(0.5f, -0.25f)));
             Transform.SetCoordinates(SPlayer, new EntityCoordinates(gridUid, new Vector2(-0.5f, -0.5f)));
         });
         await RunTicks(100);
@@ -199,8 +199,10 @@ public sealed class SteamTurbineTests : InteractionTest
             steam.SteamPressure = 1f;
             SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));
             Assert.That(SEntMan.HasComponent<Content.Shared.Stunnable.KnockedDownComponent>(nearby), Is.True);
-            Assert.That(SEntMan.System<AtmosphereSystem>().IsHotspotActive(gridUid, new Robust.Shared.Maths.Vector2i(-1, 0)), Is.True);
-            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(entity), Is.LessThan(100f));
+            Assert.That(SEntMan.System<AtmosphereSystem>().IsHotspotActive(gridUid, new Robust.Shared.Maths.Vector2i(-1, 0)), Is.False,
+                "The initial flash must not create a persistent fire ring.");
+            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(entity), Is.EqualTo(100f),
+                "Visual flash expansion must not manufacture combustible gas from tank fuel.");
             SEntMan.DeleteEntity(entity);
         });
         await RunTicks(5);
@@ -255,8 +257,15 @@ public sealed class SteamTurbineTests : InteractionTest
             SEntMan.System<SharedSolutionContainerSystem>().TryAddReagent(burstWater!.Value, "Water", FixedPoint2.New(250), out _);
             steam.BoilerTemperature = 650f;
             steam.SteamPressure = 1f;
+            var beforeFuel = SEntMan.System<GeneratorSystem>().GetFuel(entity);
+            var room = SEntMan.System<AtmosphereSystem>().GetContainingMixture(entity, false, true)!;
+            var beforePlasma = room.GetMoles(Gas.Plasma);
             SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));
             Assert.That(SEntMan.GetComponent<FlammableComponent>(module.Value).OnFire, Is.True);
+            Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(entity), Is.EqualTo(beforeFuel),
+                "The flash must not consume fuel to manufacture a surrounding plasma ring.");
+            Assert.That(room.GetMoles(Gas.Plasma), Is.EqualTo(beforePlasma),
+                "Lingering fire uses actual leaking fuel, not synthetic flash fuel.");
             Assert.That(steam.Ruptured, Is.True);
         });
         await RunTicks(3);

@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using Content.Server.Administration.Logs;
+using Content.Server._NF.Explosion;
+using Content.Shared._NF.Construction;
+using Robust.Shared.Map.Components;
+using Robust.Shared.Random;
 using Content.Shared.Database;
 using Content.Shared.Damage.Systems;
 using Content.Server._NF.Power.Components;
@@ -44,6 +48,8 @@ namespace Content.Server._NF.Power.Steam;
 /// <summary>Burns module fuel to maintain boiler heat and turns available steam pressure into power.</summary>
 public sealed class SteamTurbineSystem : SharedGeneratorSystem
 {
+    [Dependency] private readonly IRobustRandom _random = default!;
+    [Dependency] private readonly SharedMapSystem _map = default!;
     [Dependency] private readonly IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly DamageableSystem _damage = default!;
     [Dependency] private readonly GeneratorPipingSystem _piping = default!;
@@ -180,12 +186,46 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         steam.SteamPressure = Math.Clamp(steam.SteamPressure, 0f, steam.MaximumSteamPressure);
     }
 
-    public float GetBurstIntensity(Entity<SteamTurbineComponent> entity)
+    public float GetBurstIntensity(Entity<SteamTurbineComponent> entity) =>
+        _explosion.RadiusToIntensity(GetBurstRadius(entity), entity.Comp.BurstIntensitySlope, entity.Comp.BurstMaximumIntensity);
+
+    public float GetBurstRadius(Entity<SteamTurbineComponent> entity) =>
+        ScalePressureValue(entity.Comp, entity.Comp.RatedBurstRadius, entity.Comp.MaximumBurstRadius);
+
+    public float GetFlashRadius(Entity<SteamTurbineComponent> entity) =>
+        ScalePressureValue(entity.Comp, entity.Comp.RatedFlashRadius, entity.Comp.MaximumFlashRadius);
+
+    public float GetBreachChance(Entity<SteamTurbineComponent> entity) =>
+        ScalePressureValue(entity.Comp, entity.Comp.RatedBreachChance, entity.Comp.MaximumBreachChance);
+
+    private static float ScalePressureValue(SteamTurbineComponent steam, float rated, float maximum)
     {
-        var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
-        return pressure <= 1f ? entity.Comp.RatedBurstIntensity * pressure :
-            entity.Comp.RatedBurstIntensity + (entity.Comp.MaximumBurstIntensity - entity.Comp.RatedBurstIntensity) *
-            (pressure - 1f) / (entity.Comp.MaximumSteamPressure - 1f);
+        var pressure = Math.Clamp(steam.SteamPressure, 0f, steam.MaximumSteamPressure);
+        return pressure <= 1f ? rated * pressure : rated + (maximum - rated) *
+            (pressure - 1f) / Math.Max(0.001f, steam.MaximumSteamPressure - 1f);
+    }
+
+    public ExplosionAreaRestriction GetBurstAreaRestriction(Entity<SteamTurbineComponent> entity, bool flash)
+    {
+        var limits = new ExplosionAreaRestriction
+        {
+            DamageRadius = GetBurstRadius(entity),
+            FlashRadius = flash ? GetFlashRadius(entity) : GetBurstRadius(entity),
+            BreachGrid = Transform(entity).GridUid,
+        };
+        if (!entity.Comp.CanBreachHull || limits.BreachGrid is not { } grid ||
+            !TryComp<MapGridComponent>(grid, out var gridComp) ||
+            !TryComp<MachineFootprintComponent>(entity, out var footprint))
+            return limits;
+
+        foreach (var offset in footprint.Tiles)
+        {
+            if (!_random.Prob(GetBreachChance(entity)))
+                continue;
+            var coordinates = new EntityCoordinates(entity.Owner, new Vector2(offset.X, offset.Y) * gridComp.TileSize);
+            limits.BreachTiles.Add(_map.TileIndicesFor(grid, gridComp, coordinates));
+        }
+        return limits;
     }
 
     public float GetFuelHeatFactor(Entity<FuelModuleComponent> fuelModule, SteamTurbineComponent steam)
@@ -446,14 +486,19 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         StopSteamAudio(entity);
         var running = TryComp<FuelGeneratorComponent>(entity, out var generator) && generator.On;
         var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, entity.Comp.ReleaseOffset));
+        var flash = running && _generator.GetFuel(entity.Owner) > 0f &&
+            _atmosphere.GetContainingMixture(entity.Owner, false, true) is { } burnerAir &&
+            burnerAir.GetMoles(Gas.Oxygen) >= 1f;
         if (catastrophic && entity.Comp.SteamPressure >= entity.Comp.PressureTripThreshold && GetWaterLevel(entity) > 0f)
         {
             _adminLogger.Add(LogType.Explosion, LogImpact.High,
                 $"{ToPrettyString(entity.Owner):subject} catastrophically ruptured at {entity.Comp.SteamPressure * entity.Comp.RatedPressureKpa} kPa(g), {entity.Comp.BoilerTemperature} K; source {ToPrettyString(origin):actor}.");
+            var limits = GetBurstAreaRestriction(entity, flash);
             _explosion.QueueExplosion(burstPosition, "NFSteamPressureBurst", GetBurstIntensity(entity),
                 entity.Comp.BurstIntensitySlope, entity.Comp.BurstMaximumIntensity, origin ?? entity.Owner,
-                tileBreakScale: entity.Comp.CanBreachHull ? 1f : 15f,
-                maxTileBreak: entity.Comp.CanBreachHull ? 2 : 1, canCreateVacuum: entity.Comp.CanBreachHull);
+                tileBreakScale: 15f,
+                maxTileBreak: entity.Comp.CanBreachHull ? 2 : 1, canCreateVacuum: entity.Comp.CanBreachHull,
+                areaRestriction: limits);
             ApplyPressureKnockdown(entity);
         }
         if (GetWaterLevel(entity) > 0f && entity.Comp.BoilerTemperature > entity.Comp.BoilingTemperature)
@@ -472,7 +517,6 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
         {
             _flammable.AdjustFireStacks(fuelModule, 2f, flammable);
             _flammable.Ignite(fuelModule, entity.Owner, flammable);
-            ReleaseBurnerFire(entity, fuelModule);
         }
         if (running && Transform(entity).GridUid is { } grid)
         {
@@ -502,8 +546,7 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
     {
         var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, entity.Comp.ReleaseOffset));
         var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
-        var radius = _explosion.IntensityToRadius(GetBurstIntensity(entity),
-            entity.Comp.BurstIntensitySlope, entity.Comp.BurstMaximumIntensity);
+        var radius = GetBurstRadius(entity);
         foreach (var nearby in _lookup.GetEntitiesInRange<CrawlerComponent>(burstPosition, radius))
         {
             if (!EntityManager.System<SharedInteractionSystem>().InRangeUnobstructed(burstPosition,
@@ -511,37 +554,6 @@ public sealed class SteamTurbineSystem : SharedGeneratorSystem
                     predicate: obstacle => obstacle == entity.Owner || obstacle == nearby.Owner))
                 continue;
             _stun.TryKnockdown(nearby.Owner, TimeSpan.FromSeconds(Math.Clamp(pressure, 0.2f, 2f)));
-        }
-    }
-
-    private void ReleaseBurnerFire(Entity<SteamTurbineComponent> entity, EntityUid fuelModule)
-    {
-        var transform = Transform(entity);
-        if (transform.GridUid is not { } grid)
-            return;
-        var burstPosition = _transform.ToMapCoordinates(new EntityCoordinates(entity.Owner, entity.Comp.ReleaseOffset));
-        var pressure = Math.Clamp(entity.Comp.SteamPressure, 0f, entity.Comp.MaximumSteamPressure);
-        var radius = pressure <= 1f ? 0.8f + 1.4f * pressure : 2.2f + (pressure - 1f);
-        var origin = _transform.GetGridOrMapTilePosition(entity.Owner, transform);
-        for (var tileX = -3; tileX <= 3; tileX++)
-        for (var tileY = -3; tileY <= 3; tileY++)
-        {
-            var position = origin + new Vector2i(tileX, tileY);
-            var coordinates = new EntityCoordinates(grid, new Vector2(position.X + 0.5f, position.Y + 0.5f));
-            if (!EntityManager.System<SharedInteractionSystem>().InRangeUnobstructed(burstPosition,
-                    _transform.ToMapCoordinates(coordinates), radius, predicate: obstacle => obstacle == entity.Owner) ||
-                _atmosphere.IsTileAirBlocked(grid, position) ||
-                _atmosphere.GetTileMixture(grid, transform.MapUid, position, true) is not { } environment ||
-                environment.GetMoles(Gas.Oxygen) < 1f || _generator.GetFuel(entity.Owner) < 1f)
-                continue;
-            // A finite parcel of escaped burner fuel, represented by atmos' combustible gas.
-            // This is a gameplay conversion for all accepted fuels, not flammable steam.
-            _fuelModules.ConsumeModuleFuel((fuelModule, Comp<FuelModuleComponent>(fuelModule)), 1f);
-            var gasRelease = new GasMixture();
-            gasRelease.SetMoles(Gas.Plasma, 0.6f);
-            gasRelease.Temperature = Math.Max(500f, entity.Comp.BoilerTemperature);
-            _atmosphere.Merge(environment, gasRelease);
-            _atmosphere.HotspotExpose(grid, position, gasRelease.Temperature, 50f, entity.Owner, true);
         }
     }
 

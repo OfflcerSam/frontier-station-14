@@ -161,6 +161,7 @@ public sealed class GeneratorPresentationTests : InteractionTest
             var steam = SEntMan.GetComponent<SteamTurbineComponent>(machine);
             steam.BoilerTemperature = steam.MaximumBoilerTemperature;
             steam.SteamPressure = steam.MaximumSteamPressure;
+            steam.MaximumBreachChance = 1f;
             SEntMan.System<DamageableSystem>().TryChangeDamage(machine,
                 new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(45) } }, true);
         });

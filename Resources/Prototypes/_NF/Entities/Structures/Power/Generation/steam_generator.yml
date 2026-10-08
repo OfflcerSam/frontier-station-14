@@ -46,6 +46,30 @@
     - state: damaged
       visible: false
       map: ["enum.GeneratorStatusLayers.Damage"]
+    - state: fuel_liquid
+      visible: false
+      map: ["enum.GeneratorStatusLayers.FuelLabel"]
+    - state: fuel_lamp
+      visible: false
+      map: ["enum.GeneratorStatusLayers.FuelLamp"]
+    - state: water_label
+      visible: true
+      map: ["enum.GeneratorStatusLayers.WaterLabel"]
+    - state: water_lamp
+      visible: true
+      map: ["enum.GeneratorStatusLayers.WaterLamp"]
+    - state: pressure_label
+      visible: true
+      map: ["enum.GeneratorStatusLayers.PressureLabel"]
+    - state: pressure_lamp
+      visible: true
+      map: ["enum.GeneratorStatusLayers.PressureLamp"]
+    - state: temperature_label
+      visible: true
+      map: ["enum.GeneratorStatusLayers.TemperatureLabel"]
+    - state: temperature_lamp
+      visible: true
+      map: ["enum.GeneratorStatusLayers.TemperatureLamp"]
   - type: Appearance
   - type: GeneratorStatusVisuals
   - type: GenericVisualizer
@@ -62,6 +86,39 @@
         enum.GeneratorStatusLayers.Damage:
           True: { visible: true }
           False: { visible: false }
+      enum.GeneratorStatusVisuals.FuelKind:
+        enum.GeneratorStatusLayers.FuelLabel:
+          none: { visible: false }
+          solid: { visible: true, state: fuel_solid }
+          liquid: { visible: true, state: fuel_liquid }
+        enum.GeneratorStatusLayers.FuelLamp:
+          none: { visible: false }
+          solid: { visible: true }
+          liquid: { visible: true }
+      enum.GeneratorStatusVisuals.FuelLevel:
+        enum.GeneratorStatusLayers.FuelLamp:
+          empty: { color: "#FF544A" }
+          low: { color: "#FFBA40" }
+          medium: { color: "#B3E77B" }
+          full: { color: "#51F28B" }
+      enum.GeneratorStatusVisuals.WaterLevel:
+        enum.GeneratorStatusLayers.WaterLamp:
+          empty: { color: "#FF544A" }
+          low: { color: "#FFBA40" }
+          medium: { color: "#B3E77B" }
+          full: { color: "#51F28B" }
+      enum.GeneratorStatusVisuals.PressureLevel:
+        enum.GeneratorStatusLayers.PressureLamp:
+          cold: { color: "#4B5563" }
+          low: { color: "#FFBA40" }
+          normal: { color: "#51F28B" }
+          high: { color: "#FF544A" }
+      enum.GeneratorStatusVisuals.TemperatureLevel:
+        enum.GeneratorStatusLayers.TemperatureLamp:
+          cold: { color: "#4B5563" }
+          low: { color: "#FFBA40" }
+          normal: { color: "#51F28B" }
+          high: { color: "#FF544A" }
   - type: Construction
     graph: NFMachine2x2
     node: machine
@@ -228,8 +285,10 @@
     maximumBoilerTemperature: 1100
     heatPerFuelUnit: 97.644
     casingHeatPower: 1500
-    ratedBurstIntensity: 2261.9468
-    maximumBurstIntensity: 9801.769
+    ratedBurstRadius: 2.25
+    maximumBurstRadius: 3
+    ratedFlashRadius: 3
+    maximumFlashRadius: 4.5
     burstIntensitySlope: 10
     burstMaximumIntensity: 60
     canBreachHull: true

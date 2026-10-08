@@ -43,6 +43,9 @@
     - state: damaged
       visible: false
       map: ["enum.GeneratorStatusLayers.Damage"]
+    - state: bays_empty1
+      visible: false
+      map: ["enum.GeneratorStatusLayers.IsotopeBays"]
   - type: Appearance
   - type: GeneratorStatusVisuals
   - type: GenericVisualizer
@@ -59,6 +62,16 @@
         enum.GeneratorStatusLayers.Damage:
           True: { visible: true }
           False: { visible: false }
+      enum.GeneratorStatusVisuals.IsotopeBays:
+        enum.GeneratorStatusLayers.IsotopeBays:
+          closed: { visible: false }
+          empty1: { visible: true, state: bays_empty1 }
+          full1: { visible: true, state: bays_full1 }
+          empty2: { visible: true, state: bays_empty2 }
+          left2: { visible: true, state: bays_left2 }
+          right2: { visible: true, state: bays_right2 }
+          full2: { visible: true, state: bays_full2 }
+          shielded: { visible: true, state: bays_shielded }
   - type: Machine
     board: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
   - type: Damageable

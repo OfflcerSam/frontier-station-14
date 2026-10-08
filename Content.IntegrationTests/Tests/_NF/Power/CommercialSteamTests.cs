@@ -204,6 +204,8 @@ public sealed class CommercialSteamTests : InteractionTest
             var steam = SEntMan.GetComponent<SteamTurbineComponent>(entity);
             steam.BoilerTemperature = steam.RatedSteamTemperature;
             steam.SteamPressure = 1f;
+            steam.RatedBreachChance = 1f;
+            steam.MaximumBreachChance = 1f;
             SEntMan.System<SteamTurbineSystem>().RuptureSteam((entity, steam));
         });
         await RunTicks(30);

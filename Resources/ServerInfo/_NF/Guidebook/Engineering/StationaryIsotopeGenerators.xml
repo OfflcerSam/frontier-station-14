@@ -23,7 +23,7 @@
 
   # Isotope Service and Shielding
 
-  Unscrew the hatch with a screwdriver. Insert cells first, then a shielding insert. A crowbar removes the insert before removing cells. Close the hatch afterward. Opening the hatch alone does not remove shielding, and cell slots remain fixed regardless of stock-part upgrades.
+  Unscrew the hatch with a screwdriver. Insert cells first, then a shielding insert. A crowbar removes the insert before removing cells. Close the hatch afterward. Opening the hatch alone does not remove shielding, and cell slots remain fixed regardless of stock-part upgrades. The open-panel display shows empty or occupied cell bays; an installed shielding insert covers the bays until removed.
 
   Activated cells are radioactive. Bananium emits more than Uranium. Depleted cells retain weak radiation, including while being refilled. The R1 housing provides basic shielding. Removable R2, R3 and R4 inserts replace that protection; they do not stack. Capacitors never increase radiation.
 
