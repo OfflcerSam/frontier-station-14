@@ -7,6 +7,9 @@ using Content.Shared.Atmos.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.FixedPoint;
 using Content.Shared.Fluids.Components;
+using Content.Shared.Temperature;
+using Content.Shared.Throwing;
+using Robust.Shared.Physics.Events;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 
@@ -24,6 +27,8 @@ public sealed class FuelPuddleFireSystem : EntitySystem
     {
         UpdatesBefore.Add(typeof(FlammableSystem));
         SubscribeLocalEvent<PuddleComponent, IgnitedEvent>(OnIgnited);
+        SubscribeLocalEvent<PuddleComponent, StartCollideEvent>(OnContact);
+        SubscribeLocalEvent<ThrownItemComponent, LandEvent>(OnLand);
     }
 
     private void OnIgnited(Entity<PuddleComponent> ent, ref IgnitedEvent args)
@@ -46,8 +51,16 @@ public sealed class FuelPuddleFireSystem : EntitySystem
         var elapsed = _elapsed;
         _elapsed = 0f;
         var query = EntityQueryEnumerator<PuddleComponent, FlammableComponent>();
+        // Snapshot existing fires: new neighbors spread on the next update, independent of entity order.
+        var sources = new List<EntityUid>();
         while (query.MoveNext(out var uid, out var puddle, out var flame))
+        {
+            var wasBurning = flame.OnFire;
             UpdatePuddle((uid, puddle), flame, elapsed);
+            if (wasBurning && flame.OnFire) sources.Add(uid);
+        }
+        foreach (var source in sources)
+            SpreadFrom(source);
     }
 
     public void UpdatePuddle(Entity<PuddleComponent> ent, FlammableComponent flame, float elapsed)
@@ -93,6 +106,32 @@ public sealed class FuelPuddleFireSystem : EntitySystem
             _flammable.Extinguish(ent, flame);
     }
 
+    private bool TryIgnitePuddle(EntityUid uid, EntityUid source)
+    {
+        if (!TryComp<PuddleComponent>(uid, out var puddle) || !TryComp<FlammableComponent>(uid, out var flame) ||
+            flame.OnFire || flame.FireStacks < 0f ||
+            !_solutions.TryGetSolution(uid, puddle.SolutionName, out _, out var solution) || FuelGaugeSystem.UsableLiquid(solution) <= 0f ||
+            _atmosphere.GetContainingMixture(uid, false, true) is not { Immutable: false } air || air.GetMoles(Gas.Oxygen) < 1f)
+            return false;
+        _flammable.AdjustFireStacks(uid, 2f - flame.FireStacks, flame);
+        _flammable.Ignite(uid, source, flame);
+        return flame.OnFire;
+    }
+
+    private void OnContact(Entity<PuddleComponent> ent, ref StartCollideEvent args)
+    {
+        var hot = new IsHotEvent();
+        RaiseLocalEvent(args.OtherEntity, hot);
+        if (hot.IsHot) TryIgnitePuddle(ent.Owner, args.OtherEntity);
+    }
+
+    private void OnLand(Entity<ThrownItemComponent> ent, ref LandEvent args)
+    {
+        var hot = new IsHotEvent();
+        RaiseLocalEvent(ent.Owner, hot);
+        if (hot.IsHot) IgniteAt(ent.Owner);
+    }
+
     public void IgniteAt(EntityUid source)
     {
         var xform = Transform(source);
@@ -100,13 +139,25 @@ public sealed class FuelPuddleFireSystem : EntitySystem
             return;
         var tile = grid.TileIndicesFor(xform.Coordinates);
         foreach (var uid in grid.GetAnchoredEntities(tile))
+            TryIgnitePuddle(uid, source);
+    }
+
+    public void SpreadFrom(EntityUid source)
+    {
+        if (!TryComp<FlammableComponent>(source, out var flame) || !flame.OnFire)
+            return;
+        var xform = Transform(source);
+        if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
+            return;
+        var tile = grid.TileIndicesFor(xform.Coordinates);
+        foreach (var direction in new[] { AtmosDirection.North, AtmosDirection.East, AtmosDirection.South, AtmosDirection.West })
         {
-            if (!TryComp<PuddleComponent>(uid, out var puddle) || !TryComp<FlammableComponent>(uid, out var flame) ||
-                !_solutions.TryGetSolution(uid, puddle.SolutionName, out _, out var solution) || FuelGaugeSystem.UsableLiquid(solution) <= 0f ||
-                _atmosphere.GetContainingMixture(uid, false, true) is not { Immutable: false } air || air.GetMoles(Gas.Oxygen) < 1f || flame.FireStacks < 0f)
+            var neighbor = tile + direction.ToDirection().ToIntVec();
+            if (_atmosphere.IsTileAirBlocked(gridUid, tile, direction) ||
+                _atmosphere.IsTileAirBlocked(gridUid, neighbor, direction.GetOpposite()))
                 continue;
-            _flammable.AdjustFireStacks(uid, 2f - flame.FireStacks, flame);
-            _flammable.Ignite(uid, source, flame);
+            foreach (var uid in grid.GetAnchoredEntities(neighbor))
+                TryIgnitePuddle(uid, source);
         }
     }
 

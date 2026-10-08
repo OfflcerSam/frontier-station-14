@@ -37,13 +37,13 @@ public sealed class CommercialCombustionTests : InteractionTest
                 Is.EqualTo(1f / MathF.Pow(1.5f, 1.3f)).Within(0.0001));
             var solutions = SEntMan.System<SharedSolutionContainerSystem>();
             Assert.That(solutions.TryGetSolution(FuelContainer(uid), "tank", out var tank, out var solution), Is.True);
-            Assert.That(solution!.MaxVolume, Is.EqualTo(FixedPoint2.New(4800)));
+            Assert.That(solution!.MaxVolume, Is.EqualTo(FixedPoint2.New(2250)));
             solutions.TryAddReagent(tank!.Value, "WeldingFuel", FixedPoint2.New(1000), out _);
             var damage = SEntMan.System<DamageableSystem>();
             damage.TryChangeDamage(uid, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(29) } }, true);
             Assert.That(solution.Volume, Is.EqualTo(FixedPoint2.New(1000)));
             damage.TryChangeDamage(uid, new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(1) } }, true);
-            Assert.That(solution.Volume, Is.EqualTo(FixedPoint2.New(904)), "First leak is 2% of the 4800u tank at 20% of 150 HP.");
+            Assert.That(solution.Volume, Is.EqualTo(FixedPoint2.New(955)), "First leak is 2% of the 2250u tank at 20% of 150 HP.");
         });
         await Interact(Screw, "RPEDT4Filled");
         await UpgradeFuelModule();
@@ -56,8 +56,8 @@ public sealed class CommercialCombustionTests : InteractionTest
             Assert.That(fuel.OptimalBurnRate * 3600, Is.EqualTo(1020).Within(0.01));
             Assert.That(SEntMan.GetComponent<PowerSupplierComponent>(uid).SupplyRampRate, Is.EqualTo(25375).Within(0.01));
             Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(FuelContainer(uid), "tank", out _, out var solution), Is.True);
-            Assert.That(solution!.MaxVolume, Is.EqualTo(FixedPoint2.New(7680)));
-            Assert.That(solution.Volume, Is.EqualTo(FixedPoint2.New(904)), "Upgrading cannot create fuel.");
+            Assert.That(solution!.MaxVolume, Is.EqualTo(FixedPoint2.New(3600)));
+            Assert.That(solution.Volume, Is.EqualTo(FixedPoint2.New(955)), "Upgrading cannot create fuel.");
         });
     }
 
@@ -141,7 +141,7 @@ public sealed class CommercialCombustionTests : InteractionTest
     }
 
     [TestCase("NFStationaryGeneratorCombustionCommercial", false, 0)]
-    [TestCase("NFStationaryGeneratorCombustionCommercialShip", true, 4800)]
+    [TestCase("NFStationaryGeneratorCombustionCommercialShip", true, 2250)]
     public async Task MappingSupplies(string prototype, bool anchored, int amount)
     {
         await SpawnTarget(prototype);

@@ -71,6 +71,7 @@
       visible: true
       map: ["enum.GeneratorStatusLayers.TemperatureLamp"]
   - type: Appearance
+  - type: MachineFireVisuals
   - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:

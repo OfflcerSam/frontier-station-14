@@ -197,7 +197,7 @@ public sealed class FuelModuleTests : InteractionTest
 
     [TestCase("NFStationaryGeneratorStirlingCompactLiquidEmpty", 500f, 100f)]
     [TestCase("NFStationaryGeneratorStirlingStandardLiquidEmpty", 1500f, 100f)]
-    [TestCase("NFStationaryGeneratorCombustionStandardLiquidEmpty", 1800f, 100f)]
+    [TestCase("NFStationaryGeneratorCombustionStandardLiquidEmpty", 1500f, 100f)]
     [TestCase("NFLiquidFuelTankCompact", 500f, 50f)]
     public async Task FuelLeaksAboveDamageThreshold(string prototypeId, float fuelCapacity, float destructionThreshold)
     {

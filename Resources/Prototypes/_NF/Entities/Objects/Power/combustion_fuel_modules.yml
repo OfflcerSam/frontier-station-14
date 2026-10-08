@@ -2,31 +2,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 - type: entity
-  parent: NFLiquidFuelTankStandard
-  id: NFLiquidFuelTankCombustionStandard
-  name: basic standard combustion fuel tank
-  components:
-  - type: FuelModule
-    baseCapacity: 1800
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 1800
-
-- type: entity
-  parent: NFLiquidFuelTankCombustionStandard
-  id: NFLiquidFuelTankCombustionStandardFull
-  categories: [HideSpawnMenu]
-  components:
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 1800
-        reagents:
-        - ReagentId: WeldingFuel
-          Quantity: 1800
-
-- type: entity
   parent: NFStationaryGeneratorCombustionStandardEmpty
   id: NFStationaryGeneratorCombustionStandardLiquidEmpty
   categories: [NFGeneratorConstruction]
@@ -38,7 +13,7 @@
         insertOnInteract: false
         disableEject: true
         ejectOnBreak: true
-        startingItem: NFLiquidFuelTankCombustionStandard
+        startingItem: NFLiquidFuelTankStandard
         whitelist:
           components: [FuelModule]
 
@@ -54,34 +29,9 @@
         insertOnInteract: false
         disableEject: true
         ejectOnBreak: true
-        startingItem: NFLiquidFuelTankCombustionStandardFull
+        startingItem: NFLiquidFuelTankStandardFull
         whitelist:
           components: [FuelModule]
-
-- type: entity
-  parent: NFLiquidFuelTankCommercial
-  id: NFLiquidFuelTankCombustionCommercial
-  name: basic commercial combustion fuel tank
-  components:
-  - type: FuelModule
-    baseCapacity: 4800
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 4800
-
-- type: entity
-  parent: NFLiquidFuelTankCombustionCommercial
-  id: NFLiquidFuelTankCombustionCommercialFull
-  categories: [HideSpawnMenu]
-  components:
-  - type: SolutionContainerManager
-    solutions:
-      tank:
-        maxVol: 4800
-        reagents:
-        - ReagentId: WeldingFuel
-          Quantity: 4800
 
 - type: entity
   parent: NFStationaryGeneratorCombustionCommercialEmpty
@@ -95,7 +45,7 @@
         insertOnInteract: false
         disableEject: true
         ejectOnBreak: true
-        startingItem: NFLiquidFuelTankCombustionCommercial
+        startingItem: NFLiquidFuelTankCommercial
         whitelist:
           components: [FuelModule]
 
@@ -111,6 +61,6 @@
         insertOnInteract: false
         disableEject: true
         ejectOnBreak: true
-        startingItem: NFLiquidFuelTankCombustionCommercialFull
+        startingItem: NFLiquidFuelTankCommercialFull
         whitelist:
           components: [FuelModule]

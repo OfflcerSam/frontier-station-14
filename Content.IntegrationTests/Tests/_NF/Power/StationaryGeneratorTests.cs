@@ -80,7 +80,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
 
             var solution = SEntMan.System<SharedSolutionContainerSystem>();
             Assert.That(solution.TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
-            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2880)));
+            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2400)));
             solution.TryAddReagent(fuelSolution.Value, "WeldingFuel", FixedPoint2.New(10), out _);
             solution.TryAddReagent(fuelSolution.Value, "Ethanol", FixedPoint2.New(10), out _);
             solution.TryAddReagent(fuelSolution.Value, "Plasma", FixedPoint2.New(10), out _);
@@ -124,7 +124,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
             Assert.That(generator.MaxTargetPower, Is.EqualTo(56000f).Within(0.01f));
             Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(570f).Within(0.01f));
             Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
-            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2160)));
+            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(1800)));
         });
         await InteractUsing("RPEDT4Filled");
         await UpgradeFuelModule();
@@ -136,7 +136,7 @@ public sealed class StationaryGeneratorTests : InteractionTest
             Assert.That(generator.MaxTargetPower, Is.EqualTo(63000f).Within(0.01f));
             Assert.That(generator.OptimalBurnRate * 3600f, Is.EqualTo(510f).Within(0.01f));
             Assert.That(SEntMan.System<SharedSolutionContainerSystem>().TryGetSolution(FuelContainer(entity), "tank", out var fuelSolution), Is.True);
-            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2880)));
+            Assert.That(fuelSolution!.Value.Comp.Solution.MaxVolume, Is.EqualTo(FixedPoint2.New(2400)));
         });
     }
 

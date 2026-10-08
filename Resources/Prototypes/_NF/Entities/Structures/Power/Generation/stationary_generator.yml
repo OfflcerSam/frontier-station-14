@@ -106,9 +106,7 @@
     damage:
       types:
         Heat: 1
-  - type: FireVisuals
-    sprite: Effects/fire.rsi
-    normalState: 1
+  - type: MachineFireVisuals
   - type: StationaryGenerator
     ratedPower: 35000
     ratedMaximumPower: 52500

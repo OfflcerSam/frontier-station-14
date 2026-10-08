@@ -83,7 +83,7 @@
 - type: entity
   parent: NFStationaryGeneratorCombustionStandardLiquidEmpty
   id: NFStationaryGeneratorCombustionStandard
-  suffix: Welding Fuel, 35 kW
+  suffix: Liquid, 35 kW
   components:
   - type: Transform
     anchored: false
@@ -95,7 +95,7 @@
 - type: entity
   parent: NFStationaryGeneratorCombustionStandardLiquidFull
   id: NFStationaryGeneratorCombustionStandardShip
-  suffix: Welding Fuel, 35 kW, Ship
+  suffix: Liquid, 35 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true

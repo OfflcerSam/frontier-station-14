@@ -29,8 +29,8 @@ namespace Content.IntegrationTests.Tests._NF.Power;
 
 public sealed class GeneratorModuleFireTests : InteractionTest
 {
-    [TestCase("Standard", 1800)]
-    [TestCase("Commercial", 4800)]
+    [TestCase("Standard", 1500)]
+    [TestCase("Commercial", 2250)]
     public async Task LiquidEjectRetainsContentsAndRequiresPanel(string size, int capacity)
     {
         await SpawnTarget($"NFStationaryGeneratorCombustion{size}LiquidEmpty");

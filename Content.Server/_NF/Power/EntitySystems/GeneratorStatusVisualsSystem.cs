@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 using System.Linq;
+using Content.Server.Atmos.EntitySystems;
+using Content.Shared.Atmos;
+using Content.Shared.Atmos.Components;
 using Content.Server._NF.Power.Isotope;
 using Content.Server._NF.Power.FuelModules;
 using Content.Server._NF.Power.Steam;
@@ -31,6 +34,7 @@ public sealed class GeneratorStatusVisualsSystem : EntitySystem
     {
         base.Initialize();
         UpdatesAfter.Add(typeof(GeneratorSystem));
+        UpdatesAfter.Add(typeof(FlammableSystem));
         UpdatesAfter.Add(typeof(IsotopeGeneratorSystem));
     }
 
@@ -49,6 +53,7 @@ public sealed class GeneratorStatusVisualsSystem : EntitySystem
             _appearance.SetData(uid, GeneratorStatusVisuals.Damaged,
                 TryComp<DamageableComponent>(uid, out var damage) && damage.TotalDamage > 0, appearance);
             UpdateSupplies(uid, appearance);
+            UpdateFire(uid, appearance);
             if (TryComp<SteamTurbineComponent>(uid, out var steam))
             {
                 _appearance.SetData(uid, GeneratorStatusVisuals.WaterLevel,
@@ -64,6 +69,16 @@ public sealed class GeneratorStatusVisualsSystem : EntitySystem
             if (TryComp<IsotopeGeneratorComponent>(uid, out var isotope))
                 UpdateIsotopeBays(uid, isotope, panel?.Open == true, appearance);
         }
+    }
+
+    public void UpdateFire(EntityUid uid, AppearanceComponent appearance)
+    {
+        var stacks = TryComp<FlammableComponent>(uid, out var casing) && casing.OnFire ? casing.FireStacks : 0f;
+        if (_modules.GetInstalledModule(uid) is { } module && TryComp<FlammableComponent>(module, out var fuel) && fuel.OnFire)
+            stacks = Math.Max(stacks, fuel.FireStacks);
+        // Burning installed fuel is visible across the host footprint, without adding casing damage or heat.
+        _appearance.SetData(uid, FireVisuals.OnFire, stacks > 0f, appearance);
+        _appearance.SetData(uid, FireVisuals.FireStacks, stacks, appearance);
     }
 
     private void UpdateSupplies(EntityUid uid, AppearanceComponent appearance)
