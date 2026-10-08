@@ -223,7 +223,7 @@ public sealed class CommercialSteamRevisionTests : InteractionTest
                 air.SetMoles(Gas.Nitrogen, 83f);
             }
             SEntMan.SpawnEntity("GasPipeStraight", new EntityCoordinates(gridUid, new Vector2(0.5f, 3.5f)));
-            mapped = SEntMan.SpawnEntity("NFStationaryGenerator" + variant, new EntityCoordinates(gridUid, new Vector2(0.5f, 0.5f)));
+            mapped = SEntMan.SpawnEntity("NFStationaryGenerator" + variant + (variant.StartsWith("Isotope") ? "UraniumShip" : "Ship"), new EntityCoordinates(gridUid, new Vector2(0.5f, 0.5f)));
             empty = SEntMan.SpawnEntity("NFStationaryGenerator" + variant + "Empty", new EntityCoordinates(gridUid, new Vector2(5.5f, 0.5f)));
             var environment = SEntMan.System<AtmosphereSystem>().GetContainingMixture(mapped, false, true);
             if (environment is { Immutable: false })
@@ -235,6 +235,26 @@ public sealed class CommercialSteamRevisionTests : InteractionTest
                 Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(empty), Is.Zero);
                 Assert.That(SEntMan.GetComponent<FuelGeneratorComponent>(empty).On, Is.False);
             }
+            Assert.That(SEntMan.GetComponent<TransformComponent>(mapped).Anchored, Is.True);
+            var portable = SEntMan.SpawnEntity("NFStationaryGenerator" + variant,
+                new EntityCoordinates(gridUid, new Vector2(7.5f, 0.5f)));
+            Assert.That(SEntMan.GetComponent<TransformComponent>(portable).Anchored, Is.False);
+            if (!variant.StartsWith("Isotope"))
+            {
+                Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(portable), Is.Zero);
+                Assert.That(SEntMan.GetComponent<FuelGeneratorComponent>(portable).On, Is.False);
+            }
+            if (variant.StartsWith("Steam"))
+            {
+                var cold = SEntMan.GetComponent<SteamTurbineComponent>(portable);
+                Assert.That(SEntMan.System<SteamTurbineSystem>().GetWaterLevel((portable, cold)), Is.Zero);
+                Assert.That(cold.SteamPressure, Is.Zero);
+            }
+            var generic = (variant.StartsWith("Steam") || variant.StartsWith("Stirling")) &&
+                !variant.EndsWith("Solid") && !variant.EndsWith("Liquid");
+            Assert.That(SEntMan.GetComponent<MetaDataComponent>(portable).EntityPrototype!.HideSpawnMenu, Is.EqualTo(generic));
+            Assert.That(SEntMan.GetComponent<MetaDataComponent>(empty).EntityPrototype!.HideSpawnMenu, Is.True);
+            Assert.That(SEntMan.GetComponent<MetaDataComponent>(mapped).EntityPrototype!.HideSpawnMenu, Is.EqualTo(generic));
             var baseVariant = variant.Replace("Solid", "").Replace("Liquid", "");
             var board = SEntMan.SpawnEntity("NFStationaryGenerator" + baseVariant + "MachineCircuitboard",
                 new EntityCoordinates(gridUid, new Vector2(6.5f, 0.5f)));
@@ -272,29 +292,22 @@ public sealed class CommercialSteamRevisionTests : InteractionTest
 
     [TestCase("Water")]
     [TestCase("WeldingFuel")]
-    public async Task DebugSupplies(string reagent)
+    public async Task BottomlessSupplies(string reagent)
     {
         await Server.WaitAssertion(() =>
         {
             var solutions = SEntMan.System<SharedSolutionContainerSystem>();
-            var container = SEntMan.SpawnEntity("NFDebug" + reagent + "Tank",
+            var jug = SEntMan.SpawnEntity("NFBottomlessJerryCan" + reagent,
                 new EntityCoordinates(MapData.Grid.Owner, new Vector2(0.5f, 0.5f)));
-            Assert.That(solutions.TryGetSolution(container, "tank", out _, out var tank), Is.True);
-            Assert.That(tank!.GetTotalPrototypeQuantity(reagent), Is.EqualTo(FixedPoint2.New(5000)));
-            var jug = SEntMan.SpawnEntity("NFDebug" + reagent + "Jug",
-                new EntityCoordinates(MapData.Grid.Owner, new Vector2(0.5f, 0.5f)));
-            Assert.That(solutions.TryGetDrainableSolution(jug, out _, out var jugContents), Is.True);
-            Assert.That(jugContents!.GetTotalPrototypeQuantity(reagent), Is.EqualTo(FixedPoint2.New(5000)));
+            Assert.That(solutions.TryGetDrainableSolution(jug, out var solution, out var contents), Is.True);
+            Assert.That(contents!.GetTotalPrototypeQuantity(reagent), Is.EqualTo(FixedPoint2.New(500)));
             Assert.That(SEntMan.GetComponent<Content.Shared.Chemistry.Components.SolutionTransferComponent>(jug).TransferAmount,
                 Is.EqualTo(FixedPoint2.New(500)));
-            foreach (var size in new[] { "Standard", "Commercial" })
+            for (var i = 0; i < 3; i++)
             {
-                var machine = SEntMan.SpawnEntity("NFStationaryGeneratorSteam" + size + "Debug" + reagent,
-                    new EntityCoordinates(MapData.Grid.Owner, new Vector2(3.5f, 3.5f)));
-                var steam = SEntMan.GetComponent<SteamTurbineComponent>(machine);
-                Assert.That(SEntMan.System<SteamTurbineSystem>().GetWaterLevel((machine, steam)), Is.EqualTo(steam.WaterCapacity));
-                Assert.That(SEntMan.System<GeneratorSystem>().GetFuel(machine),
-                    reagent == "Water" ? Is.Zero : Is.GreaterThan(0f));
+                var poured = solutions.SplitSolution(solution!.Value, FixedPoint2.New(500));
+                Assert.That(poured.GetTotalPrototypeQuantity(reagent), Is.EqualTo(FixedPoint2.New(500)));
+                Assert.That(contents.GetTotalPrototypeQuantity(reagent), Is.EqualTo(FixedPoint2.New(500)));
             }
         });
     }

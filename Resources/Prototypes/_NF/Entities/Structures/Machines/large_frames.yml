@@ -11,9 +11,27 @@
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_1x2_placeholder.rsi
+    state: box_0
     noRot: false
-    scale: 1, 2
+    snapCardinals: false
+    scale: 1, 1
     offset: 0, 0.5
+    layers:
+    - state: box_0
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: unwired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -35,9 +53,29 @@
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_1x2_placeholder.rsi
+    state: box_1
     noRot: false
-    scale: 1, 2
+    snapCardinals: false
+    scale: 1, 1
     offset: 0, 0.5
+    layers:
+    - state: box_1
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: ItemMapper
+    mapLayers: {}
+  - type: MachineFrameStatusVisuals
+    initialState: wired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -59,9 +97,27 @@
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_1x2_placeholder.rsi
+    state: destroyed
     noRot: false
-    scale: 1, 2
+    snapCardinals: false
+    scale: 1, 1
     offset: 0, 0.5
+    layers:
+    - state: destroyed
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: destroyed
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -83,9 +139,27 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_2x2_placeholder.rsi
+    state: box_0
     noRot: false
-    scale: 2, 2
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 0.5
+    layers:
+    - state: box_0
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: unwired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -107,9 +181,29 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_2x2_placeholder.rsi
+    state: box_1
     noRot: false
-    scale: 2, 2
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 0.5
+    layers:
+    - state: box_1
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: ItemMapper
+    mapLayers: {}
+  - type: MachineFrameStatusVisuals
+    initialState: wired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -131,9 +225,27 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_2x2_placeholder.rsi
+    state: destroyed
     noRot: false
-    scale: 2, 2
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 0.5
+    layers:
+    - state: destroyed
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: destroyed
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -155,9 +267,27 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1", "0, 2", "1, 2"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_2x3_placeholder.rsi
+    state: box_0
     noRot: false
-    scale: 2, 3
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 1
+    layers:
+    - state: box_0
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: unwired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -179,9 +309,29 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1", "0, 2", "1, 2"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_2x3_placeholder.rsi
+    state: box_1
     noRot: false
-    scale: 2, 3
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 1
+    layers:
+    - state: box_1
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: ItemMapper
+    mapLayers: {}
+  - type: MachineFrameStatusVisuals
+    initialState: wired
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:
@@ -203,9 +353,27 @@
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1", "0, 2", "1, 2"]
   - type: Sprite
+    sprite: _NF/Structures/Machines/frame_2x3_placeholder.rsi
+    state: destroyed
     noRot: false
-    scale: 2, 3
+    snapCardinals: false
+    scale: 1, 1
     offset: 0.5, 1
+    layers:
+    - state: destroyed
+      map: ["enum.MachineFrameStatusLayers.Body"]
+  - type: Appearance
+  - type: MachineFrameStatusVisuals
+    initialState: destroyed
+  - type: GenericVisualizer
+    visuals:
+      enum.MachineFrameStatusVisuals.Stage:
+        enum.MachineFrameStatusLayers.Body:
+          unwired: { state: box_0 }
+          wired: { state: box_1 }
+          board: { state: box_2 }
+          ready: { state: box_3 }
+          destroyed: { state: destroyed }
   - type: Fixtures
     fixtures:
       fix1:

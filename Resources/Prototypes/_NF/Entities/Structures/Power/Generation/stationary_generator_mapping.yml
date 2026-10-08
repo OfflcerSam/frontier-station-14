@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 OfflcerSam
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Mapping supplies only. Machine boards always build the Empty prototypes.
+# Ship supplies are mapping-only. Machine boards build hidden, empty construction prototypes.
 
 - type: entity
   parent: NFFuelHopperCompact
@@ -83,7 +83,19 @@
 - type: entity
   parent: NFStationaryGeneratorCombustionStandardEmpty
   id: NFStationaryGeneratorCombustionStandard
-  suffix: Filled
+  suffix: Welding Fuel, 35 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorCombustionStandardEmpty
+  id: NFStationaryGeneratorCombustionStandardShip
+  suffix: Welding Fuel, 35 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -98,7 +110,21 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactEmpty
   id: NFStationaryGeneratorStirlingCompact
-  suffix: Filled
+  suffix: 8 kW
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompactEmpty
+  id: NFStationaryGeneratorStirlingCompactShip
+  suffix: Liquid, 8 kW, Ship
+  categories: [NFGeneratorConstruction]
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -116,7 +142,21 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingStandardEmpty
   id: NFStationaryGeneratorStirlingStandard
-  suffix: Filled
+  suffix: 20 kW
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandardEmpty
+  id: NFStationaryGeneratorStirlingStandardShip
+  suffix: Liquid, 20 kW, Ship
+  categories: [NFGeneratorConstruction]
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -134,7 +174,19 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactSolidEmpty
   id: NFStationaryGeneratorStirlingCompactSolid
-  suffix: Solid
+  suffix: Solid, 8 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompactSolidEmpty
+  id: NFStationaryGeneratorStirlingCompactSolidShip
+  suffix: Solid, 8 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -152,7 +204,19 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactLiquidEmpty
   id: NFStationaryGeneratorStirlingCompactLiquid
-  suffix: Liquid
+  suffix: Liquid, 8 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingCompactLiquidEmpty
+  id: NFStationaryGeneratorStirlingCompactLiquidShip
+  suffix: Liquid, 8 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -170,7 +234,19 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingStandardSolidEmpty
   id: NFStationaryGeneratorStirlingStandardSolid
-  suffix: Solid
+  suffix: Solid, 20 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandardSolidEmpty
+  id: NFStationaryGeneratorStirlingStandardSolidShip
+  suffix: Solid, 20 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -188,7 +264,19 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingStandardLiquidEmpty
   id: NFStationaryGeneratorStirlingStandardLiquid
-  suffix: Liquid
+  suffix: Liquid, 20 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorStirlingStandardLiquidEmpty
+  id: NFStationaryGeneratorStirlingStandardLiquidShip
+  suffix: Liquid, 20 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -206,7 +294,17 @@
 - type: entity
   parent: NFStationaryGeneratorIsotopeCompactEmpty
   id: NFStationaryGeneratorIsotopeCompact
-  suffix: Filled
+  suffix: Rads, 5-7.5 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+
+- type: entity
+  parent: NFStationaryGeneratorIsotopeCompactEmpty
+  id: NFStationaryGeneratorIsotopeCompactUraniumShip
+  suffix: Uranium, Rads, 5 kW, Ship
   components:
   - type: ItemSlots
     slots:
@@ -231,9 +329,46 @@
           components: [RadiationShieldingInsert]
 
 - type: entity
+  parent: NFStationaryGeneratorIsotopeCompactEmpty
+  id: NFStationaryGeneratorIsotopeCompactBananiumShip
+  suffix: Bananium, Rads, 7.5 kW, Ship
+  components:
+  - type: ItemSlots
+    slots:
+      cell1:
+        name: isotope-slot-cell-one
+        startingItem: NFIsotopeCellBananiumFull
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      shielding:
+        name: isotope-slot-shielding
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [RadiationShieldingInsert]
+
+- type: entity
   parent: NFStationaryGeneratorIsotopeStandardEmpty
   id: NFStationaryGeneratorIsotopeStandard
-  suffix: Filled
+  suffix: Rads, 10-15 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+
+- type: entity
+  parent: NFStationaryGeneratorIsotopeStandardEmpty
+  id: NFStationaryGeneratorIsotopeStandardUraniumShip
+  suffix: Uranium, Rads, 10 kW, Ship
   components:
   - type: ItemSlots
     slots:
@@ -268,9 +403,60 @@
           components: [RadiationShieldingInsert]
 
 - type: entity
+  parent: NFStationaryGeneratorIsotopeStandardEmpty
+  id: NFStationaryGeneratorIsotopeStandardBananiumShip
+  suffix: Bananium, Rads, 15 kW, Ship
+  components:
+  - type: ItemSlots
+    slots:
+      cell1:
+        name: isotope-slot-cell-one
+        startingItem: NFIsotopeCellBananiumFull
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      cell2:
+        name: isotope-slot-cell-two
+        startingItem: NFIsotopeCellBananiumFull
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [IsotopeCell]
+      shielding:
+        name: isotope-slot-shielding
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        swap: false
+        ejectOnBreak: true
+        whitelist:
+          components: [RadiationShieldingInsert]
+
+- type: entity
   parent: NFStationaryGeneratorSteamStandardEmpty
   id: NFStationaryGeneratorSteamStandard
-  suffix: Filled
+  suffix: 40 kW
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardEmpty
+  id: NFStationaryGeneratorSteamStandardShip
+  suffix: Liquid, 40 kW, Ship
+  categories: [NFGeneratorConstruction]
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -299,7 +485,19 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardSolidEmpty
   id: NFStationaryGeneratorSteamStandardSolid
-  suffix: Solid
+  suffix: Solid, 40 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardSolidEmpty
+  id: NFStationaryGeneratorSteamStandardSolidShip
+  suffix: Solid, 40 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -328,7 +526,19 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardLiquidEmpty
   id: NFStationaryGeneratorSteamStandardLiquid
-  suffix: Liquid
+  suffix: Liquid, 40 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorSteamStandardLiquidEmpty
+  id: NFStationaryGeneratorSteamStandardLiquidShip
+  suffix: Liquid, 40 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -357,7 +567,21 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialEmpty
   id: NFStationaryGeneratorSteamCommercial
-  suffix: Filled
+  suffix: 60 kW
+  categories: [NFGeneratorConstruction]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialEmpty
+  id: NFStationaryGeneratorSteamCommercialShip
+  suffix: Liquid, 60 kW, Ship
+  categories: [NFGeneratorConstruction]
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -386,7 +610,19 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialSolidEmpty
   id: NFStationaryGeneratorSteamCommercialSolid
-  suffix: Solid
+  suffix: Solid, 60 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialSolidEmpty
+  id: NFStationaryGeneratorSteamCommercialSolidShip
+  suffix: Solid, 60 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -415,7 +651,19 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
   id: NFStationaryGeneratorSteamCommercialLiquid
-  suffix: Liquid
+  suffix: Liquid, 60 kW
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: PortableGenerator
+    startOnMapInit: false
+
+- type: entity
+  parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
+  id: NFStationaryGeneratorSteamCommercialLiquidShip
+  suffix: Liquid, 60 kW, Ship
   components:
   - type: PortableGenerator
     startOnMapInit: true
@@ -440,3 +688,13 @@
         reagents:
         - ReagentId: Water
           Quantity: 500
+- type: entity
+  parent: NFIsotopeCellCasing
+  id: NFIsotopeCellBananiumFull
+  suffix: Bananium, Full
+  components:
+  - type: IsotopeCell
+    state: Active
+    fuelType: NFIsotopeFuelBananium
+    loadedMaterial: 1500
+    remainingLifetime: 9000

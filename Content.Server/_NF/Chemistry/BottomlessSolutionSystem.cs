@@ -14,8 +14,19 @@ public sealed class BottomlessSolutionSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
+        SubscribeLocalEvent<BottomlessSolutionComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<BottomlessSolutionComponent, SolutionContainerChangedEvent>(OnSolutionChanged);
         SubscribeLocalEvent<BottomlessSolutionComponent, GetVerbsEvent<AlternativeVerb>>(OnGetVerbs);
+    }
+
+    private void OnMapInit(Entity<BottomlessSolutionComponent> entity, ref MapInitEvent arguments)
+    {
+        if (entity.Comp.Sample == null &&
+            _solutionContainers.TryGetSolution(entity.Owner, entity.Comp.SolutionName, out _, out var solution) &&
+            solution.Volume > FixedPoint2.Zero)
+            entity.Comp.Sample = solution.Clone();
+
+        RefillSolution(entity);
     }
 
     private void OnSolutionChanged(Entity<BottomlessSolutionComponent> entity, ref SolutionContainerChangedEvent arguments)

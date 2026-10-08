@@ -128,6 +128,7 @@ public sealed class SteamTurbineTests : InteractionTest
             Assert.That(frameMaterialCost["Silver"] - materialCosts.GetValueOrDefault("Silver"), Is.EqualTo(-100));
             Assert.That(frameMaterialCost["Gold"] - materialCosts.GetValueOrDefault("Gold"), Is.EqualTo(-50));
             var generator = SEntMan.SpawnEntity(machine, new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)));
+            Transform.SetLocalRotation(generator, Robust.Shared.Maths.Angle.FromDegrees(90));
             SEntMan.System<DamageableSystem>().TryChangeDamage(generator,
                 new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(200) } }, true);
         });
@@ -139,6 +140,8 @@ public sealed class SteamTurbineTests : InteractionTest
                          new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)), 0.3f))
             {
                 Assert.That(SEntMan.GetComponent<MetaDataComponent>(nearby.Owner).EntityPrototype!.ID, Is.EqualTo(frame));
+                Assert.That(SEntMan.GetComponent<TransformComponent>(nearby.Owner).LocalRotation.Degrees,
+                    Is.EqualTo(90).Within(0.01), "Destruction must preserve the sideways machine rotation.");
                 frameCount++;
             }
             Assert.That(frameCount, Is.EqualTo(1));

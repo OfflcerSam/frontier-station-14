@@ -3,9 +3,14 @@
 - type: entity
   parent: [BaseMachine, SmallConstructibleMachine]
   id: NFStationaryGeneratorIsotopeCompactEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: compact radioisotope thermoelectric generator
-  description: A compact auxiliary generator with a single isotope-cell bay.
+  description: |-
+    A compact radioisotope thermoelectric generator for auxiliary power.
+    Runs off of one uranium or bananium isotope cell.
+    Rated for up to 9 kW with basic parts.
+    Bananium output fluctuates; uranium provides steadier power.
   components:
   - type: Transform
     anchored: true
@@ -26,9 +31,34 @@
     tiles: ["0, 0"]
   - type: Sprite
     sprite: _NF/Structures/Power/Generation/isotope_generator_placeholder.rsi
-    state: generator
     noRot: false
+    snapCardinals: false
     scale: 0.5, 0.5
+    layers:
+    - state: generator
+      map: ["enum.GeneratorVisualLayers.Body"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+  - type: Appearance
+  - type: GeneratorStatusVisuals
+  - type: GenericVisualizer
+    visuals:
+      enum.GeneratorVisuals.Running:
+        enum.GeneratorVisualLayers.Body:
+          True: { state: generator_on }
+          False: { state: generator }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
   - type: Machine
     board: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
   - type: Damageable
@@ -120,9 +150,14 @@
 - type: entity
   parent: NFStationaryGeneratorIsotopeCompactEmpty
   id: NFStationaryGeneratorIsotopeStandardEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: standard radioisotope thermoelectric generator
-  description: An auxiliary generator with two isotope-cell bays.
+  description: |-
+    A standard radioisotope thermoelectric generator for auxiliary power.
+    Runs off of two uranium or bananium isotope cells.
+    Rated for up to 18 kW with basic parts.
+    Bananium output fluctuates; uranium provides steadier power.
   components:
   - type: Machine
     board: NFStationaryGeneratorIsotopeStandardMachineCircuitboard

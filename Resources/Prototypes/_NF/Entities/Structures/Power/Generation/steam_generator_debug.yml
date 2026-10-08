@@ -4,7 +4,8 @@
 - type: entity
   parent: WaterTank
   id: NFDebugWaterTank
-  suffix: DEBUG, Water
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -17,7 +18,8 @@
 - type: entity
   parent: WeldingFuelTank
   id: NFDebugWeldingFuelTank
-  suffix: DEBUG, Welding Fuel
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -30,7 +32,8 @@
 - type: entity
   parent: NFLiquidFuelTankStandard
   id: NFLiquidFuelTankStandardDebug
-  suffix: DEBUG, Welding Fuel
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -43,7 +46,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardLiquidEmpty
   id: NFStationaryGeneratorSteamStandardDebugWater
-  suffix: DEBUG, Water
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -56,7 +60,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardLiquidEmpty
   id: NFStationaryGeneratorSteamStandardDebugWeldingFuel
-  suffix: DEBUG, Welding Fuel
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -79,7 +84,8 @@
 - type: entity
   parent: NFLiquidFuelTankCommercial
   id: NFLiquidFuelTankCommercialDebug
-  suffix: DEBUG, Welding Fuel
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -92,7 +98,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
   id: NFStationaryGeneratorSteamCommercialDebugWater
-  suffix: DEBUG, Water
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -105,7 +112,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialLiquidEmpty
   id: NFStationaryGeneratorSteamCommercialDebugWeldingFuel
-  suffix: DEBUG, Welding Fuel
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -128,8 +136,9 @@
 - type: entity
   parent: Jug
   id: NFDebugWaterJug
+  categories: [NFGeneratorConstruction]
   name: debug water jug
-  suffix: DEBUG, Water
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:
@@ -144,8 +153,9 @@
 - type: entity
   parent: Jug
   id: NFDebugWeldingFuelJug
+  categories: [NFGeneratorConstruction]
   name: debug welding fuel jug
-  suffix: DEBUG, Welding Fuel
+  suffix: ""
   components:
   - type: SolutionContainerManager
     solutions:

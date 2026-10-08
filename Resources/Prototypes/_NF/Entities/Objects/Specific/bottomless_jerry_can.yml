@@ -5,7 +5,6 @@
   parent: JerryCan
   id: NFBottomlessJerryCan
   name: bottomless jerry can
-  suffix: DEBUG
   description: A testing jerry can that endlessly reproduces the first liquid or mixture added. Use Clear sample to empty it and choose another mixture.
   components:
   - type: BottomlessSolution
@@ -18,3 +17,35 @@
     price: 0
     vendPrice: 0
 
+
+- type: entity
+  parent: NFBottomlessJerryCan
+  id: NFBottomlessJerryCanWater
+  suffix: Water
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 500
+        canReact: false
+        reagents:
+        - ReagentId: Water
+          Quantity: 500
+  - type: SolutionTransfer
+    transferAmount: 500
+
+- type: entity
+  parent: NFBottomlessJerryCan
+  id: NFBottomlessJerryCanWeldingFuel
+  suffix: Welding Fuel
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      beaker:
+        maxVol: 500
+        canReact: false
+        reagents:
+        - ReagentId: WeldingFuel
+          Quantity: 500
+  - type: SolutionTransfer
+    transferAmount: 500

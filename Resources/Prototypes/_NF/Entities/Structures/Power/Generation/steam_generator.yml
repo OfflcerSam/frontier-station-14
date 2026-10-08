@@ -4,9 +4,13 @@
 - type: entity
   parent: PortableGeneratorSwitchableBase
   id: NFStationaryGeneratorSteamStandardEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: standard steam turbine
-  description: A stationary boiler and turbine with a removable fuel module and internal water reservoir.
+  description: |-
+    A standard high pressure steam turbine for powering a variety of equipment.
+    Runs off of solids or liquids depending on installation.
+    Rated for up to 60 kW with basic parts.
   components:
   - type: Transform
     anchored: true
@@ -31,16 +35,33 @@
   - type: Sprite
     sprite: _NF/Structures/Power/Generation/steam_generator_placeholder.rsi
     noRot: false
+    snapCardinals: false
     offset: 0.5, 0.5
     layers:
     - state: generator
       map: ["enum.GeneratorVisualLayers.Body"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+  - type: Appearance
+  - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:
       enum.GeneratorVisuals.Running:
         enum.GeneratorVisualLayers.Body:
-          True: { color: "#AAFFAA" }
-          False: { color: "#FFFFFF" }
+          True: { state: generator_on }
+          False: { state: generator }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
   - type: Construction
     graph: NFMachine2x2
     node: machine
@@ -125,7 +146,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardEmpty
   id: NFStationaryGeneratorSteamStandardSolidEmpty
-  suffix: Solid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:
@@ -141,7 +163,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardEmpty
   id: NFStationaryGeneratorSteamStandardLiquidEmpty
-  suffix: Liquid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:
@@ -175,9 +198,14 @@
 - type: entity
   parent: NFStationaryGeneratorSteamStandardEmpty
   id: NFStationaryGeneratorSteamCommercialEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: commercial steam turbine
-  description: A high-pressure boiler and turbine with required piped exhaust and optional piped air. Red north ports exhaust gas; blue south ports draw air. Either or both ports on each edge can be piped.
+  description: |-
+    A commercial high pressure steam turbine for powering a variety of equipment.
+    Runs off of solids or liquids depending on installation.
+    Rated for up to 90 kW with basic parts.
+    Requires piped exhaust. Red north ports exhaust gas; blue south ports draw air.
   components:
   - type: Machine
     board: NFStationaryGeneratorSteamCommercialMachineCircuitboard
@@ -289,7 +317,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialEmpty
   id: NFStationaryGeneratorSteamCommercialSolidEmpty
-  suffix: Solid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:
@@ -305,7 +334,8 @@
 - type: entity
   parent: NFStationaryGeneratorSteamCommercialEmpty
   id: NFStationaryGeneratorSteamCommercialLiquidEmpty
-  suffix: Liquid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:

@@ -4,9 +4,13 @@
 - type: entity
   parent: PortableGeneratorSwitchableBase
   id: NFStationaryGeneratorStirlingCompactEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: compact stirling generator
-  description: A compact stationary generator with a removable fuel module.
+  description: |-
+    A compact stirling generator for powering a variety of equipment.
+    Runs off of solids or liquids depending on installation.
+    Rated for up to 16 kW with basic parts.
   components:
   - type: Transform
     anchored: true
@@ -34,17 +38,34 @@
   - type: Sprite
     sprite: _NF/Structures/Power/Generation/stirling_generator_placeholder.rsi
     noRot: false
+    snapCardinals: false
     offset: 0, 0
     scale: 0.5, 0.5
     layers:
     - state: generator
       map: ["enum.GeneratorVisualLayers.Body"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+  - type: Appearance
+  - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:
       enum.GeneratorVisuals.Running:
         enum.GeneratorVisualLayers.Body:
-          True: { color: "#AAFFAA" }
-          False: { color: "#FFFFFF" }
+          True: { state: generator_on }
+          False: { state: generator }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
   - type: Machine
     board: NFStationaryGeneratorStirlingCompactMachineCircuitboard
   - type: Damageable
@@ -152,9 +173,13 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactEmpty
   id: NFStationaryGeneratorStirlingStandardEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: standard stirling generator
-  description: A two-tile stationary generator with a removable fuel module.
+  description: |-
+    A standard stirling generator for powering a variety of equipment.
+    Runs off of solids or liquids depending on installation.
+    Rated for up to 30 kW with basic parts.
   components:
   - type: Machine
     board: NFStationaryGeneratorStirlingStandardMachineCircuitboard
@@ -207,7 +232,8 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactEmpty
   id: NFStationaryGeneratorStirlingCompactSolidEmpty
-  suffix: Solid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:
@@ -223,7 +249,8 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactEmpty
   id: NFStationaryGeneratorStirlingCompactLiquidEmpty
-  suffix: Liquid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:
@@ -239,7 +266,8 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingStandardEmpty
   id: NFStationaryGeneratorStirlingStandardSolidEmpty
-  suffix: Solid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:
@@ -255,7 +283,8 @@
 - type: entity
   parent: NFStationaryGeneratorStirlingStandardEmpty
   id: NFStationaryGeneratorStirlingStandardLiquidEmpty
-  suffix: Liquid, Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   components:
   - type: ItemSlots
     slots:

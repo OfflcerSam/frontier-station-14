@@ -4,9 +4,13 @@
 - type: entity
   parent: PortableGeneratorSwitchableBase
   id: NFStationaryGeneratorCombustionStandardEmpty
-  suffix: Empty
+  categories: [NFGeneratorConstruction]
+  suffix: ""
   name: standard combustion generator
-  description: A stationary liquid-fuel engine. Requires oxygen and ventilation. Its electrical connection is at the base tile.
+  description: |-
+    A standard combustion generator for powering a variety of equipment.
+    Runs off of Welding Fuel.
+    Rated for up to 52.5 kW with basic parts.
   components:
   - type: Transform
     anchored: true
@@ -35,17 +39,34 @@
   - type: Sprite
     sprite: _NF/Structures/Power/Generation/fixed_generator_placeholder.rsi
     noRot: false
+    snapCardinals: false
     offset: 0, 0.5
     scale: 0.5, 1
     layers:
     - state: generator
       map: ["enum.GeneratorVisualLayers.Body"]
+    - state: panel_open
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Panel"]
+    - state: damaged
+      visible: false
+      map: ["enum.GeneratorStatusLayers.Damage"]
+  - type: Appearance
+  - type: GeneratorStatusVisuals
   - type: GenericVisualizer
     visuals:
       enum.GeneratorVisuals.Running:
         enum.GeneratorVisualLayers.Body:
-          True: { color: "#AAFFAA" }
-          False: { color: "#FFFFFF" }
+          True: { state: generator_on }
+          False: { state: generator }
+      enum.GeneratorStatusVisuals.PanelOpen:
+        enum.GeneratorStatusLayers.Panel:
+          True: { visible: true }
+          False: { visible: false }
+      enum.GeneratorStatusVisuals.Damaged:
+        enum.GeneratorStatusLayers.Damage:
+          True: { visible: true }
+          False: { visible: false }
   - type: Construction
     graph: NFMachine1x2
     node: machine

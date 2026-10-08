@@ -9,6 +9,15 @@
   "states": [
     {
       "name": "generator"
+    },
+    {
+      "name": "generator_on"
+    },
+    {
+      "name": "panel_open"
+    },
+    {
+      "name": "damaged"
     }
   ]
 }
