@@ -1,0 +1,21 @@
+<!-- SPDX-FileCopyrightText: 2026 OfflcerSam -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<Document>
+  # Steam Turbines
+
+  <Box>
+    <GuideEntityEmbed Entity="NFStationaryGeneratorSteamStandard" Caption="Standard: 2 by 2 tiles, 40 kW rated" />
+  </Box>
+
+  # Operation
+
+  The boiler burns fuel from a removable Standard hopper or tank. It needs room oxygen and a water-filled internal reservoir. Fuel heat raises steam temperature and pressure; pressure limits electrical output while the turbine warms up or loses water. The turbine has a slow electrical ramp, so pair it with stored power for sudden loads.
+
+  Stop the machine and open its maintenance panel to install or remove a fuel module. Close the panel to add fuel or pour pure water into the reservoir. Examine the water, pressure and temperature gauges. The internal condenser returns most water; a little escapes as hot water vapor. Burning fuel also releases carbon dioxide into the room.
+
+  The basic 250u reservoir lasts about four hours at rated output. The water gauge reaches its low range near 10 percent; falling pressure throttles power and eventually trips the turbine. Refill and restart it manually. A basic 1500u tank of Welding Fuel lasts about two and a half hours at rated output. Wood, coal, plasma and fuel-grade plasma use the same Standard hopper as the Stirling generator. Weaker fuels require more stoking to hold boiler temperature.
+
+  # Damage
+
+  At 20 percent chassis damage, the boiler begins venting hot water vapor on damage steps. Further hits vent more water and lower pressure. A pressurized machine can burst if destroyed while running; its pressure blast cannot break floor tiles. Repairing the chassis restores its pressure sealing, but does not replace lost water.
+</Document>

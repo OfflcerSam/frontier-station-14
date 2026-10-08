@@ -15,6 +15,8 @@ using Content.Shared._NF.Power.Isotope;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Components;
+using Content.Shared.Damage.Systems;
+using Content.Shared.FixedPoint;
 using Content.Shared.Materials;
 using Content.Shared.Radiation.Components;
 using Content.Shared.Stacks;
@@ -102,6 +104,14 @@ public sealed class IsotopeGeneratorTests : InteractionTest
             Assert.That(insert, Is.Not.Null);
             Assert.That(SEntMan.GetComponent<PhysicalCompositionComponent>(insert!.Value).MaterialComposition.Count, Is.EqualTo(2));
             Assert.That(SEntMan.GetComponent<RadiationBlockingContainerComponent>(entity).RadResistance, Is.EqualTo(1.25f));
+            SEntMan.System<DamageableSystem>().TryChangeDamage(entity,
+                new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(20) } }, true);
+            Assert.That(SEntMan.GetComponent<RadiationBlockingContainerComponent>(entity).RadResistance,
+                Is.EqualTo(1.125f).Within(0.001f));
+            SEntMan.System<DamageableSystem>().TryChangeDamage(entity,
+                new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(-20) } }, true);
+            Assert.That(SEntMan.GetComponent<RadiationBlockingContainerComponent>(entity).RadResistance,
+                Is.EqualTo(1.25f).Within(0.001f));
             Assert.That(SEntMan.System<ItemSlotsSystem>().TryEject(entity, "shielding", SPlayer, out _), Is.False);
         });
         await InteractUsing("NFIsotopeCellCasing");
@@ -112,6 +122,12 @@ public sealed class IsotopeGeneratorTests : InteractionTest
         {
             Assert.That(SEntMan.System<ItemSlotsSystem>().GetItemOrNull(STarget!.Value, "shielding"), Is.Null);
             Assert.That(SEntMan.GetComponent<RadiationBlockingContainerComponent>(STarget.Value).RadResistance, Is.EqualTo(0.5f));
+            SEntMan.System<DamageableSystem>().TryChangeDamage(STarget.Value,
+                new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(20) } }, true);
+            Assert.That(SEntMan.GetComponent<RadiationBlockingContainerComponent>(STarget.Value).RadResistance,
+                Is.EqualTo(0.45f).Within(0.001f));
+            SEntMan.System<DamageableSystem>().TryChangeDamage(STarget.Value,
+                new DamageSpecifier { DamageDict = new() { ["Blunt"] = FixedPoint2.New(-20) } }, true);
         });
         await InteractUsing("NFIsotopeCellCasing");
         await InteractUsing("NFRadiationShieldingInsertR2");

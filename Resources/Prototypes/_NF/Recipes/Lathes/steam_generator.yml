@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+- type: latheRecipe
+  parent: PortableGeneratorPacmanMachineCircuitboard
+  id: NFStationaryGeneratorSteamStandardMachineCircuitboard
+  result: NFStationaryGeneratorSteamStandardMachineCircuitboard

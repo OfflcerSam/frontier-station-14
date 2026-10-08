@@ -9,7 +9,11 @@ using Content.Shared.Interaction;
 using Content.Shared.Tools.Systems;
 using Content.Shared.Wires;
 using Content.Server.Popups;
+using Content.Server.Destructible;
 using Content.Server.Radiation.Components;
+using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
+using Content.Shared.FixedPoint;
 using Robust.Shared.Containers;
 
 namespace Content.Server._NF.Power.Isotope;
@@ -20,6 +24,7 @@ public sealed class RadiationShieldingSystem : EntitySystem
     [Dependency] private readonly ItemSlotsSystem _itemSlots = default!;
     [Dependency] private readonly SharedToolSystem _tools = default!;
     [Dependency] private readonly PopupSystem _popup = default!;
+    [Dependency] private readonly DestructibleSystem _destructible = default!;
 
     public override void Initialize()
     {
@@ -27,6 +32,7 @@ public sealed class RadiationShieldingSystem : EntitySystem
         SubscribeLocalEvent<RadiationShieldingComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<RadiationShieldingComponent, EntInsertedIntoContainerMessage>(OnContainerInserted);
         SubscribeLocalEvent<RadiationShieldingComponent, EntRemovedFromContainerMessage>(OnContainerRemoved);
+        SubscribeLocalEvent<RadiationShieldingComponent, DamageChangedEvent>(OnDamageChanged, before: new[] { typeof(DestructibleSystem) });
         SubscribeLocalEvent<RadiationShieldingComponent, InteractUsingEvent>(OnInteractUsing, before: new[] { typeof(ItemSlotsSystem), typeof(Content.Server.Construction.ConstructionSystem) });
         SubscribeLocalEvent<RadiationShieldingComponent, ExaminedEvent>(OnExamined);
     }
@@ -34,15 +40,24 @@ public sealed class RadiationShieldingSystem : EntitySystem
     private void OnMapInit(Entity<RadiationShieldingComponent> entity, ref MapInitEvent arguments) => UpdateShielding(entity);
     private void OnContainerInserted(Entity<RadiationShieldingComponent> entity, ref EntInsertedIntoContainerMessage arguments) => UpdateShielding(entity);
     private void OnContainerRemoved(Entity<RadiationShieldingComponent> entity, ref EntRemovedFromContainerMessage arguments) => UpdateShielding(entity);
+    private void OnDamageChanged(Entity<RadiationShieldingComponent> entity, ref DamageChangedEvent arguments) => UpdateShielding(entity);
 
     public void UpdateShielding(Entity<RadiationShieldingComponent> entity)
     {
         if (!TryComp<RadiationBlockingContainerComponent>(entity, out var shielding))
             return;
-        shielding.RadResistance = entity.Comp.BaselineResistance;
+        var effectiveResistance = entity.Comp.BaselineResistance;
         if (_itemSlots.GetItemOrNull(entity, entity.Comp.ShieldingSlot) is { } insert &&
             TryComp<RadiationShieldingInsertComponent>(insert, out var part))
-            shielding.RadResistance = Math.Max(entity.Comp.BaselineResistance, part.Resistance);
+            effectiveResistance = Math.Max(entity.Comp.BaselineResistance, part.Resistance);
+        if (TryComp<DamageableComponent>(entity, out var damageable) &&
+            _destructible.TryGetDestroyedAt(entity.Owner, out var destructionThreshold) &&
+            destructionThreshold > FixedPoint2.Zero)
+        {
+            var damageFraction = Math.Clamp(damageable.TotalDamage.Float() / destructionThreshold.Value.Float(), 0f, 1f);
+            effectiveResistance *= 1f - damageFraction;
+        }
+        shielding.RadResistance = effectiveResistance;
     }
 
     public bool CanService(EntityUid entity) => TryComp<WiresPanelComponent>(entity, out var panel) && panel.Open;

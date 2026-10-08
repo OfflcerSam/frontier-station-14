@@ -6,6 +6,7 @@
   - NFStationaryCombustionGenerators
   - NFStationaryIsotopeGenerators
   - NFStationaryStirlingGenerators
+  - NFStationarySteamGenerators
 
 - type: guideEntry
   id: NFStationaryCombustionGenerators
@@ -21,3 +22,8 @@
   id: NFStationaryStirlingGenerators
   name: guide-entry-stationary-stirling-generators
   text: "/ServerInfo/_NF/Guidebook/Engineering/StationaryStirlingGenerators.xml"
+
+- type: guideEntry
+  id: NFStationarySteamGenerators
+  name: guide-entry-stationary-steam-generators
+  text: "/ServerInfo/_NF/Guidebook/Engineering/StationarySteamGenerators.xml"

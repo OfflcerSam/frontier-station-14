@@ -1359,6 +1359,7 @@
   cost: 5000
   recipeUnlocks:
   - PortableGeneratorSuperPacmanMachineCircuitboard
+  - NFStationaryGeneratorSteamStandardMachineCircuitboard
   technologyPrerequisites:
   - NFBasicPowerGeneration
   position: 3, 28

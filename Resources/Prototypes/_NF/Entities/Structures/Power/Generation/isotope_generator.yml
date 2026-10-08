@@ -3,7 +3,7 @@
 - type: entity
   parent: [BaseMachine, SmallConstructibleMachine]
   id: NFStationaryGeneratorIsotopeCompact
-  name: Compact Radioisotope Thermoelectric Generator
+  name: compact radioisotope thermoelectric generator
   description: A compact auxiliary generator with a single isotope-cell bay.
   components:
   - type: Transform
@@ -119,7 +119,7 @@
 - type: entity
   parent: NFStationaryGeneratorIsotopeCompact
   id: NFStationaryGeneratorIsotopeStandard
-  name: Standard Radioisotope Thermoelectric Generator
+  name: standard radioisotope thermoelectric generator
   description: An auxiliary generator with two isotope-cell bays.
   components:
   - type: Machine
@@ -181,7 +181,7 @@
 - type: entity
   parent: BaseMachineCircuitboard
   id: NFStationaryGeneratorIsotopeCompactMachineCircuitboard
-  name: Compact Radioisotope Thermoelectric Generator machine board
+  name: compact radioisotope thermoelectric generator machine board
   components:
   - type: Sprite
     state: engineering
@@ -197,7 +197,7 @@
 - type: entity
   parent: BaseMachineCircuitboard
   id: NFStationaryGeneratorIsotopeStandardMachineCircuitboard
-  name: Standard Radioisotope Thermoelectric Generator machine board
+  name: standard radioisotope thermoelectric generator machine board
   components:
   - type: Sprite
     state: engineering

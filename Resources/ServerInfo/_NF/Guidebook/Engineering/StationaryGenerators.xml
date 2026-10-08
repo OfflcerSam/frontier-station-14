@@ -22,6 +22,9 @@
   [textlink="Stirling Generators" link="NFStationaryStirlingGenerators"]
   Generators with interchangeable solid or liquid fuel modules.
 
+  [textlink="Steam Turbines" link="NFStationarySteamGenerators"]
+  Boilers that turn fuel heat and recirculated water into slow-ramping power.
+
   [textlink="Combustion Engines" link="NFStationaryCombustionGenerators"]
   Fueled engines that use combustion.
 

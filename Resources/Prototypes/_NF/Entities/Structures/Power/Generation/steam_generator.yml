@@ -1,0 +1,137 @@
+# SPDX-FileCopyrightText: 2026 OfflcerSam
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+- type: entity
+  parent: PortableGeneratorSwitchableBase
+  id: NFStationaryGeneratorSteamStandard
+  name: standard steam turbine
+  description: A stationary boiler and turbine with a removable fuel module and internal water reservoir.
+  components:
+  - type: Transform
+    anchored: true
+    noRot: false
+  - type: Physics
+    bodyType: Static
+  - type: TileFrictionModifier
+    modifier: 1
+  - type: Rotatable
+    rotateWhileAnchored: false
+    rotateWhilePulling: false
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,1.45,1.45"
+        density: 190
+        mask: [MachineMask]
+        layer: [MachineLayer]
+  - type: MachineFootprint
+    tiles: ["0, 0", "1, 0", "0, 1", "1, 1"]
+  - type: Sprite
+    sprite: _NF/Structures/Power/Generation/steam_generator_placeholder.rsi
+    noRot: false
+    offset: 0.5, 0.5
+    layers:
+    - state: generator
+      map: ["enum.GeneratorVisualLayers.Body"]
+  - type: GenericVisualizer
+    visuals:
+      enum.GeneratorVisuals.Running:
+        enum.GeneratorVisualLayers.Body:
+          True: { color: "#AAFFAA" }
+          False: { color: "#FFFFFF" }
+  - type: Machine
+    board: NFStationaryGeneratorSteamStandardMachineCircuitboard
+  - type: Damageable
+    damageModifierSet: Metallic
+  - type: RequireProjectileTarget
+    active: false
+  - type: ExaminableDamage
+    messages: NFStationaryGeneratorDamageMessages
+  - type: StationaryGenerator
+    ratedPower: 40000
+    ratedMaximumPower: 40000
+    ratedBurnRate: 0.16666667
+    ratedRampRate: 2000
+    ratedFuelCapacity: 0
+    oxygenMolesPerFuelUnit: 0.5
+  - type: FuelGenerator
+    targetPower: 40000
+    minTargetPower: 10000
+    optimalPower: 40000
+    maxTargetPower: 40000
+    optimalBurnRate: 0.16666667
+    fuelEfficiencyConstant: 1.3
+  - type: SteamTurbine
+  - type: FuelModuleHost
+    moduleSize: Standard
+  - type: ItemSlots
+    slots:
+      fuel_module:
+        locked: true
+        insertOnInteract: false
+        disableEject: true
+        ejectOnBreak: true
+        whitelist:
+          components: [FuelModule]
+  - type: ContainerContainer
+    containers:
+      fuel_module: !type:ContainerSlot
+      machine_board: !type:Container
+      machine_parts: !type:Container
+  - type: SolutionContainerManager
+    solutions:
+      water:
+        maxVol: 250
+  - type: AmbientSound
+    sound:
+      path: /Audio/_NF/Machines/StationaryGenerators/engine-loop.ogg
+  - type: PortableGenerator
+    startChance: 1
+  - type: PowerSupplier
+    supplyRate: 40000
+    supplyRampRate: 2000
+    supplyRampTolerance: 500
+  - type: Electrified
+    highVoltageNode: output_hv
+  - type: PowerMonitoringDevice
+    group: Generator
+    loadNode: output_hv
+    sprite: _NF/Structures/Power/Generation/steam_generator_placeholder.rsi
+    state: generator
+  - type: GeneratorExhaustGas
+    gasType: CarbonDioxide
+    moleRatio: 0.5
+    temperature: 373.15
+  - type: GuideHelp
+    guides: [NFStationarySteamGenerators]
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 100
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:ChangeConstructionNodeBehavior
+        node: machineFrame
+      - !type:DoActsBehavior
+        acts: [Destruction]
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: NFStationaryGeneratorSteamStandardMachineCircuitboard
+  name: standard steam turbine machine board
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: NFStationaryGeneratorSteamStandard
+    requirements:
+      Capacitor: 2
+      Manipulator: 1
+      MatterBin: 1
+    stackRequirements:
+      CableHV: 15
+      Steel: 15
+      Glass: 10
