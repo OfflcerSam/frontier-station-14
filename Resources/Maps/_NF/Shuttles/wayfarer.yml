@@ -4,8 +4,8 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/09/2026 00:17:54
-  entityCount: 2201
+  time: 10/09/2026 00:20:37
+  entityCount: 2204
 maps: []
 grids:
 - 1
@@ -10666,14 +10666,6 @@ entities:
       parent: 1
     - type: ApcPowerReceiver
       powerLoad: 1
-  - uid: 1365
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: -1.5,-39.5
-      parent: 1
-    - type: ApcPowerReceiver
-      powerLoad: 1
   - uid: 1669
     components:
     - type: Transform
@@ -10683,6 +10675,24 @@ entities:
     components:
     - type: Transform
       pos: -1.5,-2.5
+      parent: 1
+  - uid: 2202
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: -1.5,-3.5
+      parent: 1
+  - uid: 2203
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 7.5,-3.5
+      parent: 1
+  - uid: 2204
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: -1.5,-39.5
       parent: 1
 - proto: HandheldHealthAnalyzerUnpowered
   entities:
@@ -10708,7 +10718,7 @@ entities:
       pos: -1.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -4590.886
+      secondsUntilStateChange: -4753.524
       state: Opening
   - uid: 1369
     components:
@@ -10717,7 +10727,7 @@ entities:
       pos: 0.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -4589.586
+      secondsUntilStateChange: -4752.224
       state: Opening
   - uid: 1370
     components:
@@ -10726,7 +10736,7 @@ entities:
       pos: -1.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -4588.5195
+      secondsUntilStateChange: -4751.1577
       state: Opening
   - uid: 1371
     components:
@@ -10735,7 +10745,7 @@ entities:
       pos: 0.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -4589.0527
+      secondsUntilStateChange: -4751.691
       state: Opening
 - proto: ImpCoffeeMachine
   entities:
@@ -11004,6 +11014,32 @@ entities:
         - - Output
           - Toggle
         1527:
+        - - Output
+          - Toggle
+    - type: Physics
+      canCollide: False
+      bodyType: Static
+  - uid: 1365
+    components:
+    - type: Transform
+      anchored: True
+      rot: 3.141592653589793 rad
+      pos: -1.5,-39.5
+      parent: 1
+    - type: DeviceLinkSink
+      invokeCounter: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        1533:
+        - - Output
+          - Toggle
+        1530:
+        - - Output
+          - Toggle
+        1531:
+        - - Output
+          - Toggle
+        1532:
         - - Output
           - Toggle
     - type: Physics
@@ -11849,22 +11885,30 @@ entities:
     - type: Transform
       pos: 1.5,-42.5
       parent: 1
+    - type: DeviceLinkSink
+      invokeCounter: 1
   - uid: 1531
     components:
     - type: Transform
       pos: 4.5,-42.5
       parent: 1
+    - type: DeviceLinkSink
+      invokeCounter: 1
   - uid: 1532
     components:
     - type: Transform
       pos: 4.5,-36.5
       parent: 1
+    - type: DeviceLinkSink
+      invokeCounter: 1
   - uid: 1533
     components:
     - type: Transform
       rot: 3.141592653589793 rad
       pos: 1.5,-40.5
       parent: 1
+    - type: DeviceLinkSink
+      invokeCounter: 1
 - proto: PoweredStrobeSodiumSiren
   entities:
   - uid: 1534
@@ -12744,11 +12788,21 @@ entities:
     - type: Transform
       pos: 2.5,-41.5
       parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        1365:
+        - - DoorStatus
+          - InputA
   - uid: 1680
     components:
     - type: Transform
       pos: 3.5,-41.5
       parent: 1
+    - type: DeviceLinkSource
+      linkedPorts:
+        1365:
+        - - DoorStatus
+          - InputB
 - proto: ShuttersWindow
   entities:
   - uid: 1681
@@ -13038,26 +13092,6 @@ entities:
           - Open
         - - Off
           - Close
-        1533:
-        - - On
-          - On
-        - - Off
-          - Off
-        1530:
-        - - Off
-          - Off
-        - - On
-          - On
-        1531:
-        - - On
-          - On
-        - - Off
-          - Off
-        1532:
-        - - On
-          - On
-        - - Off
-          - Off
     - type: Fixtures
       fixtures: {}
   - uid: 1382
