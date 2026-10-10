@@ -13,7 +13,7 @@
   parent: BaseVessel
   name: SI Probe
   description: Built upon the reliable Pick-class platform, some heavy modification was done to allow for scienctific research. Brought to you by Stonian Industries.
-  price: 39400 # ~37460 (calculated) * ~1.05 to 1.10 (markup) = 39333
+  price: 35000 # ~32399 (calculated) * ~1.05 to 1.10 (markup) = ~34018.95
   category: Medium
   group: Shipyard
   shuttlePath: /Maps/_NF/Shuttles/probe.yml
