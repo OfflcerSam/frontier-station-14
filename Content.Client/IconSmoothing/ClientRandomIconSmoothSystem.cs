@@ -25,5 +25,6 @@ public sealed class ClientRandomIconSmoothSystem : SharedRandomIconSmoothSystem
 
         smooth.StateBase = state;
         _iconSmooth.SetStateBase(ent, smooth, state);
+		_iconSmooth.DirtyNeighbours(ent.Owner, smooth);
     }
 }
