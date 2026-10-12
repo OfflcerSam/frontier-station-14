@@ -13,11 +13,13 @@ using Robust.Shared.Map.Components;
 namespace Content.Server.NodeContainer.Nodes;
 
 /// <summary>
-/// Connects the cable beneath a powerlock to the same voltage on its docked partner.
+/// Connects matching cable behind a powerlock to its docked partner.
 /// </summary>
 [DataDefinition]
-public sealed partial class DockableCableNode : CableDeviceNode
+public sealed partial class DockableCableNode : Node, IRotatableNode
 {
+    public bool RotateNode(in MoveEvent ev) => true;
+
     public override IEnumerable<Node> GetReachableNodes(
         TransformComponent xform,
         EntityQuery<NodeContainerComponent> nodeQuery,
@@ -25,11 +27,23 @@ public sealed partial class DockableCableNode : CableDeviceNode
         MapGridComponent? grid,
         IEntityManager entMan)
     {
-        foreach (var node in base.GetReachableNodes(xform, nodeQuery, xformQuery, grid, entMan))
-            yield return node;
-
         if (!xform.Anchored || grid == null)
             yield break;
+
+        var rear = xform.LocalRotation.GetCardinalDir().GetOpposite();
+        var tile = grid.TileIndicesFor(xform.Coordinates);
+        foreach (var (direction, node) in NodeHelpers.GetCardinalNeighborNodes(nodeQuery, grid, tile, false))
+        {
+            if (direction != rear || node is not CableNode cable || node.NodeGroupID != NodeGroupID)
+                continue;
+
+            // Let the cable apply its terminal-direction blocking rules as well.
+            foreach (var reachable in cable.GetReachableNodes(xformQuery.GetComponent(cable.Owner), nodeQuery, xformQuery, grid, entMan))
+            {
+                if (reachable == this)
+                    yield return cable;
+            }
+        }
 
         if (!entMan.TryGetComponent(Owner, out DockingComponent? docking) ||
             docking.DockedWith == null ||

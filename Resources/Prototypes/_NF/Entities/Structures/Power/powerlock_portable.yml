@@ -1,0 +1,134 @@
+# Portable ports combine gaslock frames with voltage-specific powerlock cable art.
+- type: entity
+  parent: [BasePowerlock, BaseStructureDynamic, ConstructibleMachine]
+  id: BasePowerlockFrame
+  abstract: true
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Dynamic
+  - type: Anchorable
+  - type: Rotatable
+  - type: WiresPanel
+  - type: WiresVisuals
+  - type: Docking
+    receiveOnly: true
+  - type: Sprite
+    sprite: _NF/Structures/Piping/Atmospherics/portable_gaslock.rsi
+    layers:
+    - state: base
+    - state: closed_unlit
+      shader: unshaded
+      map: ["docked-unlit"]
+      visible: false
+    - state: lvStraight
+      sprite: _NF/Structures/Power/Powerlock/lvlock.rsi
+      map: ["cable"]
+      color: Green
+    - state: panel_open
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
+  - type: PowerMonitoringDevice
+    sprite: _NF/Structures/Piping/Atmospherics/portable_gaslock.rsi
+    state: base
+  - type: StaticPrice
+    price: 100
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.25,-0.49,0.25,0.25"
+        density: 100
+        mask:
+        - FullTileMask
+        layer:
+        - AirlockLayer
+      docking:
+        shape: !type:PhysShapeCircle
+          radius: 0.2
+          position: "0,-0.5"
+        hard: false
+  - type: BindToStation
+    enabled: false
+
+- type: entity
+  parent: BasePowerlockFrame
+  id: PowerlockLVFrame
+  name: portable LV powerlock
+  description: An anchorable LV power connection. Connect matching cable to its rear. Accepts docking from a LV powerlock while anchored.
+  components:
+  - type: Docking
+    dockType: PowerLV
+    radarColor: limegreen
+    highlightedRadarColor: white
+  - type: NodeContainer
+    nodes:
+      power:
+        !type:DockableCableNode
+        nodeGroupID: Apc
+  - type: Machine
+    board: PowerlockLVFrameMachineCircuitboard
+
+- type: entity
+  parent: BasePowerlockFrame
+  id: PowerlockMVFrame
+  name: portable MV powerlock
+  description: An anchorable MV power connection. Connect matching cable to its rear. Accepts docking from a MV powerlock while anchored.
+  components:
+  - type: Docking
+    dockType: PowerMV
+    radarColor: yellow
+    highlightedRadarColor: white
+  - type: NodeContainer
+    nodes:
+      power:
+        !type:DockableCableNode
+        nodeGroupID: MVPower
+  - type: Machine
+    board: PowerlockMVFrameMachineCircuitboard
+  - type: Sprite
+    layers:
+    - state: base
+    - state: closed_unlit
+      shader: unshaded
+      map: ["docked-unlit"]
+      visible: false
+    - state: mvStraight
+      sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
+      map: ["cable"]
+      color: Yellow
+    - state: mvstripeStraight
+      sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
+      map: ["cable-stripes"]
+    - state: panel_open
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
+
+- type: entity
+  parent: BasePowerlockFrame
+  id: PowerlockHVFrame
+  name: portable HV powerlock
+  description: An anchorable HV power connection. Connect matching cable to its rear. Accepts docking from a HV powerlock while anchored.
+  components:
+  - type: Docking
+    dockType: PowerHV
+    radarColor: orange
+    highlightedRadarColor: white
+  - type: NodeContainer
+    nodes:
+      power:
+        !type:DockableCableNode
+        nodeGroupID: HVPower
+  - type: Machine
+    board: PowerlockHVFrameMachineCircuitboard
+  - type: Sprite
+    layers:
+    - state: base
+    - state: closed_unlit
+      shader: unshaded
+      map: ["docked-unlit"]
+      visible: false
+    - state: hvStraight
+      sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
+      map: ["cable"]
+    - state: panel_open
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]

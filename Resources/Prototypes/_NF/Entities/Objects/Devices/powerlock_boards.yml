@@ -1,0 +1,44 @@
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: PowerlockLVFrameMachineCircuitboard
+  name: portable LV powerlock machine board
+  description: A machine circuit board for a portable LV powerlock.
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: PowerlockLVFrame
+    stackRequirements:
+      Steel: 10
+  - type: BindToStation
+    enabled: false
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: PowerlockMVFrameMachineCircuitboard
+  name: portable MV powerlock machine board
+  description: A machine circuit board for a portable MV powerlock.
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: PowerlockMVFrame
+    stackRequirements:
+      Steel: 10
+  - type: BindToStation
+    enabled: false
+
+- type: entity
+  parent: BaseMachineCircuitboard
+  id: PowerlockHVFrameMachineCircuitboard
+  name: portable HV powerlock machine board
+  description: A machine circuit board for a portable HV powerlock.
+  components:
+  - type: Sprite
+    state: engineering
+  - type: MachineBoard
+    prototype: PowerlockHVFrame
+    stackRequirements:
+      Steel: 10
+  - type: BindToStation
+    enabled: false

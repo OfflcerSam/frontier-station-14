@@ -1,0 +1,23 @@
+- type: latheRecipe
+  parent: [BaseCircuitboardRecipe, BaseEngineeringMachineRecipeCategory]
+  id: PowerlockLVFrameMachineCircuitboard
+  result: PowerlockLVFrameMachineCircuitboard
+  materials:
+    Steel: 800
+    Glass: 900
+
+- type: latheRecipe
+  parent: [BaseCircuitboardRecipe, BaseEngineeringMachineRecipeCategory]
+  id: PowerlockMVFrameMachineCircuitboard
+  result: PowerlockMVFrameMachineCircuitboard
+  materials:
+    Steel: 800
+    Glass: 900
+
+- type: latheRecipe
+  parent: [BaseCircuitboardRecipe, BaseEngineeringMachineRecipeCategory]
+  id: PowerlockHVFrameMachineCircuitboard
+  result: PowerlockHVFrameMachineCircuitboard
+  materials:
+    Steel: 800
+    Glass: 900

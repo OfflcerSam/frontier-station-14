@@ -69,6 +69,9 @@
   recipes:
   - GasMiningDrillMachineCircuitboard
   - GaslockFrameMachineCircuitboard
+  - PowerlockLVFrameMachineCircuitboard
+  - PowerlockMVFrameMachineCircuitboard
+  - PowerlockHVFrameMachineCircuitboard
   - RPED
   - AdvancedCapacitorStockPart
   - AdvancedMatterBinStockPart
@@ -93,6 +96,9 @@
   recipes:
   - GasMiningDrillMachineCircuitboard
   - GaslockFrameMachineCircuitboard
+  - PowerlockLVFrameMachineCircuitboard
+  - PowerlockMVFrameMachineCircuitboard
+  - PowerlockHVFrameMachineCircuitboard
   - AlertsComputerCircuitboard
   - PowerComputerCircuitboard
   - AtmosMonitoringComputerCircuitboard

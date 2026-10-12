@@ -26,11 +26,6 @@
           radius: 0.2
           position: "0,-0.5"
         hard: false
-  - type: Airtight
-  - type: RadiationBlocker
-    resistance: 3
-  - type: Occluder
-  - type: BlockWeather
   - type: Appearance
   - type: InteractionOutline
   - type: Sprite
@@ -42,17 +37,15 @@
       shader: unshaded
       map: ["docked-unlit"]
       visible: false
-    - state: cableEnd
+    - state: lvStraight
       map: ["cable"]
+      color: Green
   - type: GenericVisualizer
     visuals:
       enum.PowerlockVisuals.Docked:
         docked-unlit:
           True: { visible: true }
           False: { visible: false }
-        cable:
-          True: { state: pipeStraight }
-          False: { state: cableEnd }
   - type: PowerMonitoringDevice
     group: Powerlock
     sourceNode: power
@@ -60,9 +53,6 @@
     state: closed
   - type: StaticPrice
     price: 350
-  - type: IconSmooth
-    key: walls
-    mode: NoSprite
   - type: Tag
     tags:
     - ForceNoFixRotations
@@ -79,9 +69,23 @@
 
 - type: entity
   parent: BasePowerlock
+  id: BaseWallPowerlock
+  abstract: true
+  components:
+  - type: Airtight
+  - type: RadiationBlocker
+    resistance: 3
+  - type: Occluder
+  - type: BlockWeather
+  - type: IconSmooth
+    key: walls
+    mode: NoSprite
+
+- type: entity
+  parent: BaseWallPowerlock
   id: PowerlockLV
   name: LV powerlock
-  description: Connects LV cables between docked ships or stations. Lay matching cable beneath both ports. Only docks with another LV powerlock.
+  description: Connects LV cables between docked ships or stations. Connect matching cable to the rear of both ports. Only docks with another LV powerlock.
   components:
   - type: Docking
     dockType: PowerLV
@@ -101,10 +105,10 @@
     node: powerlock
 
 - type: entity
-  parent: BasePowerlock
+  parent: BaseWallPowerlock
   id: PowerlockMV
   name: MV powerlock
-  description: Connects MV cables between docked ships or stations. Lay matching cable beneath both ports. Only docks with another MV powerlock.
+  description: Connects MV cables between docked ships or stations. Connect matching cable to the rear of both ports. Only docks with another MV powerlock.
   components:
   - type: Docking
     dockType: PowerMV
@@ -123,22 +127,11 @@
       shader: unshaded
       map: ["docked-unlit"]
       visible: false
-    - state: cableEnd
+    - state: mvStraight
       map: ["cable"]
-    - state: stripeEnd
-      map: ["stripe"]
-  - type: GenericVisualizer
-    visuals:
-      enum.PowerlockVisuals.Docked:
-        stripe:
-          True: { state: stripeStraight }
-          False: { state: stripeEnd }
-        cable:
-          True: { state: pipeStraight }
-          False: { state: cableEnd }
-        docked-unlit:
-          True: { visible: true }
-          False: { visible: false }
+      color: Yellow
+    - state: mvstripeStraight
+      map: ["cable-stripes"]
   - type: PowerMonitoringDevice
     sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
   - type: Construction
@@ -146,10 +139,10 @@
     node: powerlock
 
 - type: entity
-  parent: BasePowerlock
+  parent: BaseWallPowerlock
   id: PowerlockHV
   name: HV powerlock
-  description: Connects HV cables between docked ships or stations. Lay matching cable beneath both ports. Only docks with another HV powerlock.
+  description: Connects HV cables between docked ships or stations. Connect matching cable to the rear of both ports. Only docks with another HV powerlock.
   components:
   - type: Docking
     dockType: PowerHV
@@ -162,6 +155,14 @@
         nodeGroupID: HVPower
   - type: Sprite
     sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
+    layers:
+    - state: closed
+    - state: closed_unlit
+      shader: unshaded
+      map: ["docked-unlit"]
+      visible: false
+    - state: hvStraight
+      map: ["cable"]
   - type: PowerMonitoringDevice
     sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
   - type: Construction

@@ -5,7 +5,7 @@
     "y": 32
   },
   "license": "CC-BY-SA-3.0",
-  "copyright": "closed, closed_unlit and panel_open copied unchanged from _NF/Structures/Piping/Atmospherics/gaslock.rsi (CC-BY-SA-3.0): closed, bolted_unlit taken from CEV-Eris at commit https://github.com/discordia-space/CEV-Eris/commit/14517938186858388656a6aee14bf47af9e9649f - then modified by 20kdc, AJCM-git and whatston3. pipeStraight and cableEnd copied unchanged from lv_cable.rsi states 3 and 1 (CC-BY-SA-3.0): Taken from tgstation at commit https://github.com/tgstation/tgstation/commit/fcf375d7d9ce6ceed5c7face899725e5655ab640. MV stripe states are copied from the same cable RSI.",
+  "copyright": "closed, closed_unlit, panel_open and pipeStraight copied unchanged from _NF/Structures/Piping/Atmospherics/gaslock.rsi (CC-BY-SA-3.0): closed, bolted_unlit taken from CEV-Eris at commit https://github.com/discordia-space/CEV-Eris/commit/14517938186858388656a6aee14bf47af9e9649f - then modified by 20kdc, AJCM-git and whatston3. cableEnd copied unchanged from Structures/Power/Cables/lv_cable.rsi (CC-BY-SA-3.0): Taken from tgstation at commit https://github.com/tgstation/tgstation/commit/fcf375d7d9ce6ceed5c7face899725e5655ab640. lvStraight edited by OfflcerSam (https://github.com/OfflcerSam) from the corresponding base-game cable sprites credited above and arranged in the four-direction pipeStraight format.",
   "states": [
     {
       "name": "closed"
@@ -17,10 +17,15 @@
       "name": "panel_open"
     },
     {
-      "name": "pipeStraight"
+      "name": "pipeStraight",
+      "directions": 4
     },
     {
       "name": "cableEnd"
+    },
+    {
+      "name": "lvStraight",
+      "directions": 4
     }
   ]
 }
