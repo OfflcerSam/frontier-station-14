@@ -53,6 +53,7 @@ Additional repositories with ported code without Namespaces (denoted by comments
 | Fork Name | Source Repository | Original License |
 |-----------|-------------------|------------------|
 | Monolith | https://github.com/Monolith-Station/Monolith | AGPL 3.0 |
+| 6MD-Monolith | https://github.com/6th-Maroon-Division/Monolith | MPL 2.0 |
 | Space Station 14 ("Wizden"/"Upstream") | https://github.com/space-wizards/space-station-14 | MIT |
 | White Dream | https://github.com/WWhiteDreamProject/wwdpublic | AGPL 3.0 |
 
