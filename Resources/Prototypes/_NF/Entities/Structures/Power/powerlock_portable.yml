@@ -28,6 +28,10 @@
       color: Green
     - state: panel_open
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
+    - state: lvHeadStraight
+      sprite: _NF/Structures/Power/Powerlock/lvlock.rsi
+      map: ["cable-head"]
+      color: White
   - type: PowerMonitoringDevice
     sprite: _NF/Structures/Piping/Atmospherics/portable_gaslock.rsi
     state: base
@@ -102,6 +106,10 @@
       map: ["cable-stripes"]
     - state: panel_open
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
+    - state: mvHeadStraight
+      sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
+      map: ["cable-head"]
+      color: White
 
 - type: entity
   parent: BasePowerlockFrame
@@ -132,3 +140,7 @@
       map: ["cable"]
     - state: panel_open
       map: ["enum.WiresVisualLayers.MaintenancePanel"]
+    - state: hvHeadStraight
+      sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
+      map: ["cable-head"]
+      color: White

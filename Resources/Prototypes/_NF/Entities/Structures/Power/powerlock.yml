@@ -40,6 +40,9 @@
     - state: lvStraight
       map: ["cable"]
       color: Green
+    - state: lvHeadStraight
+      map: ["cable-head"]
+      color: White
   - type: GenericVisualizer
     visuals:
       enum.PowerlockVisuals.Docked:
@@ -132,6 +135,9 @@
       color: Yellow
     - state: mvstripeStraight
       map: ["cable-stripes"]
+    - state: mvHeadStraight
+      map: ["cable-head"]
+      color: White
   - type: PowerMonitoringDevice
     sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
   - type: Construction
@@ -163,6 +169,9 @@
       visible: false
     - state: hvStraight
       map: ["cable"]
+    - state: hvHeadStraight
+      map: ["cable-head"]
+      color: White
   - type: PowerMonitoringDevice
     sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
   - type: Construction
