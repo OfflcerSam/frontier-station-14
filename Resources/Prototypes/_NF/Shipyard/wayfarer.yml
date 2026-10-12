@@ -1,19 +1,19 @@
 # Author Info
 # GitHub: OfflcerSam
-# Discord: Offlcer_Sam
+# Discord: [Terminated]
 
 # Maintainer Info
-# GitHub: ???
-# Discord: ???
+# GitHub: OfflcerSam
+# Discord: [Terminated]
 
 # Shuttle Notes:
-#
+# Cruising.
 - type: vessel
   id: Wayfarer
   parent: BaseVessel
   name: SI Wayfarer
   description: A former passenger spaceliner converted for salvage duty, while still retaining some service accommodations.
-  price: 139000 # ~120700 (calculated) * 1.15 to 1.30 (markup) = ~138805
+  price: 140100 # ~120700 (calculated) * ~1.16 (markup) = ~140012
   category: Large
   group: Shipyard
   shuttlePath: /Maps/_NF/Shuttles/wayfarer.yml

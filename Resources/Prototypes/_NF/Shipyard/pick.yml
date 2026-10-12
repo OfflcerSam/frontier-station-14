@@ -1,10 +1,10 @@
 # Author Info
 # GitHub: OfflcerSam
-# Discord: offlcer_sam
+# Discord: [Terminated]
 
 # Maintainer Info
-# GitHub: ???
-# Discord: ???
+# GitHub: OfflcerSam
+# Discord: [Terminated]
 
 # Shuttle Notes:
 #
@@ -13,7 +13,7 @@
   parent: BaseVessel
   name: SI Pick
   description: A personnel mining shuttle designed for single person short-term mining trips. Brought to you by Stonian Industries.
-  price: 13000 # 11911 (calculated) * ~1.05 - 1.10 (markup) = 12506.55
+  price: 12700 # 11911 (calculated) * ~1.06 (markup) = 12625.66
   category: Small
   group: Shipyard
   shuttlePath: /Maps/_NF/Shuttles/pick.yml

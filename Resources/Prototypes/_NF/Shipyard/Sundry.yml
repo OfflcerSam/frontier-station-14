@@ -1,0 +1,45 @@
+# Author Info
+# GitHub: OfflcerSam
+# Discord: Offlcer_Sam
+
+# Maintainer Info
+# GitHub: ???
+# Discord: ???
+
+# Shuttle Notes:
+#
+- type: vessel
+  id: Sundry
+  parent: BaseVessel
+  name: VD Sundry
+  description: A former passenger spaceliner converted for salvage duty, while still retaining some service accommodations.
+  price: 140500 # ~100382 + 40% = 140,535 rounded: 140500
+  category: Medium
+  group: Shipyard
+  shuttlePath: /Maps/_NF/Shuttles/Sundry.yml
+  guidebookPage: Null
+  class:
+  - Salvage
+  - Civilian
+  engine:
+  - Uranium
+
+- type: gameMap
+  id: Sundry
+  mapName: 'VD Sundry'
+  mapPath: /Maps/_NF/Shuttles/Sundry.yml
+  minPlayers: 0
+  stations:
+    Sundry:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Sundry {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]
