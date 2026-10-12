@@ -1,0 +1,169 @@
+# Dedicated power-only docks. Art is reused from FS14's attributed gaslock RSI.
+- type: entity
+  parent: BaseStructure
+  id: BasePowerlock
+  abstract: true
+  components:
+  - type: Transform
+    noRot: false
+  - type: Powerlock
+  - type: DockingSignalControl
+  - type: DeviceLinkSource
+    ports:
+    - DockStatus
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape: !type:PhysShapeAabb
+          bounds: "-0.49,-0.49,0.49,0.49"
+        density: 100
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+      docking:
+        shape: !type:PhysShapeCircle
+          radius: 0.2
+          position: "0,-0.5"
+        hard: false
+  - type: Airtight
+  - type: RadiationBlocker
+    resistance: 3
+  - type: Occluder
+  - type: BlockWeather
+  - type: Appearance
+  - type: InteractionOutline
+  - type: Sprite
+    sprite: _NF/Structures/Power/Powerlock/lvlock.rsi
+    drawdepth: Doors
+    layers:
+    - state: closed
+    - state: closed_unlit
+      shader: unshaded
+      map: ["docked-unlit"]
+      visible: false
+    - state: cableEnd
+      map: ["cable"]
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerlockVisuals.Docked:
+        docked-unlit:
+          True: { visible: true }
+          False: { visible: false }
+        cable:
+          True: { state: pipeStraight }
+          False: { state: cableEnd }
+  - type: PowerMonitoringDevice
+    group: Powerlock
+    sourceNode: power
+    loadNode: power
+    state: closed
+  - type: StaticPrice
+    price: 350
+  - type: IconSmooth
+    key: walls
+    mode: NoSprite
+  - type: Tag
+    tags:
+    - ForceNoFixRotations
+  - type: Damageable
+    damageContainer: StructuralInorganic
+    damageModifierSet: Metallic
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:DoActsBehavior
+        acts: ["Destruction"]
+
+- type: entity
+  parent: BasePowerlock
+  id: PowerlockLV
+  name: LV powerlock
+  description: Connects LV cables between docked ships or stations. Lay matching cable beneath both ports. Only docks with another LV powerlock.
+  components:
+  - type: Docking
+    dockType: PowerLV
+    radarColor: limegreen
+    highlightedRadarColor: white
+  - type: NodeContainer
+    nodes:
+      power:
+        !type:DockableCableNode
+        nodeGroupID: Apc
+  - type: Sprite
+    sprite: _NF/Structures/Power/Powerlock/lvlock.rsi
+  - type: PowerMonitoringDevice
+    sprite: _NF/Structures/Power/Powerlock/lvlock.rsi
+  - type: Construction
+    graph: PowerlockLV
+    node: powerlock
+
+- type: entity
+  parent: BasePowerlock
+  id: PowerlockMV
+  name: MV powerlock
+  description: Connects MV cables between docked ships or stations. Lay matching cable beneath both ports. Only docks with another MV powerlock.
+  components:
+  - type: Docking
+    dockType: PowerMV
+    radarColor: yellow
+    highlightedRadarColor: white
+  - type: NodeContainer
+    nodes:
+      power:
+        !type:DockableCableNode
+        nodeGroupID: MVPower
+  - type: Sprite
+    sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
+    layers:
+    - state: closed
+    - state: closed_unlit
+      shader: unshaded
+      map: ["docked-unlit"]
+      visible: false
+    - state: cableEnd
+      map: ["cable"]
+    - state: stripeEnd
+      map: ["stripe"]
+  - type: GenericVisualizer
+    visuals:
+      enum.PowerlockVisuals.Docked:
+        stripe:
+          True: { state: stripeStraight }
+          False: { state: stripeEnd }
+        cable:
+          True: { state: pipeStraight }
+          False: { state: cableEnd }
+        docked-unlit:
+          True: { visible: true }
+          False: { visible: false }
+  - type: PowerMonitoringDevice
+    sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
+  - type: Construction
+    graph: PowerlockMV
+    node: powerlock
+
+- type: entity
+  parent: BasePowerlock
+  id: PowerlockHV
+  name: HV powerlock
+  description: Connects HV cables between docked ships or stations. Lay matching cable beneath both ports. Only docks with another HV powerlock.
+  components:
+  - type: Docking
+    dockType: PowerHV
+    radarColor: orange
+    highlightedRadarColor: white
+  - type: NodeContainer
+    nodes:
+      power:
+        !type:DockableCableNode
+        nodeGroupID: HVPower
+  - type: Sprite
+    sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
+  - type: PowerMonitoringDevice
+    sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
+  - type: Construction
+    graph: PowerlockHV
+    node: powerlock

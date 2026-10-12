@@ -103,6 +103,7 @@ public struct PowerMonitoringConsoleEntry
     public PowerMonitoringConsoleGroup Group;
     public double PowerValue;
     public float? BatteryLevel;
+    public bool? PowerlockDocked; // Frontier: docking status; PowerValue is network load for powerlocks.
 
     [NonSerialized] public PowerMonitoringDeviceMetaData? MetaData = null;
 
@@ -141,6 +142,7 @@ public enum PowerMonitoringConsoleGroup : byte
     Substation,
     APC,
     Consumer,
+    Powerlock, // Frontier
 }
 
 [Flags]

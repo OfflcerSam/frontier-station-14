@@ -365,6 +365,13 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
 
             // Generate a new console entry with which to populate the UI
             var entry = new PowerMonitoringConsoleEntry(GetNetEntity(ent), device.Group, powerStats.PowerValue, powerStats.BatteryLevel);
+            // Frontier: powerlocks inspect a network without consuming or generating power.
+            if (device.Group == PowerMonitoringConsoleGroup.Powerlock)
+            {
+                entry.PowerlockDocked = TryComp<Content.Server.Shuttles.Components.DockingComponent>(ent, out var dock) && dock.Docked;
+                entry.PowerValue = GetPowerlockNetworkLoad(ent, device);
+            }
+            // End Frontier
             allEntries.Add(entry);
         }
 
@@ -518,6 +525,14 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
     {
         sources = new List<PowerMonitoringConsoleEntry>();
 
+        // Frontier: LV powerlocks inspect APC networks.
+        if (node.NodeGroup is ApcNet apcNet)
+        {
+            GetPowerlockApcSources(apcNet, sources);
+            return;
+        }
+        // End Frontier
+
         if (node.NodeGroup is not PowerNet netQ)
             return;
 
@@ -633,6 +648,14 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
     {
         loads = new List<PowerMonitoringConsoleEntry>();
 
+        // Frontier: LV powerlocks inspect APC networks.
+        if (node.NodeGroup is ApcNet apcNet)
+        {
+            GetPowerlockApcLoads(apcNet, loads);
+            return;
+        }
+        // End Frontier
+
         if (node.NodeGroup is not PowerNet netQ)
             return;
 
@@ -697,6 +720,10 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
         }
 
         loads = indexedLoads.Values.ToList();
+
+        // Frontier: a bridge shows the whole network, not a share attributed to a generator.
+        if (HasComp<Content.Server._NF.Power.Components.PowerlockComponent>(uid))
+            return;
 
         // Exit if demand is negligible
         if (MathHelper.CloseTo(currentDemand, 0))

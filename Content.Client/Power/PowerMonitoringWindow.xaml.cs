@@ -32,6 +32,7 @@ public sealed partial class PowerMonitoringWindow : FancyWindow
         { PowerMonitoringConsoleGroup.SMES, (new SpriteSpecifier.Texture(new ResPath("/Textures/Interface/NavMap/beveled_hexagon.png")), Color.OrangeRed) },
         { PowerMonitoringConsoleGroup.Substation, (new SpriteSpecifier.Texture(new ResPath("/Textures/Interface/NavMap/beveled_square.png")), Color.Yellow) },
         { PowerMonitoringConsoleGroup.APC, (new SpriteSpecifier.Texture(new ResPath("/Textures/Interface/NavMap/beveled_triangle.png")), Color.LimeGreen) },
+        { PowerMonitoringConsoleGroup.Powerlock, (new SpriteSpecifier.Texture(new ResPath("/Textures/Interface/NavMap/beveled_square.png")), Color.Cyan) }, // Frontier
     };
 
     public EntityUid Entity;
@@ -55,6 +56,7 @@ public sealed partial class PowerMonitoringWindow : FancyWindow
         MasterTabContainer.SetTabTitle(1, Loc.GetString("power-monitoring-window-label-smes"));
         MasterTabContainer.SetTabTitle(2, Loc.GetString("power-monitoring-window-label-substation"));
         MasterTabContainer.SetTabTitle(3, Loc.GetString("power-monitoring-window-label-apc"));
+        MasterTabContainer.SetTabTitle(4, Loc.GetString("power-monitoring-window-label-powerlocks")); // Frontier
 
         // Track when the MasterTabContainer changes its tab
         MasterTabContainer.OnTabChanged += OnTabChanged;
@@ -98,7 +100,7 @@ public sealed partial class PowerMonitoringWindow : FancyWindow
 
     private void OnTabChanged(int tab)
     {
-        SendPowerMonitoringConsoleMessageAction?.Invoke(_focusEntity, (PowerMonitoringConsoleGroup) tab);
+        SendPowerMonitoringConsoleMessageAction?.Invoke(_focusEntity, GetCurrentPowerMonitoringConsoleGroup()); // Frontier: Powerlock is not enum index 4.
     }
 
     private void OnShowCableToggled(PowerMonitoringConsoleLineGroup lineGroup)
@@ -190,6 +192,8 @@ public sealed partial class PowerMonitoringWindow : FancyWindow
                 currentContainer = SubstationList; break;
             case PowerMonitoringConsoleGroup.APC:
                 currentContainer = ApcList; break;
+            case PowerMonitoringConsoleGroup.Powerlock: // Frontier
+                currentContainer = PowerlockList; break;
         }
 
         // Clear excess children from the container

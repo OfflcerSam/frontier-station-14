@@ -1,0 +1,95 @@
+- type: constructionGraph
+  id: PowerlockLV
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: powerlock
+      completed:
+      - !type:SnapToGrid {}
+      steps:
+      - material: Steel
+        amount: 5
+        doAfter: 2
+      - material: Cable
+        amount: 5
+        doAfter: 2
+  - node: powerlock
+    entity: PowerlockLV
+    edges:
+    - to: start
+      steps:
+      - tool: Welding
+        doAfter: 5
+      completed:
+      - !type:SpawnPrototype
+        prototype: SheetSteel1
+        amount: 5
+      - !type:SpawnPrototype
+        prototype: CableApcStack1
+        amount: 5
+      - !type:DeleteEntity
+
+- type: constructionGraph
+  id: PowerlockMV
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: powerlock
+      completed:
+      - !type:SnapToGrid {}
+      steps:
+      - material: Steel
+        amount: 5
+        doAfter: 2
+      - material: CableMV
+        amount: 5
+        doAfter: 2
+  - node: powerlock
+    entity: PowerlockMV
+    edges:
+    - to: start
+      steps:
+      - tool: Welding
+        doAfter: 5
+      completed:
+      - !type:SpawnPrototype
+        prototype: SheetSteel1
+        amount: 5
+      - !type:SpawnPrototype
+        prototype: CableMVStack1
+        amount: 5
+      - !type:DeleteEntity
+
+- type: constructionGraph
+  id: PowerlockHV
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: powerlock
+      completed:
+      - !type:SnapToGrid {}
+      steps:
+      - material: Steel
+        amount: 5
+        doAfter: 2
+      - material: CableHV
+        amount: 5
+        doAfter: 2
+  - node: powerlock
+    entity: PowerlockHV
+    edges:
+    - to: start
+      steps:
+      - tool: Welding
+        doAfter: 5
+      completed:
+      - !type:SpawnPrototype
+        prototype: SheetSteel1
+        amount: 5
+      - !type:SpawnPrototype
+        prototype: CableHVStack1
+        amount: 5
+      - !type:DeleteEntity

@@ -1,0 +1,44 @@
+// SPDX-FileCopyrightText: 2026 Alexander Grötzsch
+// SPDX-License-Identifier: MPL-2.0
+// Adapted from 6th-Maroon-Division/Monolith, commit f84c9b2fe09e6d6e1839401346decd6b1300bcec.
+// Frontier: use one node for the local cable and the matching docked powerlock.
+using Content.Server.Power.Nodes;
+using Content.Server.Shuttles.Components;
+using Content.Shared.NodeContainer;
+using Robust.Shared.Map.Components;
+
+namespace Content.Server.NodeContainer.Nodes;
+
+/// <summary>
+/// Connects the cable beneath a powerlock to the same voltage on its docked partner.
+/// </summary>
+[DataDefinition]
+public sealed partial class DockableCableNode : CableDeviceNode
+{
+    public override IEnumerable<Node> GetReachableNodes(
+        TransformComponent xform,
+        EntityQuery<NodeContainerComponent> nodeQuery,
+        EntityQuery<TransformComponent> xformQuery,
+        MapGridComponent? grid,
+        IEntityManager entMan)
+    {
+        foreach (var node in base.GetReachableNodes(xform, nodeQuery, xformQuery, grid, entMan))
+            yield return node;
+
+        if (!xform.Anchored || grid == null)
+            yield break;
+
+        if (!entMan.TryGetComponent(Owner, out DockingComponent? docking) ||
+            docking.DockedWith == null ||
+            !nodeQuery.TryComp(docking.DockedWith.Value, out var otherNodeContainer))
+        {
+            yield break;
+        }
+
+        foreach (var node in otherNodeContainer.Nodes.Values)
+        {
+            if (node is DockableCableNode dockable && dockable.NodeGroupID == NodeGroupID)
+                yield return dockable;
+        }
+    }
+}

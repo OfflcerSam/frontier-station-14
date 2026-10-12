@@ -1,0 +1,38 @@
+- type: construction
+  id: PowerlockLV
+  graph: PowerlockLV
+  startNode: start
+  targetNode: powerlock
+  category: construction-category-structures
+  objectType: Structure
+  placementMode: SnapgridCenter
+  canRotate: true
+  canBuildInImpassable: false
+  conditions:
+  - !type:TileNotBlocked
+
+- type: construction
+  id: PowerlockMV
+  graph: PowerlockMV
+  startNode: start
+  targetNode: powerlock
+  category: construction-category-structures
+  objectType: Structure
+  placementMode: SnapgridCenter
+  canRotate: true
+  canBuildInImpassable: false
+  conditions:
+  - !type:TileNotBlocked
+
+- type: construction
+  id: PowerlockHV
+  graph: PowerlockHV
+  startNode: start
+  targetNode: powerlock
+  category: construction-category-structures
+  objectType: Structure
+  placementMode: SnapgridCenter
+  canRotate: true
+  canBuildInImpassable: false
+  conditions:
+  - !type:TileNotBlocked

@@ -89,6 +89,10 @@
                     <ScrollContainer HorizontalExpand="True" Margin="8, 8, 8, 8">
                         <BoxContainer Name="ApcList" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" Margin="0 0 10 0"/>
                     </ScrollContainer>
+                    <!-- Frontier: dedicated powerlock network inspection -->
+                    <ScrollContainer HorizontalExpand="True" Margin="8, 8, 8, 8">
+                        <BoxContainer Name="PowerlockList" Orientation="Vertical" VerticalExpand="True" HorizontalExpand="True" Margin="0 0 10 0"/>
+                    </ScrollContainer>
                 </TabContainer>
 
                 <!-- Cable network toggles -->

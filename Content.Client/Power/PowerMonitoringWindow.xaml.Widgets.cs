@@ -105,6 +105,14 @@ public sealed partial class PowerMonitoringWindow
         // Don't use SI prefixes, just give the number in W, so that it is readily apparent which consumer is using a lot of power.
         button.PowerValue.Text = Loc.GetString("power-monitoring-window-button-value", ("value", Math.Round(entry.PowerValue).ToString("N0")));
 
+        // Frontier: show docking status and explain that this is network load, not port throughput.
+        if (entry.PowerlockDocked is { } docked)
+        {
+            button.PowerValue.Text = Loc.GetString(docked ? "power-monitoring-powerlock-docked" : "power-monitoring-powerlock-undocked");
+            button.ToolTip = name + "\n" + Loc.GetString("power-monitoring-powerlock-network-load", ("value", entry.PowerValue));
+        }
+        // End Frontier
+
         // Update battery level if applicable
         if (entry.BatteryLevel != null)
         {
@@ -337,12 +345,17 @@ public sealed partial class PowerMonitoringWindow
                 MasterTabContainer.CurrentTab = 2; break;
             case PowerMonitoringConsoleGroup.APC:
                 MasterTabContainer.CurrentTab = 3; break;
+            case PowerMonitoringConsoleGroup.Powerlock: // Frontier
+                MasterTabContainer.CurrentTab = 4; break;
         }
     }
 
     private PowerMonitoringConsoleGroup GetCurrentPowerMonitoringConsoleGroup()
     {
-        return (PowerMonitoringConsoleGroup) MasterTabContainer.CurrentTab;
+        // Frontier: keep the existing Consumer enum value separate from the Powerlocks tab.
+        return MasterTabContainer.CurrentTab == 4
+            ? PowerMonitoringConsoleGroup.Powerlock
+            : (PowerMonitoringConsoleGroup) MasterTabContainer.CurrentTab;
     }
 }
 

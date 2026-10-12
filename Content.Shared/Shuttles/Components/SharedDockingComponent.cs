@@ -28,6 +28,9 @@ namespace Content.Shared.Shuttles.Components
         Airlock = 1 << 0,
         Gas = 1 << 1,
         Transit = 1 << 2,
+        PowerLV = 1 << 3,
+        PowerMV = 1 << 4,
+        PowerHV = 1 << 5,
     }
     // End Frontier
 }
