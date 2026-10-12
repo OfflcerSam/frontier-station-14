@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Alexander Grötzsch
-// SPDX-License-Identifier: MPL-2.0
-// Adapted from 6th-Maroon-Division/Monolith, commit f84c9b2fe09e6d6e1839401346decd6b1300bcec.
-// Frontier: use one node for the local cable and the matching docked powerlock.
+// SPDX-FileCopyrightText: 2026 chilla55
+//
+// SPDX-License-Identifier: MPL-2.0 (Awaiting Confirmation)
+//
+// Adapted from 6th-Maroon-Division/Monolith,
+// commit f84c9b2fe09e6d6e1839401346decd6b1300bcec.
 using Content.Server.Power.Nodes;
 using Content.Server.Shuttles.Components;
 using Content.Shared.NodeContainer;
