@@ -10398,3 +10398,26 @@ Entries:
   id: 6887
   time: '2026-10-08T18:19:10.0000000+00:00'
   url: https://github.com/new-frontiers-14/frontier-station-14/pull/4848
+- author: SemperVictor
+  changes:
+    - type: Add
+      message: Added the laser repeater to weapon and mercenary loot pools
+  id: 6888
+  time: '2026-10-10T01:34:34.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4673
+- author: SemperVictor
+  changes:
+    - type: Add
+      message: Added cigarette filters to the biogenerator
+    - type: Add
+      message: Added tobacco and cannabis seeds to the biogenerator via EMAG
+  id: 6889
+  time: '2026-10-10T16:00:06.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4754
+- author: blackknight954
+  changes:
+    - type: Add
+      message: Players can now use the Deathgasp emote once again.
+  id: 6890
+  time: '2026-10-10T22:30:51.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4861
