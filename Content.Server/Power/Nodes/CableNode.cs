@@ -38,15 +38,6 @@ namespace Content.Server.Power.Nodes
                     nodeDirs.Add((Direction.Invalid, node));
                 }
 
-                // Frontier: a powerlock accepts cable only on its rear edge, opposite its docking face.
-                // Discover it from this side too, so cables laid after the port trigger connectivity.
-                if (node is DockableCableNode && dir != Direction.Invalid &&
-                    xformQuery.GetComponent(node.Owner).LocalRotation.GetCardinalDir() == dir)
-                {
-                    nodeDirs.Add((dir, node));
-                }
-                // End Frontier
-
                 if (node is CableTerminalNode)
                 {
                     if (dir == Direction.Invalid)

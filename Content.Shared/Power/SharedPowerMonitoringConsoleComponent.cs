@@ -103,7 +103,10 @@ public struct PowerMonitoringConsoleEntry
     public PowerMonitoringConsoleGroup Group;
     public double PowerValue;
     public float? BatteryLevel;
-    public bool? PowerlockDocked; // Frontier: docking status; PowerValue is network load for powerlocks.
+    // Frontier: supply and demand on the powerlock's rear cable network.
+    public bool? PowerlockDocked;
+    public double PowerlockSupply;
+    public double PowerlockDemand;
 
     [NonSerialized] public PowerMonitoringDeviceMetaData? MetaData = null;
 

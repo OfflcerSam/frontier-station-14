@@ -8,8 +8,11 @@
     state: engineering
   - type: MachineBoard
     prototype: PowerlockLVFrame
+    requirements:
+      PowerCell: 1
     stackRequirements:
       Steel: 10
+      Cable: 5
   - type: BindToStation
     enabled: false
 
@@ -23,8 +26,12 @@
     state: engineering
   - type: MachineBoard
     prototype: PowerlockMVFrame
+    requirements:
+      Capacitor: 1
+      PowerCell: 1
     stackRequirements:
       Steel: 10
+      CableMV: 10
   - type: BindToStation
     enabled: false
 
@@ -38,7 +45,11 @@
     state: engineering
   - type: MachineBoard
     prototype: PowerlockHVFrame
+    requirements:
+      Capacitor: 1
+      PowerCell: 1
     stackRequirements:
       Steel: 10
+      CableHV: 10
   - type: BindToStation
     enabled: false

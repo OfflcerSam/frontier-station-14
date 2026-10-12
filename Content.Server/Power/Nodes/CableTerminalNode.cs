@@ -27,6 +27,10 @@ namespace Content.Server.Power.Nodes
             {
                 if (node is CableTerminalPortNode)
                     yield return node;
+                // Frontier: only the rear input of a powerlock accepts this terminal.
+                else if (node is DockableCableNode &&
+                         xformQuery.GetComponent(node.Owner).LocalRotation.GetCardinalDir() == dir)
+                    yield return node;
             }
 
             foreach (var node in base.GetReachableNodes(xform, nodeQuery, xformQuery, grid, entMan))

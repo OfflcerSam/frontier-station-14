@@ -6,14 +6,14 @@
 // Adapted from 6th-Maroon-Division/Monolith,
 // commit f84c9b2fe09e6d6e1839401346decd6b1300bcec.
 using Content.Server.Power.Nodes;
-using Content.Server.Shuttles.Components;
 using Content.Shared.NodeContainer;
 using Robust.Shared.Map.Components;
 
 namespace Content.Server.NodeContainer.Nodes;
 
 /// <summary>
-/// Connects matching cable behind a powerlock to its docked partner.
+/// Rear terminal connection for a buffered powerlock.
+/// Docked ports exchange stored energy without merging their cable networks.
 /// </summary>
 [DataDefinition]
 public sealed partial class DockableCableNode : Node, IRotatableNode
@@ -34,28 +34,9 @@ public sealed partial class DockableCableNode : Node, IRotatableNode
         var tile = grid.TileIndicesFor(xform.Coordinates);
         foreach (var (direction, node) in NodeHelpers.GetCardinalNeighborNodes(nodeQuery, grid, tile, false))
         {
-            if (direction != rear || node is not CableNode cable || node.NodeGroupID != NodeGroupID)
-                continue;
-
-            // Let the cable apply its terminal-direction blocking rules as well.
-            foreach (var reachable in cable.GetReachableNodes(xformQuery.GetComponent(cable.Owner), nodeQuery, xformQuery, grid, entMan))
-            {
-                if (reachable == this)
-                    yield return cable;
-            }
-        }
-
-        if (!entMan.TryGetComponent(Owner, out DockingComponent? docking) ||
-            docking.DockedWith == null ||
-            !nodeQuery.TryComp(docking.DockedWith.Value, out var otherNodeContainer))
-        {
-            yield break;
-        }
-
-        foreach (var node in otherNodeContainer.Nodes.Values)
-        {
-            if (node is DockableCableNode dockable && dockable.NodeGroupID == NodeGroupID)
-                yield return dockable;
+            if (direction == rear && node is CableTerminalNode && node.NodeGroupID == NodeGroupID &&
+                xformQuery.GetComponent(node.Owner).LocalRotation.GetCardinalDir().GetOpposite() == rear)
+                yield return node;
         }
     }
 }

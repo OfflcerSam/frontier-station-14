@@ -365,11 +365,13 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
 
             // Generate a new console entry with which to populate the UI
             var entry = new PowerMonitoringConsoleEntry(GetNetEntity(ent), device.Group, powerStats.PowerValue, powerStats.BatteryLevel);
-            // Frontier: powerlocks inspect a network without consuming or generating power.
+            // Frontier: show the powerlock's local network supply and demand alongside its buffer.
             if (device.Group == PowerMonitoringConsoleGroup.Powerlock)
             {
                 entry.PowerlockDocked = TryComp<Content.Server.Shuttles.Components.DockingComponent>(ent, out var dock) && dock.Docked;
-                entry.PowerValue = GetPowerlockNetworkLoad(ent, device);
+                var network = _powerlock.GetNetworkStatistics(ent, device.LoadNode);
+                entry.PowerlockSupply = network.SupplyCurrent;
+                entry.PowerlockDemand = network.Consumption;
             }
             // End Frontier
             allEntries.Add(entry);
@@ -462,7 +464,8 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
 
         else if (device.Group == PowerMonitoringConsoleGroup.SMES ||
             device.Group == PowerMonitoringConsoleGroup.Substation ||
-            device.Group == PowerMonitoringConsoleGroup.APC)
+            device.Group == PowerMonitoringConsoleGroup.APC ||
+            device.Group == PowerMonitoringConsoleGroup.Powerlock) // Frontier: buffered powerlocks.
         {
 
             if (TryComp<PowerNetworkBatteryComponent>(uid, out var battery))
@@ -528,7 +531,7 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
         // Frontier: LV powerlocks inspect APC networks.
         if (node.NodeGroup is ApcNet apcNet)
         {
-            GetPowerlockApcSources(apcNet, sources);
+            GetPowerlockApcSources(uid, apcNet, sources);
             return;
         }
         // End Frontier
@@ -599,6 +602,10 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
 
         sources = indexedSources.Values.ToList();
 
+        // Frontier: powerlocks inspect all sources on their rear cable network.
+        if (HasComp<Content.Server._NF.Power.Components.PowerlockComponent>(uid))
+            return;
+
         // Get the total demand for the network
         foreach (var powerConsumer in netQ.Consumers)
         {
@@ -651,7 +658,7 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
         // Frontier: LV powerlocks inspect APC networks.
         if (node.NodeGroup is ApcNet apcNet)
         {
-            GetPowerlockApcLoads(apcNet, loads);
+            GetPowerlockApcLoads(uid, apcNet, loads);
             return;
         }
         // End Frontier
@@ -721,7 +728,7 @@ internal sealed partial class PowerMonitoringConsoleSystem : SharedPowerMonitori
 
         loads = indexedLoads.Values.ToList();
 
-        // Frontier: a bridge shows the whole network, not a share attributed to a generator.
+        // Frontier: powerlocks inspect all loads on their rear cable network.
         if (HasComp<Content.Server._NF.Power.Components.PowerlockComponent>(uid))
             return;
 

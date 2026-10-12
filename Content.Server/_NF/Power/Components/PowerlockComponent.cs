@@ -1,7 +1,10 @@
 namespace Content.Server._NF.Power.Components;
 
-/// <summary>
-/// Refreshes cable connectivity when this powerlock docks or undocks.
-/// </summary>
+/// <summary>Battery-backed power transfer between matching docked powerlocks.</summary>
 [RegisterComponent]
-public sealed partial class PowerlockComponent : Component;
+public sealed partial class PowerlockComponent : Component
+{
+    // Runtime readings include local cable use and dock transfer, for the standard battery panel.
+    [ViewVariables] public float Input;
+    [ViewVariables] public float Output;
+}

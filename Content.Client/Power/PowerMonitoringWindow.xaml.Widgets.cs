@@ -104,12 +104,15 @@ public sealed partial class PowerMonitoringWindow
         // Update power value
         // Don't use SI prefixes, just give the number in W, so that it is readily apparent which consumer is using a lot of power.
         button.PowerValue.Text = Loc.GetString("power-monitoring-window-button-value", ("value", Math.Round(entry.PowerValue).ToString("N0")));
+        button.MainContainer.SetHeight = entry.PowerlockDocked.HasValue ? 72f : 32f; // Frontier: three-line powerlock readings.
+        button.PowerValue.SetWidth = entry.PowerlockDocked.HasValue ? 160f : 80f;
 
-        // Frontier: show docking status and explain that this is network load, not port throughput.
+        // Frontier: show available supply and requested demand for the connected network.
         if (entry.PowerlockDocked is { } docked)
         {
-            button.PowerValue.Text = Loc.GetString(docked ? "power-monitoring-powerlock-docked" : "power-monitoring-powerlock-undocked");
-            button.ToolTip = name + "\n" + Loc.GetString("power-monitoring-powerlock-network-load", ("value", entry.PowerValue));
+            var status = Loc.GetString(docked ? "power-monitoring-powerlock-docked" : "power-monitoring-powerlock-undocked");
+            button.PowerValue.Text = status + "\n" + Loc.GetString("power-monitoring-powerlock-network-values",
+                ("supply", entry.PowerlockSupply), ("demand", entry.PowerlockDemand));
         }
         // End Frontier
 

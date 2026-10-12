@@ -6,7 +6,38 @@
   components:
   - type: Transform
     noRot: false
+  - type: WiresPanel
+  - type: WiresVisuals
+  - type: DeviceNetwork
+    deviceNetId: Wired
+    examinableAddress: true
+    prefix: device-address-prefix-powerlock
   - type: Powerlock
+  - type: Battery
+    maxCharge: 2500000
+    startingCharge: 0
+  - type: ExaminableBattery
+  - type: PowerNetworkBattery
+    maxSupply: 150000
+    maxChargeRate: 5000
+    supplyRampTolerance: 5000
+    supplyRampRate: 1000
+  - type: PowerConsumer
+    node: power
+  - type: PowerSupplier
+    node: power
+    enabled: false
+  - type: BatteryInterface
+    minChargeRate: 5000
+    maxChargeRate: 150000
+    minSupply: 5000
+    maxSupply: 150000
+  - type: UserInterface
+    interfaces:
+      enum.BatteryUiKey.Key:
+        type: BatteryBoundUserInterface
+  - type: ActivatableUI
+    key: enum.BatteryUiKey.Key
   - type: DockingSignalControl
   - type: DeviceLinkSource
     ports:
@@ -40,6 +71,8 @@
     - state: lvStraight
       map: ["cable"]
       color: Green
+    - state: panel_open
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
     - state: lvHeadStraight
       map: ["cable-head"]
       color: White
@@ -87,18 +120,33 @@
 - type: entity
   parent: BaseWallPowerlock
   id: PowerlockLV
+  suffix: Basic, 50kJ
   name: LV powerlock
-  description: Connects LV cables between docked ships or stations. Connect matching cable to the rear of both ports. Only docks with another LV powerlock.
+  description: Connects power cables on separate ships or stations together to allow power transfer. Both sides must be docked and have the device enabled to accept transfer.
   components:
   - type: Docking
     dockType: PowerLV
     radarColor: limegreen
     highlightedRadarColor: white
   - type: NodeContainer
+    examinable: false # PowerlockSystem shows the matching cable connector once.
     nodes:
       power:
         !type:DockableCableNode
         nodeGroupID: Apc
+  - type: PowerConsumer
+    voltage: Apc
+  - type: PowerSupplier
+    voltage: Apc
+  - type: Battery
+    maxCharge: 50000
+  - type: PowerNetworkBattery
+    maxSupply: 15000
+    supplyRampTolerance: 15000
+    supplyRampRate: 500
+  - type: BatteryInterface
+    maxChargeRate: 15000
+    maxSupply: 15000
   - type: Sprite
     sprite: _NF/Structures/Power/Powerlock/lvlock.rsi
   - type: PowerMonitoringDevice
@@ -110,18 +158,24 @@
 - type: entity
   parent: BaseWallPowerlock
   id: PowerlockMV
+  suffix: Basic, 2.5MJ
   name: MV powerlock
-  description: Connects MV cables between docked ships or stations. Connect matching cable to the rear of both ports. Only docks with another MV powerlock.
+  description: Connects power cables on separate ships or stations together to allow power transfer. Both sides must be docked and have the device enabled to accept transfer.
   components:
   - type: Docking
     dockType: PowerMV
     radarColor: yellow
     highlightedRadarColor: white
   - type: NodeContainer
+    examinable: false # PowerlockSystem shows the matching cable connector once.
     nodes:
       power:
         !type:DockableCableNode
         nodeGroupID: MVPower
+  - type: PowerConsumer
+    voltage: Medium
+  - type: PowerSupplier
+    voltage: Medium
   - type: Sprite
     sprite: _NF/Structures/Power/Powerlock/mvlock.rsi
     layers:
@@ -135,6 +189,8 @@
       color: Yellow
     - state: mvstripeStraight
       map: ["cable-stripes"]
+    - state: panel_open
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
     - state: mvHeadStraight
       map: ["cable-head"]
       color: White
@@ -147,18 +203,24 @@
 - type: entity
   parent: BaseWallPowerlock
   id: PowerlockHV
+  suffix: Basic, 2.5MJ
   name: HV powerlock
-  description: Connects HV cables between docked ships or stations. Connect matching cable to the rear of both ports. Only docks with another HV powerlock.
+  description: Connects power cables on separate ships or stations together to allow power transfer. Both sides must be docked and have the device enabled to accept transfer.
   components:
   - type: Docking
     dockType: PowerHV
     radarColor: orange
     highlightedRadarColor: white
   - type: NodeContainer
+    examinable: false # PowerlockSystem shows the matching cable connector once.
     nodes:
       power:
         !type:DockableCableNode
         nodeGroupID: HVPower
+  - type: PowerConsumer
+    voltage: High
+  - type: PowerSupplier
+    voltage: High
   - type: Sprite
     sprite: _NF/Structures/Power/Powerlock/hvlock.rsi
     layers:
@@ -169,6 +231,8 @@
       visible: false
     - state: hvStraight
       map: ["cable"]
+    - state: panel_open
+      map: ["enum.WiresVisualLayers.MaintenancePanel"]
     - state: hvHeadStraight
       map: ["cable-head"]
       color: White

@@ -36,7 +36,7 @@ namespace Content.Server.Power.EntitySystems
 
             foreach (var reachable in node.ReachableNodes)
             {
-                if (reachable is not CableNode and not Content.Server.NodeContainer.Nodes.DockableCableNode) // Frontier: rear powerlock connection
+                if (reachable is not CableNode)
                     continue;
 
                 var otherTransform = Transform(reachable.Owner);

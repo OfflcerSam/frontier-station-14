@@ -58,36 +58,57 @@
 - type: entity
   parent: BasePowerlockFrame
   id: PowerlockLVFrame
+  suffix: Basic, 50kJ
   name: portable LV powerlock
-  description: An anchorable LV power connection. Connect matching cable to its rear. Accepts docking from a LV powerlock while anchored.
+  description: Allows power through. Accepts docking, but cannot dock. Both sides must be docked and have the device enabled to accept transfer.
   components:
   - type: Docking
     dockType: PowerLV
     radarColor: limegreen
     highlightedRadarColor: white
   - type: NodeContainer
+    examinable: false # PowerlockSystem shows the matching cable connector once.
     nodes:
       power:
         !type:DockableCableNode
         nodeGroupID: Apc
+  - type: PowerConsumer
+    voltage: Apc
+  - type: PowerSupplier
+    voltage: Apc
+  - type: Battery
+    maxCharge: 50000
+  - type: PowerNetworkBattery
+    maxSupply: 15000
+    supplyRampTolerance: 15000
+    supplyRampRate: 500
+  - type: BatteryInterface
+    maxChargeRate: 15000
+    maxSupply: 15000
   - type: Machine
     board: PowerlockLVFrameMachineCircuitboard
 
 - type: entity
   parent: BasePowerlockFrame
   id: PowerlockMVFrame
+  suffix: Basic, 2.5MJ
   name: portable MV powerlock
-  description: An anchorable MV power connection. Connect matching cable to its rear. Accepts docking from a MV powerlock while anchored.
+  description: Allows power through. Accepts docking, but cannot dock. Both sides must be docked and have the device enabled to accept transfer.
   components:
   - type: Docking
     dockType: PowerMV
     radarColor: yellow
     highlightedRadarColor: white
   - type: NodeContainer
+    examinable: false # PowerlockSystem shows the matching cable connector once.
     nodes:
       power:
         !type:DockableCableNode
         nodeGroupID: MVPower
+  - type: PowerConsumer
+    voltage: Medium
+  - type: PowerSupplier
+    voltage: Medium
   - type: Machine
     board: PowerlockMVFrameMachineCircuitboard
   - type: Sprite
@@ -114,18 +135,24 @@
 - type: entity
   parent: BasePowerlockFrame
   id: PowerlockHVFrame
+  suffix: Basic, 2.5MJ
   name: portable HV powerlock
-  description: An anchorable HV power connection. Connect matching cable to its rear. Accepts docking from a HV powerlock while anchored.
+  description: Allows power through. Accepts docking, but cannot dock. Both sides must be docked and have the device enabled to accept transfer.
   components:
   - type: Docking
     dockType: PowerHV
     radarColor: orange
     highlightedRadarColor: white
   - type: NodeContainer
+    examinable: false # PowerlockSystem shows the matching cable connector once.
     nodes:
       power:
         !type:DockableCableNode
         nodeGroupID: HVPower
+  - type: PowerConsumer
+    voltage: High
+  - type: PowerSupplier
+    voltage: High
   - type: Machine
     board: PowerlockHVFrameMachineCircuitboard
   - type: Sprite

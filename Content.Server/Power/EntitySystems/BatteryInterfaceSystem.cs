@@ -107,8 +107,10 @@ public sealed class BatteryInterfaceSystem : EntitySystem
                 MinMaxSupply = batteryInterface.MinSupply,
                 MaxMaxChargeRate = batteryInterface.MaxChargeRate,
                 MinMaxChargeRate = batteryInterface.MinChargeRate,
-                SupplyingNetworkHasPower = CheckHasPower<BatteryChargerComponent>(uid),
-                LoadingNetworkHasPower = CheckHasPower<BatteryDischargerComponent>(uid),
+                SupplyingNetworkHasPower = CheckHasPower<BatteryChargerComponent>(uid) ||
+                    TryComp<PowerConsumerComponent>(uid, out var consumer) && consumer.Net?.NetworkNode.LastCombinedMaxSupply > 0, // Frontier: buffered powerlocks
+                LoadingNetworkHasPower = CheckHasPower<BatteryDischargerComponent>(uid) ||
+                    TryComp<PowerSupplierComponent>(uid, out var supplier) && supplier.Net?.NetworkNode.LastCombinedMaxSupply > 0, // Frontier: buffered powerlocks
             });
 
         return;
