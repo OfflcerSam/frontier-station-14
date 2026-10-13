@@ -1,0 +1,45 @@
+# Author Info
+# GitHub: OfflcerSam
+# Discord: [Terminated]
+
+# Maintainer Info
+# GitHub: OfflcerSam
+# Discord: [Terminated]
+
+# Shuttle Notes:
+# M
+- type: vessel
+  id: Triage
+  parent: BaseVessel
+  name: SI Triage
+  description: A search and recovery vessel intended to retrieve injured specialists from hazardous mining or salvage zones. Brought to you by Stonian Industries.
+  price: 60000 # ~52010 (calculated) * ~1.15 (markup) = ~59811.5
+  category: Medium
+  group: Medical
+  shuttlePath: /Maps/_NF/Shuttles/triage.yml
+  guidebookPage: Null
+  class:
+  - Medical
+  - Chemistry
+  engine:
+  - Uranium
+
+- type: gameMap
+  id: Triage
+  mapName: 'FSB Triage'
+  mapPath: /Maps/_NF/Shuttles/triage.yml
+  minPlayers: 0
+  stations:
+    Triage:
+      stationProto: StandardFrontierVessel
+      components:
+        - type: StationNameSetup
+          mapNameTemplate: 'Triage {1}'
+          nameGenerator:
+            !type:NanotrasenNameGenerator
+            prefixCreator: '14'
+        - type: StationJobs
+          availableJobs:
+            ContractorInterview: [ 0, 0 ]
+            PilotInterview: [ 0, 0 ]
+            MercenaryInterview: [ 0, 0 ]
