@@ -17,7 +17,7 @@
   category: Medium
   group: Medical
   shuttlePath: /Maps/_NF/Shuttles/triage.yml
-  guidebookPage: Null
+  guidebookPage: ShipyardTriage
   class:
   - Medical
   - Chemistry

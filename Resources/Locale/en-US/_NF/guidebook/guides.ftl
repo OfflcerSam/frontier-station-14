@@ -118,6 +118,7 @@ guide-entry-shipyard-eagle = Eagle
 guide-entry-shipyard-searchlight = Searchlight
 guide-entry-shipyard-spirit = Spirit
 guide-entry-shipyard-stasis = Stasis
+guide-entry-shipyard-triage = Triage
 guide-entry-shipyard-tyne = Tyne
 guide-entry-shipyard-vitalis = Vitalis
 guide-entry-shipyard-voltage = Voltage

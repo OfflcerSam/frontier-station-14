@@ -11,6 +11,7 @@
   - ShipyardSearchlight
   - ShipyardSpirit
   - ShipyardStasis
+  - ShipyardTriage
   - ShipyardTyne
   - ShipyardVitalis
 
@@ -53,6 +54,11 @@
   id: ShipyardStasis
   name: guide-entry-shipyard-stasis
   text: "/ServerInfo/_NF/Guidebook/Shipyard/Stasis.xml"
+
+- type: guideEntry
+  id: ShipyardTriage
+  name: guide-entry-shipyard-triage
+  text: "/ServerInfo/_NF/Guidebook/Shipyard/Triage.xml"
 
 - type: guideEntry
   id: ShipyardTyne
