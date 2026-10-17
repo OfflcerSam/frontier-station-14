@@ -66,12 +66,12 @@
   <Box>
     <GuideEntityEmbed Entity="RandomHumanoidVisitorParamedic" Caption="Paramedic"/>
     <GuideEntityEmbed Entity="RandomHumanoidVisitorMedicalDoctor" Caption="Medical Doctor"/>
-    <GuideEntityEmbed Entity="RandomHumanoidVisitorSalvageSpecialist" Caption="Salvage Specialist"/>
   </Box>
 
   Secondary
   <Box>
     <GuideEntityEmbed Entity="RandomHumanoidVisitorChemist" Caption="Chemist"/>
+	<GuideEntityEmbed Entity="RandomHumanoidVisitorSalvageSpecialist" Caption="Salvage Specialist"/>
   </Box>
 
   # Hiring crew
