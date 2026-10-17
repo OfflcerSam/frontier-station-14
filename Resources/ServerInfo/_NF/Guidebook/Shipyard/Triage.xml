@@ -6,7 +6,9 @@
 	<GuideEntityEmbed Entity="SalvageTechfabNF" Caption="Fabrication"/>
   </Box>
   
-  Add image later
+  <Box>
+    <GuideEntityEmbed Entity="ShuttleMapTriage" Caption=""/>
+  </Box>
 
   # Operational Specifications
 

@@ -7,7 +7,9 @@
     <GuideEntityEmbed Entity="MachineAnomalyVessel" Caption="Anomaly Research"/>
   </Box>
   
-  Add image later
+  <Box>
+    <GuideEntityEmbed Entity="ShuttleMapProbe" Caption=""/>
+  </Box>
 
   # Operational Specifications
 

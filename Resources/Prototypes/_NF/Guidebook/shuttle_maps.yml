@@ -715,6 +715,17 @@
 
 - type: entity
   parent: PosterBase
+  id: ShuttleMapPick
+  name: "SI Pick"
+  description: "Detailed map of a Pick shuttle."
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
+    state: pick
+
+- type: entity
+  parent: PosterBase
   id: ShuttleMapPlacebo
   name: "NC Placebo"
   description: "Detailed map of a Placebo shuttle."
@@ -723,6 +734,17 @@
   - type: Sprite
     sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
     state: placebo
+
+- type: entity
+  parent: PosterBase
+  id: ShuttleMapProbe
+  name: "SI Probe"
+  description: "Detailed map of a Probe shuttle."
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
+    state: probe
 
 - type: entity
   parent: PosterBase
@@ -767,6 +789,17 @@
   - type: Sprite
     sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
     state: retort
+
+- type: entity
+  parent: PosterBase
+  id: ShuttleMapRivet
+  name: "SI Rivet"
+  description: "Detailed map of a Rivet shuttle."
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
+    state: rivet
 
 - type: entity
   parent: PosterBase
@@ -913,6 +946,17 @@
 
 - type: entity
   parent: PosterBase
+  id: ShuttleMapTriage
+  name: "SI Triage"
+  description: "Detailed map of a Triage shuttle."
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
+    state: triage
+
+- type: entity
+  parent: PosterBase
   id: ShuttleMapTyne
   name: "BB Tyne"
   description: "Detailed map of a Tyne shuttle."
@@ -943,6 +987,17 @@
   - type: Sprite
     sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
     state: voltage
+
+- type: entity
+  parent: PosterBase
+  id: ShuttleMapWayfarer
+  name: "SI Wayfarer"
+  description: "Detailed map of a Wayfarer shuttle."
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _NF/Guidebook/shuttle_maps/128x96.rsi
+    state: wayfarer
 
 - type: entity
   parent: PosterBase

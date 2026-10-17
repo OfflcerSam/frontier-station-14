@@ -7,7 +7,9 @@
 		<GuideEntityEmbed Entity="ServiceTechFab" Caption="Fabrication"/>
 	</Box>
   
-  Add image later
+  <Box>
+    <GuideEntityEmbed Entity="ShuttleMapWayfarer" Caption=""/>
+  </Box>
   
   # Operational Specifications
   

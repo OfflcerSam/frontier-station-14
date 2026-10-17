@@ -5,7 +5,9 @@
 		<GuideEntityEmbed Entity="BannerEngineering" Caption="Engineering"/>
 	</Box>
 	
-  In main PR
+  <Box>
+    <GuideEntityEmbed Entity="ShuttleMapRivet" Caption=""/>
+  </Box>
   
   # Operational Specifications
   

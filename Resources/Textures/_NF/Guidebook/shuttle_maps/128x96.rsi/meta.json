@@ -219,7 +219,13 @@
             "name": "phoenix"
         },
         {
+            "name": "pick"
+        },
+        {
             "name": "placebo"
+        },
+        {
+            "name": "probe"
         },
         {
             "name": "prospector"
@@ -232,6 +238,9 @@
         },
         {
             "name": "retort"
+        },
+        {
+            "name": "rivet"
         },
         {
             "name": "rogue"
@@ -273,6 +282,9 @@
             "name": "tide"
         },
         {
+            "name": "triage"
+        },
+        {
             "name": "tyne"
         },
         {
@@ -280,6 +292,9 @@
         },
         {
             "name": "voltage"
+        },
+        {
+            "name": "wayfarer"
         },
         {
             "name": "wasp"
