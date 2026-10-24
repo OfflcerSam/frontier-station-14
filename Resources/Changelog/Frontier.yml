@@ -10470,3 +10470,42 @@ Entries:
   id: 6895
   time: '2026-10-20T19:46:15.0000000+00:00'
   url: https://github.com/new-frontiers-14/frontier-station-14/pull/4741
+- author: inaraincoat
+  changes:
+    - type: Tweak
+      message: Changed the grounding rod crates to have four instead of one
+    - type: Tweak
+      message: >-
+        Changed the grounding rod flatpacks and crates to have consistent
+        pricing
+  id: 6896
+  time: '2026-10-21T08:05:05.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4789
+- author: blackknight954
+  changes:
+    - type: Add
+      message: Pulled content up to 10/1/2025
+  id: 6897
+  time: '2026-10-21T22:16:41.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4749
+- author: SemperVictor
+  changes:
+    - type: Remove
+      message: Removed the station AI core crate from cargo.
+  id: 6898
+  time: '2026-10-24T06:56:48.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4929
+- author: SemperVictor
+  changes:
+    - type: Tweak
+      message: Changed medibot healing threshold to match tricordrazine changes
+  id: 6899
+  time: '2026-10-24T07:31:53.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4916
+- author: JojyAsmir
+  changes:
+    - type: Fix
+      message: The Pirate Lord's hardsuit now comes with the correct helmet!
+  id: 6900
+  time: '2026-10-24T07:33:26.0000000+00:00'
+  url: https://github.com/new-frontiers-14/frontier-station-14/pull/4910
