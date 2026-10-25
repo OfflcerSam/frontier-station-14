@@ -10110,8 +10110,6 @@ entities:
     - type: AtmosPipeColor
       color: '#0055CCFF'
     - type: DeviceNetwork
-      configurators:
-      - invalid
       deviceLists:
       - 8
   - uid: 1240
@@ -10295,8 +10293,6 @@ entities:
       pos: 5.5,-17.5
       parent: 1
     - type: DeviceNetwork
-      configurators:
-      - invalid
       deviceLists:
       - 8
     - type: AtmosPipeColor
@@ -10319,8 +10315,6 @@ entities:
       pos: 7.5,-20.5
       parent: 1
     - type: DeviceNetwork
-      configurators:
-      - invalid
       deviceLists:
       - 8
     - type: AtmosPipeColor
@@ -10349,8 +10343,6 @@ entities:
     - type: AtmosPipeColor
       color: '#990000FF'
     - type: DeviceNetwork
-      configurators:
-      - invalid
       deviceLists:
       - 8
     - type: AtmosPipeLayers
@@ -10578,8 +10570,6 @@ entities:
       pos: 0.5,-17.5
       parent: 1
     - type: DeviceNetwork
-      configurators:
-      - invalid
       deviceLists:
       - 8
     - type: AtmosPipeColor
@@ -10631,8 +10621,6 @@ entities:
       pos: 7.5,-21.5
       parent: 1
     - type: DeviceNetwork
-      configurators:
-      - invalid
       deviceLists:
       - 8
     - type: AtmosPipeLayers
