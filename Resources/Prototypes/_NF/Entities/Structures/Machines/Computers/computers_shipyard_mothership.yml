@@ -147,7 +147,7 @@
 
 # Wayfarer Mothership console
 - type: entity
-  id: WayfarererMothershipComputer
+  id: WayfarerMothershipComputer
   parent: BaseMothershipComputer
   name: wayfarer shipyard console
   components:
