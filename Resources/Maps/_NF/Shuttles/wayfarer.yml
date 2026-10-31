@@ -4,8 +4,8 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/25/2026 09:05:29
-  entityCount: 2251
+  time: 10/31/2026 16:20:11
+  entityCount: 2252
 maps: []
 grids:
 - 1
@@ -112,6 +112,12 @@ entities:
           decals:
             720: 5,11
             721: 4,11
+        - node:
+            zIndex: 2
+            color: '#334E6DC8'
+            id: ArrowsGreyscale
+          decals:
+            1390: 0,11
         - node:
             zIndex: 3
             angle: -1.5707963267948966 rad
@@ -240,6 +246,12 @@ entities:
             388: 4,23
             539: 6,-28
             836: 1,-39
+        - node:
+            zIndex: 2
+            color: '#334E6DC8'
+            id: BoxGreyscale
+          decals:
+            1389: 0,10
         - node:
             zIndex: 6
             color: '#334E6DC8'
@@ -6587,6 +6599,14 @@ entities:
       pos: 9.5,-18.5
       parent: 1
     - type: Conveyed
+- proto: WayfarerMothershipComputer
+  entities:
+  - uid: 2252
+    components:
+    - type: Transform
+      rot: 3.141592653589793 rad
+      pos: 0.5,10.5
+      parent: 1
 - proto: DebugThruster
   entities:
   - uid: 803
@@ -11108,7 +11128,7 @@ entities:
       pos: -1.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -8791.956
+      secondsUntilStateChange: -10429.383
       state: Opening
   - uid: 1369
     components:
@@ -11117,7 +11137,7 @@ entities:
       pos: 0.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -8790.656
+      secondsUntilStateChange: -10428.083
       state: Opening
   - uid: 1370
     components:
@@ -11126,7 +11146,7 @@ entities:
       pos: -1.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -8789.59
+      secondsUntilStateChange: -10427.017
       state: Opening
   - uid: 1371
     components:
@@ -11135,7 +11155,7 @@ entities:
       pos: 0.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -8790.123
+      secondsUntilStateChange: -10427.55
       state: Opening
 - proto: ImpCoffeeMachine
   entities:
