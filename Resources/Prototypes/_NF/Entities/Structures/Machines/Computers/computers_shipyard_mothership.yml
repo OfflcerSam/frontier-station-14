@@ -90,6 +90,7 @@
     - Adder
     - Prospector
     - Chisel
+    - Pick
 
 # The crescent console
 - type: entity
@@ -107,6 +108,7 @@
     - Stringer
     - Liquidator
     - Honker
+    - Pick
 
 # The Edison Console
 
@@ -124,6 +126,7 @@
     - Hammer
     - Gaslight
     - Firefighter
+    - Rivet
 
 # Ambition Mothership Console
 - type: entity
@@ -139,6 +142,8 @@
     - Prospector
     - Chisel
     - Surveyor
+    - Rivet
+    - Pick
 
 # Wayfarer Mothership console
 - type: entity
