@@ -139,3 +139,17 @@
     - Prospector
     - Chisel
     - Surveyor
+
+# Wayfarer Mothership console
+- type: entity
+  id: WayfarererMothershipComputer
+  parent: BaseMothershipComputer
+  name: wayfarer shipyard console
+  components:
+  - type: ShipyardListing
+    shuttles:
+    - Pick
+    - Adder
+    - Prospector
+    - Chisel
+    - Surveyor
