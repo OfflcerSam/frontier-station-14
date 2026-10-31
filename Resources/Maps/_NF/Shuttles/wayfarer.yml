@@ -4,8 +4,8 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 10/31/2026 16:54:55
-  entityCount: 2263
+  time: 10/31/2026 17:09:17
+  entityCount: 2265
 maps: []
 grids:
 - 1
@@ -2148,10 +2148,15 @@ entities:
       rot: -1.5707963267948966 rad
       pos: 4.5,5.5
       parent: 1
-  - uid: 1694
+  - uid: 1453
     components:
     - type: Transform
       pos: -0.5,0.5
+      parent: 1
+  - uid: 1694
+    components:
+    - type: Transform
+      pos: 6.5,0.5
       parent: 1
   - uid: 1726
     components:
@@ -2163,11 +2168,6 @@ entities:
     - type: Transform
       rot: -1.5707963267948966 rad
       pos: 1.5,5.5
-      parent: 1
-  - uid: 2253
-    components:
-    - type: Transform
-      pos: 6.5,0.5
       parent: 1
 - proto: AirlockCaptainLocked
   entities:
@@ -5152,6 +5152,21 @@ entities:
     - type: Transform
       pos: 3.5,-40.5
       parent: 1
+  - uid: 2261
+    components:
+    - type: Transform
+      pos: 4.5,-42.5
+      parent: 1
+  - uid: 2262
+    components:
+    - type: Transform
+      pos: 3.5,-42.5
+      parent: 1
+  - uid: 2263
+    components:
+    - type: Transform
+      pos: 1.5,-42.5
+      parent: 1
 - proto: CableMV
   entities:
   - uid: 568
@@ -6639,6 +6654,17 @@ entities:
       rot: 3.141592653589793 rad
       pos: -0.5,-16.5
       parent: 1
+  - uid: 1724
+    components:
+    - type: Transform
+      pos: 0.5,-39.5
+      parent: 1
+  - uid: 2169
+    components:
+    - type: Transform
+      rot: -1.5707963267948966 rad
+      pos: 6.5,-17.5
+      parent: 1
   - uid: 2185
     components:
     - type: Transform
@@ -6741,48 +6767,37 @@ entities:
       rot: 3.141592653589793 rad
       pos: 4.5,-37.5
       parent: 1
-  - uid: 2254
-    components:
-    - type: Transform
-      pos: 0.5,-39.5
-      parent: 1
-  - uid: 2255
-    components:
-    - type: Transform
-      rot: -1.5707963267948966 rad
-      pos: 6.5,-17.5
-      parent: 1
-  - uid: 2256
+  - uid: 2253
     components:
     - type: Transform
       rot: -1.5707963267948966 rad
       pos: -2.5,-18.5
       parent: 1
-  - uid: 2257
+  - uid: 2254
     components:
     - type: Transform
       rot: -1.5707963267948966 rad
       pos: 6.5,-8.5
       parent: 1
-  - uid: 2258
+  - uid: 2255
     components:
     - type: Transform
       rot: -1.5707963267948966 rad
       pos: 1.5,-11.5
       parent: 1
-  - uid: 2259
+  - uid: 2256
     components:
     - type: Transform
       rot: -1.5707963267948966 rad
       pos: 0.5,5.5
       parent: 1
-  - uid: 2260
+  - uid: 2257
     components:
     - type: Transform
       rot: -1.5707963267948966 rad
       pos: 5.5,19.5
       parent: 1
-  - uid: 2261
+  - uid: 2258
     components:
     - type: Transform
       rot: -1.5707963267948966 rad
@@ -11177,7 +11192,7 @@ entities:
       pos: -1.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -10837.845
+      secondsUntilStateChange: -11699.419
       state: Opening
   - uid: 1369
     components:
@@ -11186,7 +11201,7 @@ entities:
       pos: 0.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -10836.545
+      secondsUntilStateChange: -11698.119
       state: Opening
   - uid: 1370
     components:
@@ -11195,7 +11210,7 @@ entities:
       pos: -1.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -10835.479
+      secondsUntilStateChange: -11697.053
       state: Opening
   - uid: 1371
     components:
@@ -11204,7 +11219,7 @@ entities:
       pos: 0.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -10836.012
+      secondsUntilStateChange: -11697.586
       state: Opening
 - proto: ImpCoffeeMachine
   entities:
@@ -11847,15 +11862,15 @@ entities:
       parent: 1
 - proto: PortableGeneratorDKJrShuttle
   entities:
-  - uid: 1453
+  - uid: 2264
     components:
     - type: Transform
-      pos: 3.5,-43.5
+      pos: 4.5,-42.5
       parent: 1
-  - uid: 1454
+  - uid: 2265
     components:
     - type: Transform
-      pos: 2.5,-43.5
+      pos: 1.5,-42.5
       parent: 1
 - proto: PottedPlantRandomPlastic
   entities:
@@ -13644,6 +13659,8 @@ entities:
         1686:
         - - On
           - Open
+        - - Off
+          - Close
         1683:
         - - On
           - Open
@@ -13949,15 +13966,15 @@ entities:
       parent: 1
 - proto: SolidReinforcedSecretDoor
   entities:
+  - uid: 1454
+    components:
+    - type: Transform
+      pos: -1.5,-0.5
+      parent: 1
   - uid: 1723
     components:
     - type: Transform
       pos: 7.5,-0.5
-      parent: 1
-  - uid: 1724
-    components:
-    - type: Transform
-      pos: -1.5,-0.5
       parent: 1
 - proto: SpawnPointLatejoin
   entities:
@@ -14536,14 +14553,14 @@ entities:
       parent: 1
 - proto: ToyFigurineBartender
   entities:
-  - uid: 2263
+  - uid: 2260
     components:
     - type: Transform
       pos: 1.3251245,-15.047286
       parent: 1
 - proto: ToyFigurineCaptain
   entities:
-  - uid: 2262
+  - uid: 2259
     components:
     - type: Transform
       pos: 8.7104025,20.79961
@@ -16848,13 +16865,5 @@ entities:
     - type: Transform
       rot: 1.5707963267948966 rad
       pos: 4.5,16.5
-      parent: 1
-- proto: Wrench
-  entities:
-  - uid: 2169
-    components:
-    - type: Transform
-      rot: 3.141592653589793 rad
-      pos: 3.4868832,-43.4261
       parent: 1
 ...
