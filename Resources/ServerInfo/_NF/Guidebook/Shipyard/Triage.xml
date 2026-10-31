@@ -2,13 +2,13 @@
   # TRIAGE-CLASS MEDICAL SEARCH AND RECOVERY SHUTTLE
 
   <Box>
-    <GuideEntityEmbed Entity="OreProcessor" Caption="Ore Processing"/>
+	<GuideEntityEmbed Entity="BannerMedical" Caption="Medical"/>
+    <GuideEntityEmbed Entity="ScrapProcessor" Caption="Scrap Processing"/>
 	<GuideEntityEmbed Entity="SalvageTechfabNF" Caption="Fabrication"/>
+	<GuideEntityEmbed Entity="MedicalTechFab" Caption="Fabrication"/>
   </Box>
   
-  <Box>
-    <GuideEntityEmbed Entity="ShuttleMapTriage" Caption=""/>
-  </Box>
+  Add image later
 
   # Operational Specifications
 
