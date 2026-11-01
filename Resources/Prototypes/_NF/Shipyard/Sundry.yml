@@ -1,18 +1,18 @@
 # Author Info
-# GitHub: OfflcerSam
-# Discord: Offlcer_Sam
+# GitHub: MoriEnfield
+# Discord: laimorikiylkaikhi
 
 # Maintainer Info
 # GitHub: ???
 # Discord: ???
 
-# Shuttle Notes:
+# Shuttle Notes: REMEMBER TO REDEFINE 
 #
 - type: vessel
   id: Sundry
   parent: BaseVessel
   name: VD Sundry
-  description: A former passenger spaceliner converted for salvage duty, while still retaining some service accommodations.
+  description: Salvage, fresh food, and a little commercial comfort, all packed into one versatile ship.
   price: 140500 # ~100382 + 40% = 140,535 rounded: 140500
   category: Medium
   group: Shipyard
