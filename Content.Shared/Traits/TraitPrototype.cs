@@ -56,6 +56,35 @@ public sealed partial class TraitPrototype : IPrototype
     /// </summary>
     [DataField]
     public List<ProtoId<LanguagePrototype>> LanguagesUnderstood = new();
+
+    /// <summary>
+    /// Replace native language knowledge instead of adding to it, as required by Iterator.
+    /// </summary>
+    [DataField]
+    public bool ReplaceLanguages;
+
+    /// <summary>
+    /// Forget the species' primary native language while retaining Common and separately learned languages.
+    /// </summary>
+    [DataField]
+    public bool RemoveNativeLanguage;
+
+    /// <summary>
+    /// A background removing this language needs at least one other intrinsic or selected spoken language.
+    /// </summary>
+    [DataField]
+    public ProtoId<LanguagePrototype>? RequireLanguageOtherThan;
+
+    /// <summary>
+    /// Mutually exclusive traits. Checked in both directions when selecting and validating preferences.
+    /// </summary>
+    [DataField]
+    public HashSet<ProtoId<TraitPrototype>> Conflicts = new();
+
+    public bool ConflictsWith(TraitPrototype other)
+    {
+        return Conflicts.Contains(other.ID) || other.Conflicts.Contains(ID);
+    }
     // End Frontier
 
     /// <summary>

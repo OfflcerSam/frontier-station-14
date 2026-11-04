@@ -8,7 +8,7 @@
   # Frontier: species language ported from Starlight.
   - type: LanguageKnowledge
     speaks: [GalacticCommon, Canilunzt]
-    understands: [GalacticCommon, Canilunzt]
+    understands: [GalacticCommon, Canilunzt, Fox, Dog] # Frontier: retain Starlight's related canine languages
   # End Frontier
   - type: HumanoidAppearance
     species: Vulpkanin

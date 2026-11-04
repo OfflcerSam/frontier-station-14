@@ -63,6 +63,10 @@ public abstract partial class SharedLanguageSystem : EntitySystem
 
     public void CallLanguagesUpdate(EntityUid uid)
     {
+        // Frontier: translators detach while their owner is being deleted; never add update components then.
+        if (TerminatingOrDeleted(uid))
+            return;
+
         var comp = EnsureComp<LanguageSpeakerUpdateComponent>(uid);
         comp.TargetTick = _gameTiming.CurTick.Value + 1;
     }
@@ -206,6 +210,20 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     }
 
     #region public api
+
+    /// <summary>
+    /// Replaces intrinsic knowledge for language backgrounds without retaining native languages.
+    /// </summary>
+    public void SetLanguages(EntityUid uid, IEnumerable<ProtoId<LanguagePrototype>> spoken,
+        IEnumerable<ProtoId<LanguagePrototype>> understood)
+    {
+        var knowledge = EnsureComp<LanguageKnowledgeComponent>(uid);
+        var speaker = EnsureComp<LanguageSpeakerComponent>(uid);
+        knowledge.Speaks = spoken.Distinct().ToList();
+        knowledge.Understands = understood.Distinct().ToList();
+        Dirty(uid, knowledge);
+        UpdateEntityLanguages((uid, speaker));
+    }
 
     public bool CanUnderstand(Entity<LanguageSpeakerComponent?> ent, ProtoId<LanguagePrototype> language, bool universalcheck = true)
     {
@@ -379,6 +397,10 @@ public abstract partial class SharedLanguageSystem : EntitySystem
     /// </summary>
     public void UpdateEntityLanguages(Entity<LanguageSpeakerComponent?> ent)
     {
+        // Frontier: inventory teardown can request a refresh after the holder has begun terminating.
+        if (TerminatingOrDeleted(ent.Owner))
+            return;
+
         if (!Resolve(ent, ref ent.Comp, false))
             return;
 

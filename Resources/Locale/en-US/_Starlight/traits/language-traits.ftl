@@ -1,5 +1,18 @@
 trait-category-languages = Languages
 
+trait-native-language = Species language (automatic): {$language}
+trait-native-language-none = None
+trait-native-language-choice = {$language} (species)
+
+trait-language-xenosocialized-name = Xenosocialized
+trait-language-xenosocialized-desc = You were raised without being taught the language your species normally uses. Common and separately learned languages are retained.
+
+trait-language-foreigner-light-name = Foreigner Lite
+trait-language-foreigner-light-desc = You understand Common, but cannot speak it without your supplied translator. Keep it charged. Requires another native or learned spoken language.
+
+trait-language-foreigner-name = Foreigner
+trait-language-foreigner-desc = You need your supplied translator to speak and understand Common. Keep it charged. Requires another native or learned spoken language.
+
 trait-language-signlanguage-name = Galactic Sign Language
 trait-language-signlanguage-desc = A sign language commonly used for those who are deaf or mute. Especially popular with spacers, due to practicality in airless environments.
 

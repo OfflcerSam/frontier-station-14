@@ -1,5 +1,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
+using Content.Shared._Starlight.Language.Components; // Frontier: language-background prerequisites
+using Content.Shared._Starlight.Language; // Frontier: automatic native language choices
+using Content.Shared._Starlight.Language.Systems; // Frontier: Common and machine language identifiers
 using Content.Shared._NF.Bank;
 using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
@@ -301,9 +304,13 @@ namespace Content.Shared.Preferences
         }
         // End Frontier
 
-        public HumanoidCharacterProfile WithSpecies(string species)
+        public HumanoidCharacterProfile WithSpecies(string species, IPrototypeManager? protoManager = null) // Frontier
         {
-            return new(this) { Species = species };
+            var profile = new HumanoidCharacterProfile(this) { Species = species };
+            // Frontier: revalidate skills becoming automatic and backgrounds losing a species prerequisite.
+            if (protoManager != null)
+                profile._traitPreferences = new(profile.GetValidTraits(profile._traitPreferences, protoManager));
+            return profile;
         }
 
 
@@ -407,6 +414,12 @@ namespace Content.Shared.Preferences
             if (!protoManager.TryIndex(traitId, out var traitProto))
                 return new(this);
 
+            // Frontier: language backgrounds and incompatible skills cannot be selected together.
+            if (_traitPreferences.Any(selected => protoManager.TryIndex(selected, out var other) &&
+                                                  traitProto.ConflictsWith(other)))
+                return new(this);
+            // End Frontier
+
             var category = traitProto.Category;
 
             // Category not found so dump it.
@@ -416,6 +429,11 @@ namespace Content.Shared.Preferences
                 return new(this);
 
             var list = new HashSet<ProtoId<TraitPrototype>>(_traitPreferences) { traitId };
+
+            // Frontier: a Foreigner must retain a native or learned language for their translator.
+            if (!HasTraitLanguageRequirement(traitProto, list, protoManager))
+                return new(this);
+            // End Frontier
 
             if (traitCategory == null || traitCategory.MaxTraitPoints < 0)
             {
@@ -456,7 +474,7 @@ namespace Content.Shared.Preferences
 
             return new(this)
             {
-                _traitPreferences = list,
+                _traitPreferences = new(GetValidTraits(list, protoManager)), // Frontier: revalidate dependent backgrounds
             };
         }
 
@@ -684,10 +702,18 @@ namespace Content.Shared.Preferences
             var groups = new Dictionary<string, int>();
             var result = new List<ProtoId<TraitPrototype>>();
 
-            foreach (var trait in traits)
+            // Frontier: count background credits first so an unordered saved trait set retains valid language skills.
+            foreach (var trait in traits.Distinct()
+                         .OrderBy(id => protoManager.TryIndex(id, out var prototype) ? prototype.Cost : 0)
+                         .ThenBy(id => id.ToString(), StringComparer.Ordinal))
             {
                 if (!protoManager.TryIndex(trait, out var traitProto))
                     continue;
+
+                // Frontier: validate conflicts on the server as well as in the preference selector.
+                if (result.Any(selected => traitProto.ConflictsWith(protoManager.Index(selected))))
+                    continue;
+                // End Frontier
 
                 // Always valid.
                 if (traitProto.Category == null)
@@ -711,8 +737,71 @@ namespace Content.Shared.Preferences
                 result.Add(trait);
             }
 
+            // Frontier: removing an invalid negative-cost background also requires rechecking the points budget.
+            var languageValid = result.Where(id => HasTraitLanguageRequirement(protoManager.Index(id), result, protoManager))
+                .ToList();
+            if (languageValid.Count != result.Count)
+                return GetValidTraits(languageValid, protoManager);
+            // End Frontier
+
             return result;
         }
+
+        // Frontier: evaluate language-background prerequisites without depending on server-only trait components.
+        public bool HasTraitLanguageRequirement(TraitPrototype trait, IEnumerable<ProtoId<TraitPrototype>> selected,
+            IPrototypeManager protoManager)
+        {
+            var native = GetSpeciesNativeLanguage(protoManager);
+            if (trait.RemoveNativeLanguage && native == null)
+                return false;
+
+            // Native skills are supplied by the species, and Xenosocialized cannot buy its forgotten language back.
+            if (!trait.ReplaceLanguages && native is { } nativeId && trait.LanguagesSpoken.Contains(nativeId))
+                return false;
+
+            if (trait.RequireLanguageOtherThan is not { } excluded)
+                return true;
+
+            if (protoManager.TryIndex<SpeciesPrototype>(Species, out var species) &&
+                protoManager.TryIndex(species.Prototype, out var entity) &&
+                entity.Components.TryGetComponent("LanguageKnowledge", out var component) &&
+                component is LanguageKnowledgeComponent knowledge && knowledge.Speaks.Any(language => language != excluded))
+                return true;
+
+            return selected.Any(id => protoManager.TryIndex(id, out var other) &&
+                                      other.LanguagesSpoken.Any(language => language != excluded));
+        }
+
+        /// <summary>
+        /// Frontier: the primary species language used by Starlight's Xenosocialized trait.
+        /// </summary>
+        public ProtoId<LanguagePrototype>? GetSpeciesNativeLanguage(IPrototypeManager protoManager)
+        {
+            if (!protoManager.TryIndex<SpeciesPrototype>(Species, out var species) ||
+                !protoManager.TryIndex(species.Prototype, out var entity) ||
+                !entity.Components.TryGetComponent("LanguageKnowledge", out var component) ||
+                component is not LanguageKnowledgeComponent knowledge)
+                return null;
+
+            foreach (var language in knowledge.Speaks)
+            {
+                if (language != SharedLanguageSystem.FallbackLanguagePrototype && language != "Machine")
+                    return language;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Frontier: the automatic species grant shown in character creation after background selection.
+        /// </summary>
+        public ProtoId<LanguagePrototype>? GetAutomaticNativeLanguage(IPrototypeManager protoManager)
+        {
+            if (_traitPreferences.Any(id => protoManager.TryIndex(id, out var trait) &&
+                                            (trait.ReplaceLanguages || trait.RemoveNativeLanguage)))
+                return null;
+            return GetSpeciesNativeLanguage(protoManager);
+        }
+        // End Frontier
 
         public ICharacterProfile Validated(ICommonSession session, IDependencyCollection collection)
         {

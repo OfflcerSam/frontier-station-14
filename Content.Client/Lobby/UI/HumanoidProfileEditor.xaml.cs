@@ -511,6 +511,20 @@ namespace Content.Client.Lobby.UI
                 return;
             }
 
+            // Frontier: species grants are automatic and do not consume language-trait points.
+            if (Profile != null)
+            {
+                var native = Profile.GetAutomaticNativeLanguage(_prototypeManager);
+                var languageName = native is { } id
+                    ? _prototypeManager.Index(id).Name
+                    : Loc.GetString("trait-native-language-none");
+                TraitsList.AddChild(new Label
+                {
+                    Text = Loc.GetString("trait-native-language", ("language", languageName)),
+                });
+            }
+            // End Frontier
+
             // Setup model
             Dictionary<string, List<string>> traitGroups = new();
             List<string> defaultTraits = new();
@@ -556,8 +570,23 @@ namespace Content.Client.Lobby.UI
                     var trait = _prototypeManager.Index<TraitPrototype>(traitProto);
                     var selector = new TraitPreferenceSelector(trait);
 
-                    selector.Preference = Profile?.TraitPreferences.Contains(trait.ID) == true;
-                    if (selector.Preference)
+                    var selected = Profile?.TraitPreferences.Contains(trait.ID) == true; // Frontier: distinguish paid choices
+                    var automatic = Profile?.GetAutomaticNativeLanguage(_prototypeManager) is { } nativeLanguage &&
+                                    !trait.ReplaceLanguages && trait.LanguagesSpoken.Contains(nativeLanguage); // Frontier
+                    selector.Preference = selected || automatic; // Frontier: show the species language as already known
+                    if (automatic)
+                    {
+                        selector.Cost = 0;
+                        selector.Checkbox.Text = Loc.GetString("trait-native-language-choice", ("language", Loc.GetString(trait.Name)));
+                    }
+                    // Frontier: show Iterator's incompatibility with other language skills before selection.
+                    selector.Checkbox.Disabled = automatic || !selected && Profile?.TraitPreferences.Any(preference =>
+                        _prototypeManager.TryIndex(preference, out var other) && trait.ConflictsWith(other)) == true;
+                    if (!selected && Profile != null &&
+                        !Profile.HasTraitLanguageRequirement(trait, Profile.TraitPreferences, _prototypeManager))
+                        selector.Checkbox.Disabled = true;
+                    // End Frontier
+                    if (selected && !automatic) // Frontier: automatic native languages never consume points
                         selectionCount += trait.Cost;
 
                     selector.PreferenceChanged += preference =>
@@ -1234,7 +1263,7 @@ namespace Content.Client.Lobby.UI
 
         private void SetSpecies(string newSpecies)
         {
-            Profile = Profile?.WithSpecies(newSpecies);
+            Profile = Profile?.WithSpecies(newSpecies, _prototypeManager); // Frontier: revalidate native language choices
             OnSkinColorOnValueChanged(); // Species may have special color prefs, make sure to update it.
             Markings.SetSpecies(newSpecies); // Repopulate the markings tab as well.
             // In case there's job restrictions for the species

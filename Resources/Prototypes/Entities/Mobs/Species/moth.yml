@@ -8,7 +8,7 @@
   # Frontier: species language ported from Starlight.
   - type: LanguageKnowledge
     speaks: [GalacticCommon, Moffic]
-    understands: [GalacticCommon, Moffic]
+    understands: [GalacticCommon, Moffic, Mothroach] # Frontier: retain Starlight's related animal language
   # End Frontier
   - type: HumanoidAppearance
     species: Moth

@@ -1,0 +1,70 @@
+# Ported from Starlight. These devices translate Common without granting native language knowledge.
+- type: entity
+  id: Translator
+  parent: BaseItem
+  name: translator
+  description: A portable translator. Carry it in a hand or pocket and keep its power cell charged.
+  components:
+  - type: Item
+    size: Small
+  - type: ToggleCellDraw
+  - type: PowerCellDraw
+    drawRate: 0.6 # 10 min with low-cap / 20 min with med-cap / 30 min with high-cap power cells
+  - type: ItemToggle
+  - type: PowerCellSlot
+    cellSlotId: cell_slot
+  - type: ContainerContainer
+    containers:
+      cell_slot: !type:ContainerSlot
+  - type: ItemSlots
+    slots:
+      cell_slot:
+        name: power-cell-slot-component-slot-name-default
+        startingItem: PowerCellMedium
+        # Frontier: whitelist power cells; Starlight's MechReactor tag is not available here.
+        whitelist:
+          components:
+          - PowerCell
+  - type: Sprite
+    sprite: _Starlight/Objects/Devices/translator.rsi
+    state: icon
+    layers:
+    - state: icon
+    - state: translator
+      shader: unshaded
+      visible: false
+      map: [translator]
+  - type: Appearance
+  - type: ToggleableVisuals
+    spriteLayer: translator
+  - type: HandheldTranslator
+    enabled: false
+    understood: [GalacticCommon]
+  - type: Clothing
+    slots: [POCKET] # Frontier: Starlight's misc slot is POCKET in this fork.
+
+- type: entity
+  categories: [HideSpawnMenu]
+  id: TranslatorForeigner
+  parent: Translator
+  name: foreigner's translator
+  description: A special-issue translator that helps foreigners speak and understand this station's primary language.
+
+- type: entity
+  categories: [HideSpawnMenu]
+  id: TranslatorIterator
+  parent: Translator
+  name: iterator's translator
+  description: A special-issue translator that helps Iterators understand this station's primary language.
+  components:
+  - type: Sprite
+    layers:
+    - state: icon
+    - state: color
+    - state: translator
+      shader: unshaded
+      visible: false
+      map: [translator]
+  - type: HandheldTranslator
+    understood: [GalacticCommon]
+    requires: [ScurretSign]
