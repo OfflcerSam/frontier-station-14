@@ -5,6 +5,15 @@
   parent: BaseMob
   id: MobRobotic
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    - Machine
+    understands:
+    - GalacticCommon
+    - Machine
+  # End Frontier
   - type: Reactive
     groups:
       Acidic: [Touch]

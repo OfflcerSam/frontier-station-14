@@ -53,6 +53,8 @@ public sealed class SurveillanceCameraSpeakerSystem : EntitySystem
 
         // Frontier: Do not send TV messages to admins that are out of range. (GhostRangeLimit>GhostRangeLimitNoAdminCheck)
         // log to chat so people can identity the speaker/source, but avoid clogging ghost chat if there are many radios
-        _chatSystem.TrySendInGameICMessage(uid, args.Message, InGameICChatType.Speak, ChatTransmitRange.GhostRangeLimitNoAdminCheck, nameOverride: name);
+        _chatSystem.TrySendInGameICMessage(uid, args.Message, InGameICChatType.Speak,
+            ChatTransmitRange.GhostRangeLimitNoAdminCheck, nameOverride: name, checkRadioPrefix: false,
+            ignoreActionBlocker: true, languageOverride: args.Language); // Frontier: replay already-authorized speech
     }
 }

@@ -7,6 +7,10 @@
 # for basic physical traits
 - type: cloningSettings
   id: Body
+  # Frontier: retain learned languages and the current selection when cloning.
+  eventComponents:
+  - LanguageKnowledge
+  # End Frontier
   components:
   # general
   - DetailExaminable

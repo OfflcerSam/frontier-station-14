@@ -5,6 +5,11 @@
   id: BaseMobMoth
   abstract: true
   components:
+  # Frontier: species language ported from Starlight.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon, Moffic]
+    understands: [GalacticCommon, Moffic]
+  # End Frontier
   - type: HumanoidAppearance
     species: Moth
     hideLayersOnEquip:

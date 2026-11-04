@@ -4,6 +4,13 @@
   name: Nar'Sie
   description: Your mind begins to bubble and ooze as it tries to comprehend what it sees.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Darktongue
+    understands:
+    - Darktongue
+  # End Frontier
   - type: Sprite
     sprite: Mobs/Demons/narsie.rsi
     drawdepth: Ghosts

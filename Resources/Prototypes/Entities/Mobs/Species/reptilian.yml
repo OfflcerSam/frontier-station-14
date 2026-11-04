@@ -5,6 +5,11 @@
   id: BaseMobReptilian
   abstract: true
   components:
+  # Frontier: species language ported from Starlight.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon, Draconic]
+    understands: [GalacticCommon, Draconic]
+  # End Frontier
   - type: HumanoidAppearance
     species: Reptilian
     hideLayersOnEquip:

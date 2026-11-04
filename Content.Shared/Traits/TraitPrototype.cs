@@ -1,3 +1,4 @@
+using Content.Shared._Starlight.Language; // Frontier: Starlight language support
 using Content.Shared.Whitelist;
 using Robust.Shared.Prototypes;
 
@@ -41,7 +42,21 @@ public sealed partial class TraitPrototype : IPrototype
     /// The components that get added to the player, when they pick this trait.
     /// </summary>
     [DataField]
-    public ComponentRegistry Components { get; private set; } = default!;
+    public ComponentRegistry Components { get; private set; } = new(); // Frontier: allow language-only traits
+
+    // Frontier: language skills ported from Starlight.
+    /// <summary>
+    /// Languages added to intrinsic spoken knowledge when this trait is applied.
+    /// </summary>
+    [DataField]
+    public List<ProtoId<LanguagePrototype>> LanguagesSpoken = new();
+
+    /// <summary>
+    /// Languages added to intrinsic understood knowledge when this trait is applied.
+    /// </summary>
+    [DataField]
+    public List<ProtoId<LanguagePrototype>> LanguagesUnderstood = new();
+    // End Frontier
 
     /// <summary>
     /// Gear that is given to the player, when they pick this trait.

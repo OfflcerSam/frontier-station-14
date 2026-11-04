@@ -4,6 +4,15 @@
   id: MobMoproach
   description: This little mothroach has mopshoes on its feet! How adorable!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Mothroach
+    understands:
+    - Moffic
+    - Mothroach
+    - GalacticCommon
+  # End Frontier
   - type: GhostRole
     name: ghost-role-information-moproach-name
     description: ghost-role-information-moproach-description

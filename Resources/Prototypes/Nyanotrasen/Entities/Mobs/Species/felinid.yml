@@ -4,6 +4,11 @@
   id: MobFelinidBase
   abstract: true
   components:
+  # Frontier: Nekomimetic corresponds to Starlight's feline species language.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon, Nekomimetic]
+    understands: [GalacticCommon, Nekomimetic, Cat]
+  # End Frontier
   - type: Sprite
     scale: 0.8, 0.8
   - type: HumanoidAppearance

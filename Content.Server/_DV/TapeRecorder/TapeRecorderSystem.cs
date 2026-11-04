@@ -1,3 +1,4 @@
+using Content.Shared._Starlight.Language.Systems; // Frontier: Starlight language support
 using Content.Server.Chat.Systems;
 using Content.Server.Hands.Systems;
 using Content.Server.Speech;
@@ -21,6 +22,7 @@ public sealed class TapeRecorderSystem : SharedTapeRecorderSystem
     [Dependency] private readonly HandsSystem _hands = default!;
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly PaperSystem _paper = default!;
+    [Dependency] private readonly SharedLanguageSystem _languages = default!; // Frontier
 
     public override void Initialize()
     {
@@ -50,7 +52,11 @@ public sealed class TapeRecorderSystem : SharedTapeRecorderSystem
             var verb = message.Verb ?? SharedChatSystem.DefaultSpeechVerb;
             speech.SpeechVerb = _proto.Index<SpeechVerbPrototype>(verb);
             //Play the message
-            _chat.TrySendInGameICMessage(ent, message.Message, InGameICChatType.Speak, false);
+            // Frontier: playback preserves the recorded language and cannot parse it as a new command prefix.
+            var language = _proto.Index(message.Language ?? SharedLanguageSystem.UniversalPrototype);
+            _chat.TrySendInGameICMessage(ent, message.Message, InGameICChatType.Speak, ChatTransmitRange.Normal,
+                checkRadioPrefix: false, ignoreActionBlocker: true, languageOverride: language);
+            // End Frontier
         }
     }
 
@@ -79,7 +85,12 @@ public sealed class TapeRecorderSystem : SharedTapeRecorderSystem
         //Add a new entry to the tape
         var verb = _chat.GetSpeechVerb(args.Source, args.Message);
         var name = nameEv.VoiceName;
-        cassette.Comp.Buffer.Add(new TapeCassetteRecordedMessage(cassette.Comp.CurrentPosition, name, verb, args.Message));
+        // Frontier: keep language metadata for both playback and transcription.
+        cassette.Comp.Buffer.Add(new TapeCassetteRecordedMessage(cassette.Comp.CurrentPosition, name, verb, args.Message)
+        {
+            Language = args.Language?.ID,
+        });
+        // End Frontier
     }
 
     private void OnPrintMessage(Entity<TapeRecorderComponent> ent, ref PrintTapeRecorderMessage args)
@@ -120,7 +131,7 @@ public sealed class TapeRecorderSystem : SharedTapeRecorderSystem
             text.AppendLine(Loc.GetString("tape-recorder-print-message-text",
                 ("time", time.ToString(@"hh\:mm\:ss")),
                 ("source", name),
-                ("message", message.Message)));
+                ("message", GetTranscriptMessage(message, player)))); // Frontier: unknown languages cannot be transcribed
         }
         text.AppendLine();
         text.Append(Loc.GetString("tape-recorder-print-end-text"));
@@ -128,5 +139,15 @@ public sealed class TapeRecorderSystem : SharedTapeRecorderSystem
         _paper.SetContent((paper, paperComp), text.ToString());
 
         comp.CooldownEndTime = Timing.CurTime + comp.PrintCooldown;
+    }
+
+    // Frontier: paper content is shared with every reader, so check comprehension before writing it.
+    public string GetTranscriptMessage(TapeCassetteRecordedMessage message, EntityUid actor)
+    {
+        if (message.Language is not { } id || _languages.CanUnderstand(actor, id))
+            return message.Message;
+
+        var language = _proto.Index(id);
+        return $"({language.Name}) {_languages.ObfuscateSpeech(message.Message, language)}";
     }
 }

@@ -5,6 +5,11 @@
   id: BaseMobDiona
   abstract: true
   components:
+  # Frontier: species language ported from Starlight.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon, Sylvan]
+    understands: [GalacticCommon, Sylvan]
+  # End Frontier
   - type: HumanoidAppearance
     species: Diona
   - type: Hunger

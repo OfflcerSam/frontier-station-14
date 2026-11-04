@@ -4,6 +4,14 @@
   id: MobBat
   description: Some cultures find them terrifying, others crunchy on the teeth.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Bat
+    understands:
+    - Bat
+    - GalacticCommon
+  # End Frontier
   - type: MovementSpeedModifier
     baseWalkSpeed : 3
     baseSprintSpeed : 6
@@ -198,6 +206,14 @@
   id: MobChicken
   description: Comes before an egg, and IS a dinosaur!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Chicken
+    understands:
+    - GalacticCommon
+    - Chicken
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -492,6 +508,15 @@
   id: MobMothroach
   description: This is the adorable by-product of multiple attempts at genetically mixing mothpeople with cockroaches.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Mothroach
+    understands:
+    - GalacticCommon
+    - Moffic
+    - Mothroach
+  # End Frontier
   - type: GhostRole
     makeSentient: true
     allowSpeech: true
@@ -665,6 +690,14 @@
   id: MobDuckMallard
   description: An adorable mallard duck, it's fluffy and soft!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Duck
+    understands:
+    - GalacticCommon
+    - Duck
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -1181,6 +1214,13 @@
   id: MobGorilla
   description: Smashes, roars, looks cool. Don't stand near one.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    understands:
+    - Ancestor
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -1352,6 +1392,14 @@
   description: The genetic bipedal ancestor of... Uh... Something. Yeah, there's definitely something on the station that descended from whatever this is.
   abstract: true
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    understands:
+    - GalacticCommon
+    - Ancestor
+  # End Frontier
   - type: CombatMode
   - type: Inventory
     templateId: monkey
@@ -1510,6 +1558,14 @@
   description: New church of neo-darwinists actually believe that EVERY animal evolved from a monkey. Tastes like pork, and killing them is both fun and relaxing.
   suffix: syndicate base
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    understands:
+    - Ancestor
+    - GalacticCommon
+  # End Frontier
   - type: NameIdentifier
     group: Monkey
   - type: SentienceTarget
@@ -1541,6 +1597,14 @@
   parent: MobBaseSyndicateMonkey
   suffix: syndicate agent
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    understands:
+    - Ancestor
+    - GalacticCommon
+  # End Frontier
     # make the player a traitor once its taken
   - type: AutoTraitor
     profile: TraitorReinforcement
@@ -1550,6 +1614,14 @@
   parent: MobBaseSyndicateMonkey
   suffix: NukeOps
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    understands:
+    - Ancestor
+    - GalacticCommon
+  # End Frontier
   - type: NukeOperative
 
 - type: entity
@@ -1559,6 +1631,16 @@
   description: Cousins to the sentient race of lizard people, kobolds blend in with their natural habitat and are as nasty as monkeys; ready to pull out your hair and stab you to death.
   abstract: true
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    - Draconic
+    understands:
+    - GalacticCommon
+    - Ancestor
+    - Draconic
+  # End Frontier
   - type: NameIdentifier
     group: Kobold
   - type: LizardAccent
@@ -1689,6 +1771,16 @@
   parent: MobBaseKobold
   suffix: syndicate base
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    - Draconic
+    understands:
+    - Ancestor
+    - Draconic
+    - GalacticCommon
+  # End Frontier
   - type: MobThresholds
     thresholds:
       0: Alive
@@ -1731,6 +1823,15 @@
   id: MobMouse
   description: Squeak!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Mouse
+    understands:
+    - GalacticCommon
+    - Mouse
+    - Squeakish
+  # End Frontier
   - type: Body
     prototype: Mouse
   - type: GhostRole
@@ -2230,6 +2331,11 @@
   abstract: true
   description: Infiltrates your domain, spies on you, and somehow still a cool pet.
   components:
+  # Frontier: preserve Common mimicry without translating unfamiliar languages.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon]
+    understands: [GalacticCommon]
+  # End Frontier
   - type: MovementSpeedModifier
     baseWalkSpeed : 2.5
     baseSprintSpeed : 6
@@ -2315,6 +2421,14 @@
   id: MobPenguin
   description: Their lives are constant pain due to their inner-body knees.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Penguin
+    understands:
+    - GalacticCommon
+    - Penguin
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -2503,6 +2617,14 @@
   id: MobSpiderBase
   abstract: true
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Chittin
+    understands:
+    - GalacticCommon
+    - Chittin
+  # End Frontier
   - type: Carriable #DeltaV ##shiva deserves to be held
   - type: Physics
   - type: Fixtures
@@ -2850,6 +2972,15 @@
   id: MobFox
   description: They're a fox.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Fox
+    understands:
+    - GalacticCommon
+    - Fox
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Animals/fox.rsi
@@ -2973,6 +3104,17 @@
   parent: MobCorgiBase
   id: MobCorgi
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - GalacticCommon
+    - Dog
+    - DogFeral
+    - Canilunzt
+  # End Frontier
   - type: DamageStateVisuals
     states:
       Alive:
@@ -2997,6 +3139,17 @@
   id: MobCorgiNarsi
   description: Ian! No!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/corgi.rsi
@@ -3085,6 +3238,17 @@
   id: MobCat
   description: Feline pet, very funny.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Cat
+    - CatFeral
+    understands:
+    - GalacticCommon
+    - Cat
+    - CatFeral
+    - Nekomimetic
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/cat.rsi
@@ -3199,6 +3363,16 @@
   parent: MobCatSpace
   description: Explosive kitten.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Cat
+    - CatFeral
+    understands:
+    - Cat
+    - CatFeral
+    - GalacticCommon
+  # End Frontier
   - type: Sprite
     layers:
     - map: ["enum.DamageStateVisualLayers.Base"]
@@ -3458,6 +3632,15 @@
   id: MobHamster
   description: A cute, fluffy, robust hamster.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Mouse
+    understands:
+    - GalacticCommon
+    - Mouse
+    - Squeakish
+  # End Frontier
   - type: GhostRole
     makeSentient: true
     allowSpeech: true
@@ -3619,6 +3802,14 @@
   id: MobPig
   description: Oink.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Pig
+    understands:
+    - GalacticCommon
+    - Pig
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -3691,6 +3882,14 @@
   id: MobDionaNymph
   description: It's like a cat, only.... branch-ier.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Sylvan
+    understands:
+    - GalacticCommon
+    - Sylvan
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     layers:
@@ -3772,6 +3971,14 @@
   id: MobDionaNymphAccent # No talky. For non-brain & wild nymphs
   suffix: Accent
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Sylvan
+    understands:
+    - GalacticCommon
+    - Sylvan
+  # End Frontier
   - type: ReplacementAccent
     accent: nymph
 
@@ -3875,6 +4082,18 @@
   name: smart corgi
   description: An unusually smart dog.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   # Use corgi sprite, need to add handcuff layer
   - type: Sprite
     layers:

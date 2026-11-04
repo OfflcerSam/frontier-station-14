@@ -9,6 +9,11 @@
   id: BaseMobSpecies
   abstract: true
   components:
+  # Frontier: language system ported from Starlight.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon]
+    understands: [GalacticCommon]
+  # End Frontier
   - type: Sprite
     layers:
     - map: [ "enum.HumanoidVisualLayers.Chest" ]

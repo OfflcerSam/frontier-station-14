@@ -1,3 +1,5 @@
+using Content.Shared._Starlight.Language.Components; // Frontier: Starlight language support
+using Content.Shared._Starlight.Language.Systems; // Frontier: Starlight language support
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Server.Atmos.EntitySystems;
@@ -54,6 +56,7 @@ public sealed class EntityEffectSystem : EntitySystem
     [Dependency] private readonly AtmosphereSystem _atmosphere = default!;
     [Dependency] private readonly BloodstreamSystem _bloodstream = default!;
     [Dependency] private readonly ChatSystem _chat = default!;
+    [Dependency] private readonly SharedLanguageSystem _languages = default!; // Frontier
     [Dependency] private readonly EmpSystem _emp = default!;
     [Dependency] private readonly ExplosionSystem _explosion = default!;
     [Dependency] private readonly FlammableSystem _flammable = default!;
@@ -765,6 +768,11 @@ public sealed class EntityEffectSystem : EntitySystem
         // We call this before the mind check to allow things like player-controlled mice to be able to benefit from the effect
         RemComp<ReplacementAccentComponent>(uid);
         RemComp<MonkeyAccentComponent>(uid);
+
+        // Frontier: cognizine grants Common speech as well as removing animal accents.
+        if (!HasComp<LanguageGrantImmuneComponent>(uid))
+            _languages.AddLanguage(uid, SharedLanguageSystem.FallbackLanguagePrototype);
+        // End Frontier
 
         // Stops from adding a ghost role to things like people who already have a mind
         if (TryComp<MindContainerComponent>(uid, out var mindContainer) && mindContainer.HasMind)

@@ -1,3 +1,5 @@
+using Content.Shared._Starlight.Language; // Frontier: Starlight languages
+using Content.Shared._Starlight.Language.Systems; // Frontier
 using Content.Server._NF.Radio; // Frontier
 using Content.Server.Administration.Logs;
 using Content.Server.Chat.Systems;
@@ -32,6 +34,7 @@ public sealed class RadioSystem : EntitySystem
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly ChatSystem _chat = default!;
+    [Dependency] private readonly SharedLanguageSystem _languages = default!; // Frontier
 
     // set used to prevent radio feedback loops.
     private readonly HashSet<string> _messages = new();
@@ -51,7 +54,7 @@ public sealed class RadioSystem : EntitySystem
     {
         if (args.Channel != null && component.Channels.Contains(args.Channel.ID))
         {
-            SendRadioMessage(uid, args.Message, args.Channel, uid);
+            SendRadioMessage(uid, args.Message, args.Channel, uid, language: args.Language); // Frontier
             args.Channel = null; // prevent duplicate messages from other listeners.
         }
     }
@@ -76,15 +79,17 @@ public sealed class RadioSystem : EntitySystem
     private void OnIntrinsicReceive(EntityUid uid, IntrinsicRadioReceiverComponent component, ref RadioReceiveEvent args)
     {
         if (TryComp(uid, out ActorComponent? actor))
-            _netMan.ServerSendMessage(args.ChatMsg, actor.PlayerSession.Channel);
+            _netMan.ServerSendMessage(GetChatMessageForListener(uid, args), actor.PlayerSession.Channel); // Frontier
     }
 
     /// <summary>
     /// Send radio message to all active radio listeners
     /// </summary>
-    public void SendRadioMessage(EntityUid messageSource, string message, ProtoId<RadioChannelPrototype> channel, EntityUid radioSource, int? frequency = null, bool escapeMarkup = true) // Frontier: added frequency
+    /// <param name="language">Frontier: the original spoken language, retained when a device relays speech.</param>
+    public void SendRadioMessage(EntityUid messageSource, string message, ProtoId<RadioChannelPrototype> channel, EntityUid radioSource, int? frequency = null, bool escapeMarkup = true, LanguagePrototype? language = null) // Frontier: added frequency
     {
-        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, frequency: frequency, escapeMarkup: escapeMarkup); // Frontier: added frequency
+        // Frontier: preserve language when resolving the radio channel prototype.
+        SendRadioMessage(messageSource, message, _prototype.Index(channel), radioSource, frequency: frequency, escapeMarkup: escapeMarkup, language: language); // Frontier: added frequency
     }
 
     /// <summary>
@@ -92,8 +97,15 @@ public sealed class RadioSystem : EntitySystem
     /// </summary>
     /// <param name="messageSource">Entity that spoke the message</param>
     /// <param name="radioSource">Entity that picked up the message and will send it, e.g. headset</param>
-    public void SendRadioMessage(EntityUid messageSource, string message, RadioChannelPrototype channel, EntityUid radioSource, int? frequency = null, bool escapeMarkup = true) // Nuclear-14: add frequency
+    /// <param name="language">Frontier: the original spoken language, retained when a device relays speech.</param>
+    public void SendRadioMessage(EntityUid messageSource, string message, RadioChannelPrototype channel, EntityUid radioSource, int? frequency = null, bool escapeMarkup = true, LanguagePrototype? language = null) // Nuclear-14: add frequency
     {
+        // Frontier: prevent visual and hive languages from being transmitted over radio hardware.
+        language ??= _languages.GetLanguage(messageSource);
+        if (!language.Speech.AllowRadio || language.Speech.BlockSpeech)
+            return;
+        // End Frontier
+
         // TODO if radios ever garble / modify messages, feedback-prevention needs to be handled better than this.
         if (!_messages.Add(message))
             return;
@@ -129,14 +141,19 @@ public sealed class RadioSystem : EntitySystem
             channelText = $"\\[{channel.LocalizedName}\\]";
         // End Frontier
 
-        var wrappedMessage = Loc.GetString(speech.Bold ? "chat-radio-message-wrap-bold" : "chat-radio-message-wrap",
+        // Frontier: both versions retain the same radio channel and speaker formatting.
+        string WrapRadio(string text, bool obfuscated = false) => Loc.GetString(speech.Bold ? "chat-radio-message-wrap-bold" : "chat-radio-message-wrap",
             ("color", channel.Color),
             ("fontType", speech.FontId),
             ("fontSize", speech.FontSize),
             ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
             ("channel", channelText), // Frontier: $"\\[{channel.LocalizedName}\\]"<channelText
             ("name", name),
-            ("message", content));
+            ("message", _chat.FormatLanguageMessage(language, text, obfuscated)));
+        var wrappedMessage = WrapRadio(content);
+        var unknown = _languages.ObfuscateSpeech(message, language);
+        var unknownWrap = WrapRadio(FormattedMessage.EscapeText(unknown), true);
+        // End Frontier
 
         // most radios are relayed to chat, so lets parse the chat message beforehand
         var chat = new ChatMessage(
@@ -146,7 +163,8 @@ public sealed class RadioSystem : EntitySystem
             NetEntity.Invalid,
             null);
         var chatMsg = new MsgChatMessage { Message = chat };
-        var ev = new RadioReceiveEvent(message, messageSource, channel, radioSource, chatMsg);
+        var ev = new RadioReceiveEvent(message, messageSource, channel, radioSource, chatMsg, language,
+            new MsgChatMessage { Message = new ChatMessage(ChatChannel.Radio, unknown, unknownWrap, NetEntity.Invalid, null) }); // Frontier
 
         var sendAttemptEv = new RadioSendAttemptEvent(channel, radioSource);
         RaiseLocalEvent(ref sendAttemptEv);
@@ -200,6 +218,14 @@ public sealed class RadioSystem : EntitySystem
 
         _replay.RecordServerMessage(chat);
         _messages.Remove(message);
+    }
+
+    // Frontier: radio hardware never decides which languages its wearer understands.
+    public MsgChatMessage GetChatMessageForListener(EntityUid listener, RadioReceiveEvent args)
+    {
+        if (args.Language == null || HasComp<GhostComponent>(listener) || _languages.CanUnderstand(listener, args.Language.ID))
+            return args.ChatMsg;
+        return args.ObfuscatedChatMsg ?? args.ChatMsg;
     }
 
     /// <inheritdoc cref="TelecomServerComponent"/>

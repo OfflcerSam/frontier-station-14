@@ -5,6 +5,11 @@
   id: BaseMobDwarf
   abstract: true
   components:
+  # Frontier: species language ported from Starlight.
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon, Grumbakul]
+    understands: [GalacticCommon, Grumbakul]
+  # End Frontier
   - type: Hunger
   - type: Thirst
   - type: Carriable # Carrying system from nyanotrasen.

@@ -1,3 +1,4 @@
+using Content.Shared._Starlight.Language; // Frontier: Starlight language support
 using Content.Shared.Speech;
 using Robust.Shared.Prototypes;
 
@@ -32,6 +33,10 @@ public sealed partial class TapeCassetteRecordedMessage : IComparable<TapeCasset
     /// </summary>
     [DataField]
     public string Message = string.Empty;
+
+    // Frontier: null preserves universal speech for recordings made before languages were introduced.
+    [DataField]
+    public ProtoId<LanguagePrototype>? Language;
 
     public TapeCassetteRecordedMessage(float timestamp, string name, ProtoId<SpeechVerbPrototype> verb, string message)
     {

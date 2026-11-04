@@ -60,6 +60,11 @@ namespace Content.Server.Speech
 
         private void OnEntitySpoke(EntityUid uid, SpeechComponent component, EntitySpokeEvent args)
         {
+            // Frontier: visual and hive languages do not produce speech sounds.
+            if (args.Language is { Speech.RequireSound: false } or { Speech.BlockSpeech: true })
+                return;
+            // End Frontier
+
             if (component.SpeechSounds == null)
                 return;
 

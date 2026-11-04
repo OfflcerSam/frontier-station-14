@@ -1,0 +1,44 @@
+- type: entity
+  id: BaseSiliconBrainLanguages
+  abstract: true
+  components:
+  - type: LanguageSpeaker
+  - type: LanguageKnowledge
+    speaks: [GalacticCommon, Machine]
+    understands: [GalacticCommon, Machine]
+
+- type: entity
+  id: BaseSiliconLanguages
+  abstract: true
+  components:
+    - type: LanguageSpeaker
+    - type: LanguageKnowledge
+      speaks:
+      - GalacticCommon
+      - Machine
+      understands:
+      - GalacticCommon
+      - SolCommon
+      - Machine
+      - Canilunzt
+      - Sign
+      - Bubblish
+      - Chittin
+      - Draconic
+      - Marish
+      - Moffic
+      - Nekomimetic
+      - Sylvan
+      - Terrum
+      - VoxPidgin
+      - Scratch
+      - Thaveyan
+      - Darktongue
+      - Classical
+      - Grumbakul
+      - Aielic
+      - Felyaic
+      - Lagomorphian
+      - Squeakish
+      - ClassicalSign
+      - CygniStandard

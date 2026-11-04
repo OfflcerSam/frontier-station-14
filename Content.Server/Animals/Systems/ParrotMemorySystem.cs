@@ -1,3 +1,5 @@
+using Content.Shared._Starlight.Language; // Frontier: Starlight language support
+using Content.Shared._Starlight.Language.Systems; // Frontier: Starlight language support
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Administration.Systems;
@@ -27,6 +29,7 @@ namespace Content.Server.Animals.Systems;
 /// </summary>
 public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
 {
+    [Dependency] private readonly SharedLanguageSystem _languages = default!; // Frontier
     [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
     [Dependency] private readonly IAdminLogManager _adminLogger = default!;
     [Dependency] private readonly IGameTiming _gameTiming = default!;
@@ -63,7 +66,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
     private void OnListen(Entity<ParrotListenerComponent> entity, ref ListenEvent args)
     {
 
-        TryLearn(entity.Owner, args.Message, args.Source);
+        TryLearn(entity.Owner, args.Message, args.Source, args.Language); // Frontier
     }
 
     private void OnHeadsetReceive(Entity<ParrotListenerComponent> entity, ref HeadsetRadioReceiveRelayEvent args)
@@ -71,7 +74,7 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
         var message = args.RelayedEvent.Message;
         var source = args.RelayedEvent.MessageSource;
 
-        TryLearn(entity.Owner, message, source);
+        TryLearn(entity.Owner, message, source, args.RelayedEvent.Language); // Frontier
     }
 
     /// <summary>
@@ -102,10 +105,16 @@ public sealed partial class ParrotMemorySystem : SharedParrotMemorySystem
     /// <param name="entity">Entity learning a new word</param>
     /// <param name="incomingMessage">Message to learn</param>
     /// <param name="source">Source EntityUid of the message</param>
-    public void TryLearn(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity, string incomingMessage, EntityUid source)
+    public void TryLearn(Entity<ParrotMemoryComponent?, ParrotListenerComponent?> entity, string incomingMessage, EntityUid source,
+        LanguagePrototype? language = null) // Frontier
     {
         if (!Resolve(entity, ref entity.Comp1, ref entity.Comp2))
             return;
+
+        // Frontier: parrots cannot turn unfamiliar speech into a readable translation.
+        if (language != null && !_languages.CanUnderstand(entity.Owner, language.ID))
+            return;
+        // End Frontier
 
         if (!_whitelist.CheckBoth(source, entity.Comp2.Blacklist, entity.Comp2.Whitelist))
             return;

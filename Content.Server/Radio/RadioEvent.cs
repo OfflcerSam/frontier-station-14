@@ -1,10 +1,11 @@
+using Content.Shared._Starlight.Language; // Frontier: Starlight language support
 using Content.Shared.Chat;
 using Content.Shared.Radio;
 
 namespace Content.Server.Radio;
 
 [ByRefEvent]
-public readonly record struct RadioReceiveEvent(string Message, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource, MsgChatMessage ChatMsg);
+public readonly record struct RadioReceiveEvent(string Message, EntityUid MessageSource, RadioChannelPrototype Channel, EntityUid RadioSource, MsgChatMessage ChatMsg, LanguagePrototype? Language = null, MsgChatMessage? ObfuscatedChatMsg = null); // Frontier: listener-specific language versions
 
 /// <summary>
 /// Event raised on the parent entity of a headset radio when a radio message is received

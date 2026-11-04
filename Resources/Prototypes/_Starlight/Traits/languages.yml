@@ -1,0 +1,205 @@
+# Language skills ported from Starlight for Frontier's existing trait system.
+- type: traitCategory
+  id: LanguageTraits
+  name: trait-category-languages
+  maxTraitPoints: 4
+
+# Galactic Languages // Should cost: 1
+- type: trait
+  id: SignLanguage
+  name: trait-language-signlanguage-name
+  description: trait-language-signlanguage-desc
+  category: LanguageTraits
+  cost: 1
+  languagesSpoken: [Sign]
+  languagesUnderstood: [Sign]
+
+- type: trait
+  id: ClassicalSignLanguage
+  name: trait-language-classicalsign-name
+  description: trait-language-classicalsign-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [ClassicalSign]
+  languagesUnderstood: [ClassicalSign]
+
+- type: trait
+  id: Classical
+  name: trait-language-classical-name
+  description: trait-language-classical-desc
+  category: LanguageTraits
+  cost: 1
+  languagesSpoken: [Classical]
+  languagesUnderstood: [Classical]
+
+- type: trait
+  id: CygniStandard
+  name: trait-language-cygnistandard-name
+  description: trait-language-cygnistandard-desc
+  category: LanguageTraits
+  cost: 1
+  languagesSpoken: [CygniStandard]
+  languagesUnderstood: [CygniStandard]
+
+- type: trait
+  id: Darktongue
+  name: trait-language-darktongue-name
+  description: trait-language-darktongue-desc
+  category: LanguageTraits
+  cost: 1
+  languagesSpoken: [Darktongue]
+  languagesUnderstood: [Darktongue]
+
+- type: trait
+  id: Felyaic
+  name: trait-language-felyaic-name
+  description: trait-language-felyaic-desc
+  category: LanguageTraits
+  cost: 1
+  languagesSpoken: [Felyaic]
+  languagesUnderstood: [Felyaic]
+
+# Species Languages // Should cost: 2
+- type: trait
+  id: Nekomimetic
+  name: trait-language-nekomimetic-name
+  description: trait-language-nekomimetic-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Nekomimetic]
+  languagesUnderstood: [Nekomimetic, Cat]
+
+- type: trait
+  id: Canilunzt
+  name: trait-language-canilunzt-name
+  description: trait-language-canilunzt-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Canilunzt]
+  languagesUnderstood: [Canilunzt, Fox, Dog]
+
+- type: trait
+  id: Scratch
+  name: trait-language-scratch-name
+  description: trait-language-scratch-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Scratch]
+  languagesUnderstood: [Scratch]
+
+- type: trait
+  id: Aielic
+  name: trait-language-aielic-name
+  description: trait-language-aielic-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Aielic]
+  languagesUnderstood: [Aielic]
+
+- type: trait
+  id: Grumbakul
+  name: trait-language-grumbakul-name
+  description: trait-language-grumbakul-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Grumbakul]
+  languagesUnderstood: [Grumbakul]
+
+- type: trait
+  id: SolCommon
+  name: trait-language-solcommon-name
+  description: trait-language-solcommon-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [SolCommon]
+  languagesUnderstood: [SolCommon]
+
+- type: trait
+  id: VoxPidgin
+  name: trait-language-voxpidgin-name
+  description: trait-language-voxpidgin-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [VoxPidgin]
+  languagesUnderstood: [VoxPidgin]
+
+- type: trait
+  id: Draconic
+  name: trait-language-draconic-name
+  description: trait-language-draconic-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Draconic]
+  languagesUnderstood: [Draconic]
+
+- type: trait
+  id: Marish
+  name: trait-language-marish-name
+  description: trait-language-marish-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Marish]
+  languagesUnderstood: [Marish]
+
+- type: trait
+  id: Bubblish
+  name: trait-language-bubblish-name
+  description: trait-language-bubblish-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Bubblish]
+  languagesUnderstood: [Bubblish]
+
+- type: trait
+  id: Terrum
+  name: trait-language-terrum-name
+  description: trait-language-terrum-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Terrum]
+  languagesUnderstood: [Terrum]
+
+- type: trait
+  id: Sylvan
+  name: trait-language-sylvan-name
+  description: trait-language-sylvan-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Sylvan]
+  languagesUnderstood: [Sylvan]
+
+- type: trait
+  id: Moffic
+  name: trait-language-moffic-name
+  description: trait-language-moffic-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Moffic]
+  languagesUnderstood: [Moffic, Mothroach]
+
+- type: trait
+  id: Thaveyan
+  name: trait-language-thaveyan-name
+  description: trait-language-thaveyan-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Thaveyan]
+  languagesUnderstood: [Thaveyan]
+
+- type: trait
+  id: Lagomorphian
+  name: trait-language-lagomorphian-name
+  description: trait-language-lagomorphian-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Lagomorphian]
+  languagesUnderstood: [Lagomorphian]
+
+- type: trait
+  id: Squeakish
+  name: trait-language-squeakish-name
+  description: trait-language-squeakish-desc
+  category: LanguageTraits
+  cost: 2
+  languagesSpoken: [Squeakish]
+  languagesUnderstood: [Squeakish]

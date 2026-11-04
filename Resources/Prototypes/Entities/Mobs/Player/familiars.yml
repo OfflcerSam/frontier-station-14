@@ -4,6 +4,17 @@
   id: MobBatRemilia
   description: The chaplain's familiar. Likes fruit.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Bat
+    - Darktongue
+    understands:
+    - GalacticCommon
+    - Bat
+    - Mouse
+    - Darktongue
+  # End Frontier
   - type: GhostRole
     makeSentient: true
     allowMovement: true
@@ -39,6 +50,19 @@
   id: MobCorgiCerberus
   description: This pupper is not wholesome.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    - Darktongue
+    understands:
+    - GalacticCommon
+    - Dog
+    - DogFeral
+    - Fox
+    - Darktongue
+  # End Frontier
   - type: GhostRole
     makeSentient: true
     allowMovement: true

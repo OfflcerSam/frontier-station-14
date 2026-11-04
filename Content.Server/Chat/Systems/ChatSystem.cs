@@ -1,3 +1,5 @@
+using Content.Shared._Starlight.Language.Components; // Frontier: Starlight language support
+using Content.Shared._Starlight.Language; // Frontier: Starlight languages
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -165,7 +167,8 @@ public sealed partial class ChatSystem : SharedChatSystem
         ICommonSession? player = null,
         string? nameOverride = null,
         bool checkRadioPrefix = true,
-        bool ignoreActionBlocker = false
+        bool ignoreActionBlocker = false,
+        LanguagePrototype? languageOverride = null // Frontier: Starlight languages
         )
     {
         if (HasComp<GhostComponent>(source))
@@ -209,6 +212,15 @@ public sealed partial class ChatSystem : SharedChatSystem
             message = message[1..];
         }
 
+        // Frontier: resolve language before sanitization so prefixes survive capitalization.
+        var language = languageOverride ?? _languages.GetLanguageFromPrefix(source, ref message, out _, modifyText: true);
+        if (desiredType != InGameICChatType.Emote && HasComp<LanguageSpeakerComponent>(source) &&
+            languageOverride == null && !_languages.CanSpeak(source, language.ID))
+            return;
+        if (desiredType != InGameICChatType.Emote && language.Speech.ChatTypeOverride is { } chatType)
+            desiredType = (InGameICChatType)chatType; // Frontier: shared language speech override
+        // End Frontier
+
         bool shouldCapitalize = (desiredType != InGameICChatType.Emote);
         bool shouldPunctuate = _configurationManager.GetCVar(CCVars.ChatPunctuation);
         // Capitalizing the word I only happens in English, so we check language here
@@ -228,11 +240,11 @@ public sealed partial class ChatSystem : SharedChatSystem
             return;
 
         // This message may have a radio prefix, and should then be whispered to the resolved radio channel
-        if (checkRadioPrefix)
+        if (checkRadioPrefix && (desiredType == InGameICChatType.Emote || language.Speech.AllowRadio)) // Frontier: signing cannot use radios
         {
             if (TryProccessRadioMessage(source, message, out var modMessage, out var channel))
             {
-                SendEntityWhisper(source, modMessage, range, channel, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityWhisper(source, modMessage, range, channel, nameOverride, hideLog, ignoreActionBlocker, language); // Frontier
                 return;
             }
         }
@@ -241,10 +253,10 @@ public sealed partial class ChatSystem : SharedChatSystem
         switch (desiredType)
         {
             case InGameICChatType.Speak:
-                SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntitySpeak(source, message, range, nameOverride, hideLog, ignoreActionBlocker, language); // Frontier
                 break;
             case InGameICChatType.Whisper:
-                SendEntityWhisper(source, message, range, null, nameOverride, hideLog, ignoreActionBlocker);
+                SendEntityWhisper(source, message, range, null, nameOverride, hideLog, ignoreActionBlocker, language); // Frontier
                 break;
             case InGameICChatType.Emote:
                 SendEntityEmote(source, message, range, nameOverride, hideLog: hideLog, ignoreActionBlocker: ignoreActionBlocker);
@@ -408,13 +420,16 @@ public sealed partial class ChatSystem : SharedChatSystem
         ChatTransmitRange range,
         string? nameOverride,
         bool hideLog = false,
-        bool ignoreActionBlocker = false
+        bool ignoreActionBlocker = false,
+        LanguagePrototype? language = null // Frontier
         )
     {
-        if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
+        // Frontier: language-specific speech restrictions and accents.
+        language ??= _languages.GetLanguage(source);
+        if (!CanUseLanguage(source, language, ignoreActionBlocker))
             return;
 
-        var message = TransformSpeech(source, originalMessage);
+        var message = language.Speech.RequireSpeech ? TransformSpeech(source, originalMessage) : originalMessage; // Frontier
 
         if (message.Length == 0)
             return;
@@ -439,16 +454,19 @@ public sealed partial class ChatSystem : SharedChatSystem
 
         name = FormattedMessage.EscapeText(name);
 
-        var wrappedMessage = Loc.GetString(speech.Bold ? "chat-manager-entity-say-bold-wrap-message" : "chat-manager-entity-say-wrap-message",
-            ("entityName", name),
-            ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
-            ("fontType", speech.FontId),
-            ("fontSize", speech.FontSize),
-            ("message", FormattedMessage.EscapeText(message)));
+        // Frontier: send only the text each listener understands.
+        var wrappedMessage = WrapLanguageSpeech(language, InGameICChatType.Speak, name, message, speech);
+        if (!language.Speech.BlockSpeech)
+            SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, language: language,
+                languageWrap: text => WrapLanguageSpeech(language, InGameICChatType.Speak, name, text, speech, true));
+        else if (language.Speech.RadioChannel is { } hiveChannel)
+        {
+            SendLanguageHivemind(source, message, language, hiveChannel);
+            return; // Frontier: hive messages must not reach microphones or other local speech listeners
+        }
+        // End Frontier
 
-        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range);
-
-        var ev = new EntitySpokeEvent(source, message, null, null);
+        var ev = new EntitySpokeEvent(source, message, null, null, language); // Frontier
         RaiseLocalEvent(source, ev, true);
 
         // To avoid logging any messages sent by entities that are not players, like vendors, cloning, etc.
@@ -481,16 +499,30 @@ public sealed partial class ChatSystem : SharedChatSystem
         RadioChannelPrototype? channel,
         string? nameOverride,
         bool hideLog = false,
-        bool ignoreActionBlocker = false
+        bool ignoreActionBlocker = false,
+        LanguagePrototype? language = null // Frontier
         )
     {
-        if (!_actionBlocker.CanSpeak(source) && !ignoreActionBlocker)
+        // Frontier: signing bypasses voice restrictions, but still requires hands and the ability to interact.
+        language ??= _languages.GetLanguage(source);
+        if (!CanUseLanguage(source, language, ignoreActionBlocker))
             return;
 
-        var message = TransformSpeech(source, FormattedMessage.RemoveMarkupOrThrow(originalMessage));
+        var message = FormattedMessage.RemoveMarkupOrThrow(originalMessage);
+        if (language.Speech.RequireSpeech)
+            message = TransformSpeech(source, message); // Frontier: do not apply accents to sign languages
         if (message.Length == 0)
             return;
 
+        // Frontier: hive languages have no local whisper or radio hardware transmission.
+        if (language.Speech.BlockSpeech)
+        {
+            if (language.Speech.RadioChannel is { } hiveChannel)
+                SendLanguageHivemind(source, message, language, hiveChannel);
+            return;
+        }
+        if (!language.Speech.AllowRadio)
+            channel = null;
         var obfuscatedMessage = ObfuscateMessageReadability(message, 0.2f);
 
         // get the entity's name by visual identity (if no override provided).
@@ -509,15 +541,12 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
         name = FormattedMessage.EscapeText(name);
 
-        var wrappedMessage = Loc.GetString("chat-manager-entity-whisper-wrap-message",
-            ("entityName", name), ("message", FormattedMessage.EscapeText(message)));
-
-        var wrappedobfuscatedMessage = Loc.GetString("chat-manager-entity-whisper-wrap-message",
-            ("entityName", nameIdentity), ("message", FormattedMessage.EscapeText(obfuscatedMessage)));
-
+        // Frontier: prepare both understood and obfuscated versions without exposing the original to other listeners.
+        var wrappedMessage = WrapLanguageSpeech(language, InGameICChatType.Whisper, name, message);
+        var wrappedobfuscatedMessage = WrapLanguageSpeech(language, InGameICChatType.Whisper, nameIdentity, obfuscatedMessage);
         var wrappedUnknownMessage = Loc.GetString("chat-manager-entity-whisper-unknown-wrap-message",
-            ("message", FormattedMessage.EscapeText(obfuscatedMessage)));
-
+            ("message", FormatLanguageMessage(language, FormattedMessage.EscapeText(obfuscatedMessage))));
+        // End Frontier
 
         foreach (var (session, data) in GetRecipients(source, WhisperMuffledRange))
         {
@@ -530,6 +559,24 @@ public sealed partial class ChatSystem : SharedChatSystem
             if (MessageRangeCheck(session, data, range) != MessageRangeCheckResult.Full)
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
 
+            // Frontier: visual languages require line of sight even within whisper range.
+            if (!language.Speech.RequireSound && !CanSeeLanguage(source, listener, WhisperMuffledRange))
+                continue;
+            if (!UnderstandsLanguage(listener, language))
+            {
+                var unknownText = _languages.ObfuscateSpeech(message, language);
+                var clear = data.Range <= WhisperClearRange;
+                if (!clear)
+                    unknownText = ObfuscateMessageReadability(unknownText, 0.2f);
+                var unknownWrap = WrapLanguageSpeech(language, InGameICChatType.Whisper,
+                    clear ? name : nameIdentity, unknownText, obfuscated: true);
+                if (!clear && !_examineSystem.InRangeUnOccluded(source, listener, WhisperMuffledRange))
+                    unknownWrap = Loc.GetString("chat-manager-entity-whisper-unknown-wrap-message",
+                        ("message", FormatLanguageMessage(language, FormattedMessage.EscapeText(unknownText), true)));
+                _chatManager.ChatMessageToOne(ChatChannel.Whisper, unknownText, unknownWrap, source, false, session.Channel);
+                continue;
+            }
+            // End Frontier
             if (data.Range <= WhisperClearRange || data.Observer)
                 _chatManager.ChatMessageToOne(ChatChannel.Whisper, message, wrappedMessage, source, false, session.Channel);
             //If listener is too far, they only hear fragments of the message
@@ -542,7 +589,7 @@ public sealed partial class ChatSystem : SharedChatSystem
 
         _replay.RecordServerMessage(new ChatMessage(ChatChannel.Whisper, message, wrappedMessage, GetNetEntity(source), null, MessageRangeHideChatForReplay(range)));
 
-        var ev = new EntitySpokeEvent(source, message, channel, obfuscatedMessage);
+        var ev = new EntitySpokeEvent(source, message, channel, obfuscatedMessage, language); // Frontier: retain language in relays
         RaiseLocalEvent(source, ev, true);
         if (!hideLog)
             if (originalMessage == message)
@@ -715,7 +762,8 @@ public sealed partial class ChatSystem : SharedChatSystem
     /// <summary>
     ///     Sends a chat message to the given players in range of the source entity.
     /// </summary>
-    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null)
+    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null,
+        LanguagePrototype? language = null, Func<string, string>? languageWrap = null) // Frontier
     {
         foreach (var (session, data) in GetRecipients(source, VoiceRange))
         {
@@ -723,6 +771,19 @@ public sealed partial class ChatSystem : SharedChatSystem
             if (entRange == MessageRangeCheckResult.Disallowed)
                 continue;
             var entHideChat = entRange == MessageRangeCheckResult.HideChat;
+            // Frontier: obfuscate per recipient and keep signing behind visual range checks.
+            if (language != null && session.AttachedEntity is { } listener)
+            {
+                if (!language.Speech.RequireSound && !CanSeeLanguage(source, listener, VoiceRange))
+                    continue;
+                if (!UnderstandsLanguage(listener, language))
+                {
+                    var unknown = _languages.ObfuscateSpeech(message, language);
+                    _chatManager.ChatMessageToOne(channel, unknown, languageWrap!(unknown), source, entHideChat, session.Channel, author: author);
+                    continue;
+                }
+            }
+            // End Frontier
             _chatManager.ChatMessageToOne(channel, message, wrappedMessage, source, entHideChat, session.Channel, author: author);
         }
 
@@ -956,6 +1017,7 @@ public sealed class EntitySpokeEvent : EntityEventArgs
     public readonly EntityUid Source;
     public readonly string Message;
     public readonly string? ObfuscatedMessage; // not null if this was a whisper
+    public readonly LanguagePrototype? Language; // Frontier: preserve language across radio relays
 
     /// <summary>
     ///     If the entity was trying to speak into a radio, this was the channel they were trying to access. If a radio
@@ -963,12 +1025,13 @@ public sealed class EntitySpokeEvent : EntityEventArgs
     /// </summary>
     public RadioChannelPrototype? Channel;
 
-    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage)
+    public EntitySpokeEvent(EntityUid source, string message, RadioChannelPrototype? channel, string? obfuscatedMessage, LanguagePrototype? language = null) // Frontier
     {
         Source = source;
         Message = message;
         Channel = channel;
         ObfuscatedMessage = obfuscatedMessage;
+        Language = language; // Frontier
     }
 }
 

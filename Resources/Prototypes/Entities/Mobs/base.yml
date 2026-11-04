@@ -5,6 +5,7 @@
   id: BaseMob
   abstract: true
   components:
+  - type: LanguageSpeaker # Frontier: Starlight language support for all mobs
   - type: Sprite
     noRot: true
     drawdepth: Mobs

@@ -1,3 +1,4 @@
+using Content.Shared._Starlight.Language.Systems; // Frontier: Starlight language support
 using Content.Shared.GameTicking;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
@@ -10,6 +11,9 @@ namespace Content.Server.Traits;
 
 public sealed class TraitSystem : EntitySystem
 {
+    // Frontier: apply language skills using the existing trait system.
+    [Dependency] private readonly SharedLanguageSystem _languages = default!;
+
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
     [Dependency] private readonly SharedHandsSystem _sharedHandsSystem = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
@@ -43,6 +47,13 @@ public sealed class TraitSystem : EntitySystem
             if (_whitelistSystem.IsWhitelistFail(traitPrototype.Whitelist, args.Mob) ||
                 _whitelistSystem.IsBlacklistPass(traitPrototype.Blacklist, args.Mob))
                 continue;
+
+            // Frontier: merge language knowledge so multiple selected skills accumulate.
+            foreach (var language in traitPrototype.LanguagesSpoken)
+                _languages.AddLanguage(args.Mob, language, addUnderstood: false);
+            foreach (var language in traitPrototype.LanguagesUnderstood)
+                _languages.AddLanguage(args.Mob, language, addSpoken: false);
+            // End Frontier
 
             // Add all components required by the prototype
             EntityManager.AddComponents(args.Mob, traitPrototype.Components, false);

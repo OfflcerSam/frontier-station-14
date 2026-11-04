@@ -6,6 +6,18 @@
   description: A flying leviathan, loosely related to space carps.
   abstract: true
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    - Carptongue
+    - Carpmind
+    understands:
+    - GalacticCommon
+    - Carptongue
+    - Carpmind
+    - Thaveyan
+  # End Frontier
   - type: Bloodstream
     bloodMaxVolume: 650
   - type: GhostRole

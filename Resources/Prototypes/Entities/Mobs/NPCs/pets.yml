@@ -7,6 +7,17 @@
   id: MobCorgiIan
   description: Favorite pet corgi.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/corgi.rsi
@@ -57,6 +68,17 @@
   id: MobCorgiIanOld
   description: Still the favorite pet corgi. Love his wheels.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     layers:
     - map: ["enum.DamageStateVisualLayers.Base"]
@@ -82,6 +104,17 @@
   id: MobCorgiLisa
   description: Ian's favorite corgi.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     layers:
     - map: ["enum.DamageStateVisualLayers.Base"]
@@ -119,6 +152,17 @@
   id: MobCorgiMouse
   description: It's 100% a real hungry mouse.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     layers:
     - map: ["enum.DamageStateVisualLayers.Base"]
@@ -142,6 +186,17 @@
   id: MobCorgiIanPup
   description: Favourite puppy corgi. Awww.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Grammar
     attributes:
       proper: true
@@ -160,6 +215,17 @@
   id: MobCatRuntime
   description: Professional mouse hunter. Escape artist.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Cat
+    - CatFeral
+    understands:
+    - Cat
+    - CatFeral
+    - GalacticCommon
+    - Nekomimetic
+  # End Frontier
   - type: NpcFactionMember
     factions:
       - PetsNT
@@ -184,6 +250,17 @@
   parent: MobCatCalico
   description: Ask nicely, and maybe they'll give you one of their spare lives.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Cat
+    - CatFeral
+    understands:
+    - Cat
+    - CatFeral
+    - GalacticCommon
+    - Nekomimetic
+  # End Frontier
   - type: NpcFactionMember
     factions:
       - PetsNT
@@ -205,6 +282,17 @@
   parent: MobCatCaracal
   description: He out here.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Cat
+    - CatFeral
+    understands:
+    - Cat
+    - CatFeral
+    - GalacticCommon
+    - Nekomimetic
+  # End Frontier
   - type: NpcFactionMember
     factions:
       - Cat
@@ -250,6 +338,17 @@
   id: MobBingus
   description: Bingus my beloved...
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Cat
+    - CatFeral
+    understands:
+    - Cat
+    - CatFeral
+    - GalacticCommon
+    - Nekomimetic
+  # End Frontier
   - type: NpcFactionMember
     factions:
       - Cat
@@ -310,6 +409,17 @@
   id: MobMcGriff
   description: This dog can tell something smells around here, and that something is CRIME!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/mcgriff.rsi
@@ -420,6 +530,17 @@
   id: MobWalter
   description: He likes chems and treats. Walter.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Dog
+    - DogFeral
+    understands:
+    - Dog
+    - DogFeral
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Pets/walter.rsi
@@ -571,6 +692,14 @@
   id: MobAlexander
   description: Chef's finest colleague.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Pig
+    understands:
+    - Pig
+    - GalacticCommon
+  # End Frontier
   - type: InteractionPopup
     successChance: 1
     interactSuccessString: petting-success-pig
@@ -593,6 +722,15 @@
   id: MobFoxRenault
   description: The captain's trustworthy fox.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Fox
+    understands:
+    - Fox
+    - GalacticCommon
+    - Canilunzt
+  # End Frontier
   - type: InteractionPopup
     successChance: 1
     interactSuccessString: petting-success-soft-floofy
@@ -623,6 +761,15 @@
   id: MobHamsterHamlet
   description: A grumpy, cute and fluffy hamster.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Mouse
+    understands:
+    - Mouse
+    - GalacticCommon
+    - Squeakish # Rodentia
+  # End Frontier
   - type: Sprite
     drawdepth: SmallMobs
     sprite: Mobs/Pets/hamlet.rsi
@@ -692,6 +839,14 @@
   id: MobSpiderShiva
   description: The first defender of the station.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Chittin
+    understands:
+    - Chittin
+    - GalacticCommon
+  # End Frontier
   - type: InteractionPopup
     successChance: 0.5 # spider is mean
     interactSuccessString: petting-success-tarantula
@@ -790,6 +945,14 @@
   parent: [MobAdultSlimes, StripableInventoryBase]
   description: This masterpiece has gone through thousands of experiments. But it is the sweetest creature in the world. Smile Slime!
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Bubblish
+    understands:
+    - GalacticCommon
+    - Bubblish
+  # End Frontier
   - type: Sprite
     layers:
     - map: [ "enum.DamageStateVisualLayers.Base" ]
@@ -870,6 +1033,16 @@
   id: MobMonkeyPunpun
   description: A prominent representative of monkeys with unlimited access to alcohol.
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Ancestor
+    - Sign
+    understands:
+    - Ancestor
+    - GalacticCommon
+    - Sign
+  # End Frontier
   - type: GhostRole
     prob: 1
     makeSentient: true

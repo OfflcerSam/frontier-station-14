@@ -1,3 +1,4 @@
+using Content.Shared._Starlight.Language; // Frontier: Starlight language support
 using Content.Server.Chat.Systems;
 using Content.Shared.Speech;
 using Content.Shared.Speech.Components;
@@ -70,7 +71,7 @@ public sealed class SurveillanceCameraMicrophoneSystem : EntitySystem
         if (!TryComp(uid, out SurveillanceCameraComponent? camera))
             return;
 
-        var ev = new SurveillanceCameraSpeechSendEvent(args.Source, args.Message);
+        var ev = new SurveillanceCameraSpeechSendEvent(args.Source, args.Message, args.Language); // Frontier
 
         foreach (var monitor in camera.ActiveMonitors)
         {
@@ -99,11 +100,14 @@ public sealed class SurveillanceCameraSpeechSendEvent : EntityEventArgs
 {
     public EntityUid Speaker { get; }
     public string Message { get; }
+    public LanguagePrototype? Language { get; } // Frontier
 
-    public SurveillanceCameraSpeechSendEvent(EntityUid speaker, string message)
+    public SurveillanceCameraSpeechSendEvent(EntityUid speaker, string message,
+        LanguagePrototype? language = null) // Frontier
     {
         Speaker = speaker;
         Message = message;
+        Language = language; // Frontier
     }
 }
 

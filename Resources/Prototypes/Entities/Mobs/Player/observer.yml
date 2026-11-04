@@ -39,6 +39,7 @@
   description: Boo!
   categories: [ HideSpawnMenu ]
   components:
+  - type: UniversalLanguageSpeaker # Frontier: understand all languages as an observer
   - type: Sprite
     sprite: Mobs/Ghosts/ghost_human.rsi
     color: "#fff8"

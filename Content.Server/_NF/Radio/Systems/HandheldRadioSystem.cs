@@ -62,6 +62,9 @@ public sealed partial class HandheldRadioSystem : EntitySystem
     /// </summary>
     private void OnSpeak(EntitySpokeEvent ev)
     {
+        if (ev.Language is { Speech.AllowRadio: false } or { Speech.BlockSpeech: true })
+            return;
+
         var evt = new SpeakHandheldRadioEvent
         {
             SpeakEvent = ev
@@ -110,7 +113,8 @@ public sealed partial class HandheldRadioSystem : EntitySystem
         }
 
         //if (_recentlySent.Add((args.Message, args.Source, channel)))
-        _radio.SendRadioMessage(args.Args.SpeakEvent.Source, args.Args.SpeakEvent.Message, channel, entity, frequency: entity.Comp.Frequency);
+        _radio.SendRadioMessage(args.Args.SpeakEvent.Source, args.Args.SpeakEvent.Message, channel, entity,
+            frequency: entity.Comp.Frequency, language: args.Args.SpeakEvent.Language);
     }
 
     /// <summary>
@@ -145,7 +149,7 @@ public sealed partial class HandheldRadioSystem : EntitySystem
                 }
 
                 if (TryComp(parent, out ActorComponent? actor))
-                    _netMan.ServerSendMessage(args.ChatMsg, actor.PlayerSession.Channel);
+                    _netMan.ServerSendMessage(_radio.GetChatMessageForListener(parent, args), actor.PlayerSession.Channel);
                 break;
 
             case HandheldRadioMode.Intercom:
@@ -159,7 +163,9 @@ public sealed partial class HandheldRadioSystem : EntitySystem
                     ("speaker", Name(uid)),
                     ("originalName", nameEv.VoiceName));
 
-                _chat.TrySendInGameICMessage(uid, args.Message, component.OutputChatType, ChatTransmitRange.GhostRangeLimitNoAdminCheck, nameOverride: name, checkRadioPrefix: false);
+                _chat.TrySendInGameICMessage(uid, args.Message, component.OutputChatType,
+                    ChatTransmitRange.GhostRangeLimitNoAdminCheck, nameOverride: name, checkRadioPrefix: false,
+                    ignoreActionBlocker: true, languageOverride: args.Language);
                 break;
         }
     }
@@ -177,7 +183,8 @@ public sealed partial class HandheldRadioSystem : EntitySystem
 
         var channel = _protoMan.Index<RadioChannelPrototype>(component.Channel)!;
         //if (_recentlySent.Add((args.Message, args.Source, channel)))
-        _radio.SendRadioMessage(args.Source, args.Message, channel, uid, frequency: component.Frequency);
+        _radio.SendRadioMessage(args.Source, args.Message, channel, uid, frequency: component.Frequency,
+            language: args.Language);
     }
 
     private void OnAttemptListen(EntityUid uid, HandheldRadioComponent component, ListenAttemptEvent args)

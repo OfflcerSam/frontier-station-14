@@ -1,5 +1,5 @@
 - type: entity
-  parent: BaseItem
+  parent: [BaseItem, BaseSiliconBrainLanguages] # Frontier: Starlight silicon language support
   id: MMI
   name: man-machine interface
   description: A machine able to facilitate communication between a biological brain and electronics, enabling crew to continue to provide value after work-related incidents.
@@ -69,7 +69,7 @@
             - Brain
 
 - type: entity
-  parent: BaseItem
+  parent: [BaseItem, BaseSiliconBrainLanguages] # Frontier: Starlight silicon language support
   id: PositronicBrain
   name: positronic brain
   description: An artificial brain capable of spontaneous neural activity.

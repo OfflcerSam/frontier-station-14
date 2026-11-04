@@ -1,4 +1,5 @@
 using System.Collections.Frozen;
+using System.Linq; // Frontier: exclude language-only channels from manual radio prefixes
 using System.Text.RegularExpressions;
 using Content.Shared.Popups;
 using Content.Shared.Radio;
@@ -61,6 +62,7 @@ public abstract class SharedChatSystem : EntitySystem
     private void CacheRadios()
     {
         _keyCodes = _prototypeManager.EnumeratePrototypes<RadioChannelPrototype>()
+            .Where(x => x.KeyCode != '\0') // Frontier: hive channels have no manual radio prefix
             .ToFrozenDictionary(x => x.KeyCode);
     }
 

@@ -6,6 +6,15 @@
   description: They mostly come at night. Mostly.
   categories: [ HideSpawnMenu ] # Frontier
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - Xeno
+    - Xenomind
+    understands:
+    - Xeno
+    - Xenomind
+  # End Frontier
   - type: Insulated
   - type: CombatMode
   - type: InputMover
@@ -199,6 +208,17 @@
   id: MobXenoQueen
   categories: [ HideSpawnMenu ] # Frontier
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - GalacticCommon
+    - Xeno
+    - Xenomind
+    understands:
+    - GalacticCommon
+    - Xeno
+    - Xenomind
+  # End Frontier
   - type: Sprite
     drawdepth: Mobs
     sprite: Mobs/Aliens/Xenos/queen.rsi

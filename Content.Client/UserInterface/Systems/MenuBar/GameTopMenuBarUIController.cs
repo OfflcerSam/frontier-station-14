@@ -24,6 +24,7 @@ public sealed class GameTopMenuBarUIController : UIController
     [Dependency] private readonly SandboxUIController _sandbox = default!;
     [Dependency] private readonly GuidebookUIController _guidebook = default!;
     [Dependency] private readonly EmotesUIController _emotes = default!;
+    [Dependency] private readonly Content.Client._Starlight.UserInterface.Systems.Language.LanguageMenuUIController _languages = default!; // Frontier
 
     private GameTopMenuBar? GameTopMenuBar => UIManager.GetActiveUIWidgetOrNull<GameTopMenuBar>();
 
@@ -47,6 +48,7 @@ public sealed class GameTopMenuBarUIController : UIController
         _action.UnloadButton();
         _sandbox.UnloadButton();
         _emotes.UnloadButton();
+        _languages.UnloadButton(); // Frontier: language menu
     }
 
     public void LoadButtons()
@@ -60,5 +62,6 @@ public sealed class GameTopMenuBarUIController : UIController
         _action.LoadButton();
         _sandbox.LoadButton();
         _emotes.LoadButton();
+        _languages.LoadButton(); // Frontier: language menu
     }
 }

@@ -1,3 +1,5 @@
+using Content.Shared._Starlight.Language.Components; // Frontier: Starlight language support
+using Content.Shared._Starlight.Language.Systems; // Frontier: Starlight language support
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Content.Shared.Administration.Logs;
@@ -37,6 +39,7 @@ public abstract partial class SharedMindSystem : EntitySystem
     [Dependency] private readonly MetaDataSystem _metadata = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelist = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
+    [Dependency] private readonly SharedLanguageSystem _languages = default!; // Frontier
 
     [ViewVariables]
     protected readonly Dictionary<NetUserId, EntityUid> UserMinds = new();
@@ -712,6 +715,13 @@ public abstract partial class SharedMindSystem : EntitySystem
         {
             EnsureComp<SpeechComponent>(uid);
             EnsureComp<EmotingComponent>(uid);
+
+            // Frontier: newly sentient objects need language knowledge; preserve existing animal languages.
+            EnsureComp<LanguageSpeakerComponent>(uid);
+            if (!TryComp<LanguageKnowledgeComponent>(uid, out var knowledge) ||
+                knowledge.Speaks.Count == 0)
+                _languages.AddLanguage(uid, SharedLanguageSystem.FallbackLanguagePrototype);
+            // End Frontier
         }
 
         EnsureComp<ExaminerComponent>(uid);

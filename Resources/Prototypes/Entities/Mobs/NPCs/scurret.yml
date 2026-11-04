@@ -7,6 +7,14 @@
   parent: MobBaseAncestor
   abstract: true
   components:
+  # Frontier: language knowledge ported from Starlight.
+  - type: LanguageKnowledge
+    speaks:
+    - ScurretSign
+    understands:
+    - ScurretSign
+    - GalacticCommon
+  # End Frontier
   # Custom names
   - type: ReplacementAccent
     accent: scurret
