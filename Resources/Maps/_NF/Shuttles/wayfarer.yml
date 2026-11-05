@@ -4,7 +4,7 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 11/02/2026 15:06:28
+  time: 11/02/2026 15:07:00
   entityCount: 2360
 maps: []
 grids:
@@ -11768,7 +11768,7 @@ entities:
       pos: -1.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -18231.484
+      secondsUntilStateChange: -18263.096
       state: Opening
   - uid: 1486
     components:
@@ -11777,7 +11777,7 @@ entities:
       pos: 0.5,-28.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -18230.186
+      secondsUntilStateChange: -18261.797
       state: Opening
   - uid: 1487
     components:
@@ -11786,7 +11786,7 @@ entities:
       pos: -1.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -18229.12
+      secondsUntilStateChange: -18260.73
       state: Opening
   - uid: 1488
     components:
@@ -11795,7 +11795,7 @@ entities:
       pos: 0.5,-24.5
       parent: 1
     - type: Door
-      secondsUntilStateChange: -18229.652
+      secondsUntilStateChange: -18261.264
       state: Opening
 - proto: ImpCoffeeMachine
   entities:
