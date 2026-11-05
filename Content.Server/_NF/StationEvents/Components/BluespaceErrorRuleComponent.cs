@@ -5,6 +5,7 @@ using Content.Shared.Procedural;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 using Content.Shared._NF.Bank.Components;
+using Content.Shared._NF.Shipyard.Prototypes;
 using Robust.Shared.Map;
 using Content.Server._NF.StationEvents.Events;
 
@@ -180,6 +181,9 @@ public sealed class BluespaceDungeonSpawnGroup : IBluespaceSpawnGroup
 public sealed class BluespaceGridSpawnGroup : IBluespaceSpawnGroup
 {
     public List<ResPath> Paths = new();
+
+    [DataField]
+    public List<ProtoId<VesselPrototype>> GeneratedVessels = new();
 
     /// <inheritdoc />
     public float MinimumDistance { get; }

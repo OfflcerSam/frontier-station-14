@@ -49,3 +49,36 @@
   - type: ActiveRadio
     channels:
     - Engineering
+
+# Opt-in development event. The scheduled event continues using its handcrafted pool.
+- type: entity
+  id: BluespaceGeneratedSalvage
+  parent: BluespaceSalvage
+  name: Generated Derelict Playtest
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: StationEvent
+    weight: 0
+  - type: BluespaceErrorRule
+    groups:
+      grid: !type:GridSpawnGroup
+        nameDataset: NamesScrap
+        nameDatasetType: Nanotrasen
+        minCount: 1
+        maxCount: 1
+        minimumDistance: 1000
+        maximumDistance: 2000
+        addComponents:
+        - type: IFF
+          color: "#AAAAAA"
+        - type: LinkedLifecycleGridParent
+        - type: ProtectedGrid
+          preventArtifactTriggers: true
+        - type: PreventPilot
+        generatedVessels:
+        - Bodkin
+        - Investigator
+        - Stasis
+        - Garden
+        paths:
+        - /Maps/_NF/Shuttles/Scrap/point.yml

@@ -33,7 +33,8 @@ public sealed class RandomHumanoidSystem : EntitySystem
             component.SpawnedId = SpawnRandomHumanoid(component.SettingsPrototypeId, Transform(uid).Coordinates, MetaData(uid).EntityName); // Frontier: add "component.SpawnedId ="
     }
 
-    public EntityUid SpawnRandomHumanoid(string prototypeId, EntityCoordinates coordinates, string name)
+    public EntityUid SpawnRandomHumanoid(string prototypeId, EntityCoordinates coordinates, string name,
+        Action<EntityUid>? configureBeforeStartup = null) // Frontier: allow setting the medical bounty before it applies injuries
     {
         if (!_prototypeManager.TryIndex<RandomHumanoidSettingsPrototype>(prototypeId, out var prototype))
             throw new ArgumentException("Could not get random humanoid settings");
@@ -56,6 +57,7 @@ public sealed class RandomHumanoidSystem : EntitySystem
             }
         }
 
+        configureBeforeStartup?.Invoke(humanoid); // Frontier
         EntityManager.InitializeAndStartEntity(humanoid);
 
         return humanoid;

@@ -1,0 +1,65 @@
+- type: entityTable
+  id: NFDerelictLootScrap
+  table: !type:GroupSelector
+    rolls: !type:RangeNumberSelector
+      range: 1, 2
+    children:
+    - id: SheetSteel1
+      weight: 3
+    - id: PartRodMetal1
+      weight: 3
+    - id: SheetGlass1
+      weight: 3
+    - id: CableApcStack1
+      weight: 3
+    - id: ScrapCamera
+    - id: ScrapTube
+    - id: ScrapFireExtinguisher
+
+- type: entityTable
+  id: NFDerelictLootMining
+  table: !type:GroupSelector
+    rolls: !type:RangeNumberSelector
+      range: 1, 3
+    children:
+    - !type:NestedSelector
+      tableId: TableDungeonLootGeneralOreSingle
+      weight: 3
+    - id: SheetSteel1
+    - id: PartRodMetal1
+
+- type: entityTable
+  id: NFDerelictLootScience
+  table: !type:GroupSelector
+    rolls: !type:RangeNumberSelector
+      range: 1, 2
+    children:
+    - id: ArtifactFragment1
+      weight: 4
+    - id: CableHVStack1
+      weight: 3
+    - id: SheetGlass1
+      weight: 2
+    - id: ResearchDisk
+
+- type: entityTable
+  id: NFDerelictLootMedical
+  table: !type:GroupSelector
+    rolls: !type:RangeNumberSelector
+      range: 1, 3
+    children:
+    - id: Bloodpack1
+    - id: Brutepack1
+    - id: Ointment1
+    - id: Gauze1
+
+- type: entityTable
+  id: NFDerelictLootBotany
+  table: !type:GroupSelector
+    rolls: !type:RangeNumberSelector
+      range: 1, 3
+    children:
+    - id: TomatoSeeds
+    - id: PoppySeeds
+    - id: PotatoSeeds
+    - id: WeedSpray

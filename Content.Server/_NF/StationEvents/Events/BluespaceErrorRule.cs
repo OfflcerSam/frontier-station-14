@@ -35,6 +35,7 @@ public sealed class BluespaceErrorRule : StationEventSystem<BluespaceErrorRuleCo
     [Dependency] private readonly IPrototypeManager _protoManager = default!;
     [Dependency] private readonly IRobustRandom _random = default!;
     [Dependency] private readonly DungeonSystem _dungeon = default!;
+    [Dependency] private readonly DerelictGenerationSystem _derelicts = default!;
     [Dependency] private readonly MapLoaderSystem _loader = default!;
     [Dependency] private readonly MetaDataSystem _metadata = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
@@ -201,6 +202,9 @@ public sealed class BluespaceErrorRule : StationEventSystem<BluespaceErrorRuleCo
     {
         spawned = EntityUid.Invalid;
 
+        if (group.GeneratedVessels.Count > 0 && TryGeneratedDerelict(spawnCoords, mapId, group, out spawned))
+            return true;
+
         if (group.Paths.Count == 0)
         {
             Log.Error($"Found no paths for GridSpawn");
@@ -235,6 +239,32 @@ public sealed class BluespaceErrorRule : StationEventSystem<BluespaceErrorRuleCo
 
         Log.Error($"Error loading gridspawn for {ToPrettyString(stationUid)} / {path}");
         return false;
+    }
+
+    private bool TryGeneratedDerelict(EntityCoordinates spawnCoords, MapId stagingMap, BluespaceGridSpawnGroup group, out EntityUid spawned)
+    {
+        spawned = EntityUid.Invalid;
+        var vesselId = _random.Pick(group.GeneratedVessels);
+        if (!_protoManager.TryIndex(vesselId, out var vessel) || !_loader.TryLoadGrid(stagingMap, vessel.ShuttlePath, out var grid))
+        {
+            Log.Warning($"Could not load generated derelict hull {vesselId}; trying the handcrafted pool.");
+            return false;
+        }
+
+        var seed = _random.Next();
+        if (!HasComp<ShuttleComponent>(grid.Value.Owner) || !_derelicts.TryGenerate(grid.Value, vessel, seed) ||
+            !_shuttle.TryFTLProximity(grid.Value.Owner, spawnCoords))
+        {
+            Log.Warning($"Could not generate or place derelict {vesselId} with seed {seed}; trying the handcrafted pool.");
+            Del(grid.Value.Owner);
+            return false;
+        }
+
+        if (group.NameGrid)
+            _metadata.SetEntityName(grid.Value.Owner, vessel.Name);
+
+        spawned = grid.Value.Owner;
+        return true;
     }
 
     protected override void Ended(EntityUid uid, BluespaceErrorRuleComponent component, GameRuleComponent gameRule, GameRuleEndedEvent args)

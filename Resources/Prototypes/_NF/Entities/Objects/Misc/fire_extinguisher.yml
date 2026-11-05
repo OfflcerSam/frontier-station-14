@@ -1,0 +1,10 @@
+- type: entity
+  parent: FireExtinguisher
+  id: NFFireExtinguisherEmpty
+  suffix: Empty
+  components:
+  - type: SolutionContainerManager
+    solutions:
+      spray:
+        maxVol: 100
+        reagents: []

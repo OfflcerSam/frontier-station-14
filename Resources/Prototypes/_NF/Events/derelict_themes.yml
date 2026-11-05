@@ -1,0 +1,130 @@
+- type: derelictTheme
+  id: DerelictDecompression
+  maxBreachWidth: 1
+  damageControlChance: 0.25
+  casualty: MedicalBountyService
+  casualtyBounty: Suffocated
+  aftermath:
+  - ShardGlass
+  lootTable: NFDerelictLootScrap
+
+- type: derelictTheme
+  id: DerelictSalvageCollision
+  classes: [ Salvage ]
+  anchors: [ OreProcessor, ScrapProcessor, MaterialReclaimer ]
+  equipmentWreck: ScrapGenericBrokenMachine
+  maxBreachWidth: 2
+  casualty: MedicalBountyCargo
+  casualtyBounty: MildBruteMix
+  aftermath:
+  - SteelOre1
+  lootTable: NFDerelictLootMining
+  threats:
+  - MobIronCrab
+  - MobQuartzCrab
+
+- type: derelictTheme
+  id: DerelictArtifactContainment
+  classes: [ Science ]
+  anchors: [ MachineArtifactAnalyzer ]
+  equipmentDamage:
+    types:
+      Blunt: 35
+  scorchedTiles: 2
+  casualty: MedicalBountyScience
+  casualtyBounty: MurderedPierce
+  aftermath:
+  - ComplexXenoArtifactItem
+  - ShardGlass
+  lootTable: NFDerelictLootScience
+
+- type: derelictTheme
+  id: DerelictCriticalAnomaly
+  classes: [ Science ]
+  anchors: [ MachineAnomalyGenerator, MachineAnomalyVessel, MachineAnomalyVesselExperimental ]
+  equipmentDamage:
+    types:
+      Heat: 60
+  scorchedTiles: 5
+  casualty: MedicalBountyScience
+  casualtyBounty: Insuls
+  aftermath:
+  - ShardGlass
+  - CableHVStack1
+  - NFFireExtinguisherEmpty
+  - ScrapFirelock3
+  lootTable: NFDerelictLootScience
+
+- type: derelictTheme
+  id: DerelictMedicalWardBreach
+  classes: [ Medical ]
+  anchors: [ CryoPod, StasisBed ]
+  maxBreachWidth: 2
+  casualty: MedicalBountyMedical
+  casualtyBounty: MurderedSlash
+  bloodUnderCasualty: true
+  aftermath:
+  - BodyBagFolded
+  - Gauze1
+  lootTable: NFDerelictLootMedical
+  threats:
+  - MobCarpSalvage
+  - MobTickSalvage
+
+- type: derelictTheme
+  id: DerelictBotanyOvergrowth
+  classes: [ Botany ]
+  anchors: [ hydroponicsTray, HydroponicsTrayEmpty ]
+  equipmentDamage:
+    types:
+      Blunt: 25
+  casualty: MedicalBountyService
+  casualtyBounty: MurderedPierce
+  bloodUnderCasualty: true
+  aftermath:
+  - NFDerelictKudzu
+  - NFDerelictKudzu
+  - NFDerelictKudzu
+  lootTable: NFDerelictLootBotany
+  threats:
+  - MobTomatoKiller
+
+- type: derelictTheme
+  id: DerelictFleshInfestation
+  casualty: MedicalBountyService
+  casualtyBounty: MurderedSlash
+  bloodUnderCasualty: true
+  aftermath:
+  - NFDerelictTendons
+  - NFDerelictTendons
+  - NFDerelictTendons
+  lootTable: NFDerelictLootScrap
+  threats:
+  - MobFleshClampSalvage
+  - MobFleshJaredSalvage
+
+- type: derelictTheme
+  id: DerelictXenoImpact
+  maxBreachWidth: 2
+  casualty: MedicalBountyService
+  casualtyBounty: MurderedBlunt
+  aftermath:
+  - NFDerelictImpactRock
+  - ScrapOre1
+  - ShardGlass
+  lootTable: NFDerelictLootMining
+  threats:
+  - NFMobXeno
+
+- type: derelictTheme
+  id: DerelictRockEmbedding
+  crashRock: AsteroidRock
+  casualty: MedicalBountyService
+  casualtyBounty: MurderedBlunt
+  aftermath:
+  - FoodSnackNutribrick
+  - Gauze1
+  - NFInflatableWallStack1
+  - NFFireExtinguisherEmpty
+  - ScrapFirelock1
+  lootTable: NFDerelictLootScrap

@@ -1,0 +1,50 @@
+# Static aftermath stays within the generated scene and leaves boarding routes open.
+- type: entity
+  id: NFDerelictAftermath
+  abstract: true
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Damageable
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 20
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ Destruction ]
+
+- type: entity
+  parent: NFDerelictAftermath
+  id: NFDerelictKudzu
+  name: withered kudzu
+  description: A tangled mat of vines left behind after the growth stopped.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/kudzu.rsi
+    state: kudzu_11
+    drawdepth: Overdoors
+
+- type: entity
+  parent: NFDerelictAftermath
+  id: NFDerelictTendons
+  name: withered tendons
+  description: A tangled mass of tendons with no visible pulse.
+  components:
+  - type: Sprite
+    sprite: Objects/Misc/fleshkudzu.rsi
+    state: kudzu_11
+    drawdepth: Overdoors
+
+- type: entity
+  parent: NFDerelictAftermath
+  id: NFDerelictImpactRock
+  name: shattered impact rock
+  description: A fragment of the asteroid that struck the hull.
+  components:
+  - type: Sprite
+    sprite: Structures/Walls/rock.rsi
+    state: rock_asteroid
+    drawdepth: FloorObjects
