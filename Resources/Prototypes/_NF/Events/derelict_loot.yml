@@ -32,7 +32,7 @@
   id: NFDerelictLootScience
   table: !type:GroupSelector
     rolls: !type:RangeNumberSelector
-      range: 1, 2
+      range: 2, 3
     children:
     - id: ArtifactFragment1
       weight: 4
@@ -41,6 +41,7 @@
     - id: SheetGlass1
       weight: 2
     - id: ResearchDisk
+    - id: AnomalyScanner
 
 - type: entityTable
   id: NFDerelictLootMedical

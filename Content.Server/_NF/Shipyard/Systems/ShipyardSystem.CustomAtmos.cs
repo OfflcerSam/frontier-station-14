@@ -41,6 +41,11 @@ public sealed partial class ShipyardSystem
         }
 
         ReplaceShuttleAtmosphere(shuttleGrid, atmos);
+        ConfigureShuttleAtmosphereDevices(shuttleGrid, atmos);
+    }
+
+    internal void ConfigureShuttleAtmosphereDevices(EntityUid shuttleGrid, ShuttleAtmospherePrototype atmos)
+    {
         SetupShuttleDistroGasMixers(shuttleGrid, atmos);
         SetupShuttleDistroAtmosAlarms(shuttleGrid, atmos);
     }

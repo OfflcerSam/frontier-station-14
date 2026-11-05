@@ -14,6 +14,7 @@
   anchors: [ OreProcessor, ScrapProcessor, MaterialReclaimer ]
   equipmentWreck: ScrapGenericBrokenMachine
   maxBreachWidth: 2
+  impactTrail: true
   casualty: MedicalBountyCargo
   casualtyBounty: MildBruteMix
   aftermath:
@@ -36,24 +37,23 @@
   aftermath:
   - ComplexXenoArtifactItem
   - ShardGlass
-  lootTable: NFDerelictLootScience
 
 - type: derelictTheme
   id: DerelictCriticalAnomaly
   classes: [ Science ]
-  anchors: [ MachineAnomalyGenerator, MachineAnomalyVessel, MachineAnomalyVesselExperimental ]
+  anchors: [ MachineAnomalyGenerator, MachineMiniAnomalyGenerator, MachineAnomalyVessel, MachineAnomalyVesselExperimental ]
   equipmentDamage:
     types:
       Heat: 60
   scorchedTiles: 5
   casualty: MedicalBountyScience
   casualtyBounty: Insuls
+  additionalCasualtyChance: 0.45
   aftermath:
   - ShardGlass
   - CableHVStack1
   - NFFireExtinguisherEmpty
   - ScrapFirelock3
-  lootTable: NFDerelictLootScience
 
 - type: derelictTheme
   id: DerelictMedicalWardBreach
@@ -62,7 +62,7 @@
   maxBreachWidth: 2
   casualty: MedicalBountyMedical
   casualtyBounty: MurderedSlash
-  bloodUnderCasualty: true
+  defenseWeapon: Crowbar
   aftermath:
   - BodyBagFolded
   - Gauze1
@@ -80,7 +80,7 @@
       Blunt: 25
   casualty: MedicalBountyService
   casualtyBounty: MurderedPierce
-  bloodUnderCasualty: true
+  defenseWeapon: HydroponicsToolHatchet
   aftermath:
   - NFDerelictKudzu
   - NFDerelictKudzu
@@ -91,9 +91,14 @@
 
 - type: derelictTheme
   id: DerelictFleshInfestation
+  crashRock: AsteroidRock
+  largeImpact: true
+  impactTrail: true
+  impactGrowth: NFDerelictTendons
   casualty: MedicalBountyService
   casualtyBounty: MurderedSlash
-  bloodUnderCasualty: true
+  additionalCasualtyChance: 0.5
+  defenseWeapon: Crowbar
   aftermath:
   - NFDerelictTendons
   - NFDerelictTendons
@@ -105,22 +110,29 @@
 
 - type: derelictTheme
   id: DerelictXenoImpact
-  maxBreachWidth: 2
+  crashRock: AsteroidRock
+  largeImpact: true
+  impactTrail: true
   casualty: MedicalBountyService
-  casualtyBounty: MurderedBlunt
+  casualtyBounty: MurderedSlash
+  additionalCasualtyChance: 0.6
+  defenseWeapon: Crowbar
   aftermath:
-  - NFDerelictImpactRock
   - ScrapOre1
   - ShardGlass
   lootTable: NFDerelictLootMining
   threats:
   - NFMobXeno
+  threatCount: 2
 
 - type: derelictTheme
   id: DerelictRockEmbedding
   crashRock: AsteroidRock
+  impactTrail: true
+  damageControlChance: 1
   casualty: MedicalBountyService
   casualtyBounty: MurderedBlunt
+  additionalCasualtyChance: 0.35
   aftermath:
   - FoodSnackNutribrick
   - Gauze1

@@ -44,6 +44,15 @@ public sealed partial class DerelictThemePrototype : IPrototype
     public EntProtoId? CrashRock;
 
     [DataField]
+    public bool LargeImpact;
+
+    [DataField]
+    public bool ImpactTrail;
+
+    [DataField]
+    public EntProtoId? ImpactGrowth;
+
+    [DataField]
     public float DamageControlChance;
 
     [DataField]
@@ -58,12 +67,21 @@ public sealed partial class DerelictThemePrototype : IPrototype
     [DataField]
     public ProtoId<MedicalBountyPrototype>? CasualtyBounty;
 
+    /// <summary>
+    /// Chance of a second casualty when the scene has space and any necessary EVA stock.
+    /// </summary>
     [DataField]
-    public bool BloodUnderCasualty;
+    public float AdditionalCasualtyChance;
+
+    [DataField]
+    public EntProtoId? DefenseWeapon;
 
     [DataField]
     public ProtoId<EntityTablePrototype>? LootTable;
 
     [DataField]
     public List<EntProtoId> Threats = new();
+
+    [DataField]
+    public int ThreatCount = 1;
 }

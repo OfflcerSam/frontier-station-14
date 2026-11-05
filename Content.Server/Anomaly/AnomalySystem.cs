@@ -70,12 +70,12 @@ public sealed partial class AnomalySystem : SharedAnomalySystem
     private void OnMapInit(Entity<AnomalyComponent> anomaly, ref MapInitEvent args)
     {
         anomaly.Comp.NextPulseTime = Timing.CurTime + GetPulseLength(anomaly.Comp) * 3; // longer the first time
-        ChangeAnomalyStability(anomaly, Random.NextFloat(anomaly.Comp.InitialStabilityRange.Item1, anomaly.Comp.InitialStabilityRange.Item2), anomaly.Comp);
-        ChangeAnomalySeverity(anomaly, Random.NextFloat(anomaly.Comp.InitialSeverityRange.Item1, anomaly.Comp.InitialSeverityRange.Item2), anomaly.Comp);
+        ChangeAnomalyStability(anomaly, Random.NextFloat(anomaly.Comp.InitialStabilityRange.X, anomaly.Comp.InitialStabilityRange.Y), anomaly.Comp); // Frontier: use serialized ranges
+        ChangeAnomalySeverity(anomaly, Random.NextFloat(anomaly.Comp.InitialSeverityRange.X, anomaly.Comp.InitialSeverityRange.Y), anomaly.Comp); // Frontier: use serialized ranges
 
         ShuffleParticlesEffect(anomaly);
         anomaly.Comp.Continuity = _random.NextFloat(anomaly.Comp.MinContituty, anomaly.Comp.MaxContituty);
-        SetBehavior(anomaly, GetRandomBehavior());
+        SetBehavior(anomaly, anomaly.Comp.InitialBehavior ?? GetRandomBehavior()); // Frontier: allow an authored starting behavior
     }
 
     public void ShuffleParticlesEffect(Entity<AnomalyComponent> anomaly)

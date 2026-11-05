@@ -153,7 +153,7 @@ public sealed partial class AnomalyComponent : Component
     /// +/- 0.2 from perfect stability (0.5)
     /// </remarks>
     [DataField]
-    public (float, float) InitialStabilityRange = (0.4f, 0.6f);
+    public Vector2 InitialStabilityRange = new(0.4f, 0.6f); // Frontier: serialize authored ranges
 
     /// <summary>
     /// The range of initial values for severity
@@ -162,7 +162,11 @@ public sealed partial class AnomalyComponent : Component
     /// Between 0 and 0.5, which should be all mild effects
     /// </remarks>
     [DataField]
-    public (float, float) InitialSeverityRange = (0.1f, 0.5f);
+    public Vector2 InitialSeverityRange = new(0.1f, 0.5f); // Frontier: serialize authored ranges
+
+    // Frontier: authored anomalies can start with a specific behavior.
+    [DataField]
+    public ProtoId<AnomalyBehaviorPrototype>? InitialBehavior;
 
     /// <summary>
     /// The particle type that increases the severity of the anomaly.

@@ -39,12 +39,27 @@
     drawdepth: Overdoors
 
 - type: entity
-  parent: NFDerelictAftermath
-  id: NFDerelictImpactRock
-  name: shattered impact rock
-  description: A fragment of the asteroid that struck the hull.
+  parent: BaseAnomaly
+  id: NFDerelictAnomaly
+  name: residual anomaly
+  description: An anomaly still flickering in the wreckage of a research lab.
   components:
+  - type: Anomaly
+    initialStabilityRange: 0.35, 0.35
+    initialSeverityRange: 0.2, 0.2
+    initialBehavior: Balanced
+    pulseStabilityVariation: 0, 0
+    corePrototype: AnomalyCoreRock
+    coreInertPrototype: AnomalyCoreRockInert
   - type: Sprite
-    sprite: Structures/Walls/rock.rsi
-    state: rock_asteroid
-    drawdepth: FloorObjects
+    layers:
+    - state: anom6
+      map: ["enum.AnomalyVisualLayers.Base"]
+    - state: anom6-pulse
+      map: ["enum.AnomalyVisualLayers.Animated"]
+      visible: false
+  - type: PointLight
+    radius: 2.0
+    energy: 3.0
+    color: "#5ca8cb"
+    castShadows: false

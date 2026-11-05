@@ -1,21 +1,27 @@
 using Content.Server._NF.Medical.Components;
 using Content.Server._NF.Salvage;
+using Content.Server._NF.Shipyard.Systems;
 using Content.Server._NF.StationEvents.Prototypes;
 using Content.Server.Atmos.Components;
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Decals;
+using Content.Server.Destructible;
 using Content.Server.Humanoid.Systems;
 using Content.Shared._NF.Shipyard.Prototypes;
 using Content.Shared.Atmos;
 using Content.Shared.Body.Components;
-using Content.Shared.Body.Systems;
-using Content.Shared.Chemistry.Components;
-using Content.Shared.Chemistry.Reagent;
+using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Clothing.Components;
 using Content.Shared.Damage;
+using Content.Shared.Damage.Prototypes;
 using Content.Shared.EntityTable;
+using Content.Shared.FixedPoint;
 using Content.Shared.Fluids;
+using Content.Shared.Humanoid;
 using Content.Shared.Inventory;
+using Content.Shared.Item;
+using Content.Shared.Light.Components;
+using Content.Shared.Light.EntitySystems;
 using Content.Shared.Maps;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Systems;
@@ -39,23 +45,34 @@ public sealed class DerelictGenerationSystem : EntitySystem
     [Dependency] private readonly BarotraumaSystem _barotrauma = default!;
     [Dependency] private readonly DamageableSystem _damageable = default!;
     [Dependency] private readonly DecalSystem _decals = default!;
+    [Dependency] private readonly DestructibleSystem _destructible = default!;
     [Dependency] private readonly SharedPuddleSystem _puddles = default!;
-    [Dependency] private readonly SharedBloodstreamSystem _bloodstream = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private readonly EntityTableSystem _loot = default!;
+    [Dependency] private readonly ShipyardSystem _shipyard = default!;
     [Dependency] private readonly RandomHumanoidSystem _humanoids = default!;
     [Dependency] private readonly InventorySystem _inventory = default!;
+    [Dependency] private readonly SharedPoweredLightSystem _lights = default!;
     [Dependency] private readonly MobStateSystem _mobStates = default!;
     [Dependency] private readonly IPrototypeManager _prototypes = default!;
     [Dependency] private readonly TagSystem _tags = default!;
     [Dependency] private readonly TurfSystem _turfs = default!;
     [Dependency] private readonly ITileDefinitionManager _tileDefinitions = default!;
     [Dependency] private readonly TileSystem _tiles = default!;
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
 
     private static readonly ProtoId<TagPrototype> WallTag = "Wall";
     private static readonly EntProtoId InflatableDoor = "NFInflatableDoor";
     private static readonly EntProtoId InflatableWall = "NFInflatableWall";
+    private static readonly ProtoId<EntityTablePrototype> ScienceLoot = "NFDerelictLootScience";
+    private static readonly ProtoId<DamageTypePrototype> BluntDamage = "Blunt";
+    private static readonly ProtoId<ShuttleAtmospherePrototype> NitrogenAtmosphere = "PureNitrogen";
+    private static readonly string[] ScienceAnchors =
+        ["MachineAnomalyVessel", "MachineAnomalyVesselExperimental", "MachineMiniAnomalyGenerator", "MachineAnomalyGenerator", "MachineArtifactAnalyzer"];
+    private static readonly string[] SolarPanels = ["SolarPanel", "SolarPanelPlasma", "SolarPanelUranium"];
+    private static readonly string[] WearDecals = ["Rust", "DirtHeavyMonotile", "Damaged"];
     private const string CrashTerrainTile = "FloorAsteroidSand";
-    private const int CasualtyBloodVolume = 10;
+    private const string DamagedPlatingTile = "PlatingDamaged";
     private static readonly Vector2i[] CardinalOffsets = [new(0, 1), new(1, 0), new(0, -1), new(-1, 0)];
     private const int SceneRadius = 4;
     private const int AnchorRadius = 8;
@@ -69,6 +86,8 @@ public sealed class DerelictGenerationSystem : EntitySystem
         var blockedTiles = new HashSet<Vector2i>();
         var walls = new Dictionary<Vector2i, EntityUid>();
         var equipmentByPrototype = new Dictionary<string, List<Equipment>>();
+        var looseItems = new List<Equipment>();
+        var lightFixtures = new List<Equipment>();
 
         var gridChildren = Transform(grid.Owner).ChildEnumerator;
         while (gridChildren.MoveNext(out var entity))
@@ -76,10 +95,17 @@ public sealed class DerelictGenerationSystem : EntitySystem
             if (MetaData(entity).EntityPrototype is not { } prototype)
                 continue;
 
+            var transform = Transform(entity);
+            var entry = new Equipment(entity, _map.TileIndicesFor(grid, transform.Coordinates));
+            if (!transform.Anchored && HasComp<ItemComponent>(entity))
+                looseItems.Add(entry);
+            if (transform.Anchored && HasComp<PoweredLightComponent>(entity))
+                lightFixtures.Add(entry);
+
             if (!equipmentByPrototype.TryGetValue(prototype.ID, out var equipment))
                 equipmentByPrototype.Add(prototype.ID, equipment = new());
 
-            equipment.Add(new Equipment(entity, _map.TileIndicesFor(grid, Transform(entity).Coordinates)));
+            equipment.Add(entry);
         }
 
         foreach (var tile in _map.GetAllTiles(grid.Owner, grid.Comp))
@@ -130,7 +156,8 @@ public sealed class DerelictGenerationSystem : EntitySystem
             if (theme.Weight <= 0 || theme.Classes.Count > 0 && !theme.Classes.Any(vessel.Classes.Contains))
                 continue;
 
-            var requiredSpace = theme.Aftermath.Count + (theme.Casualty.HasValue ? 1 : 0) + (theme.Threats.Count > 0 ? 1 : 0);
+            var threatCount = theme.Threats.Count > 0 ? Math.Max(0, theme.ThreatCount) : 0;
+            var requiredSpace = theme.Aftermath.Count + (theme.Casualty.HasValue ? 1 : 0) + threatCount;
             if (requiredSpace > MaxAftermathEntities)
                 continue;
 
@@ -157,7 +184,7 @@ public sealed class DerelictGenerationSystem : EntitySystem
                     continue;
                 }
 
-                var crash = theme.CrashRock.HasValue ? FindCrashPlacement(incident, walls, occupiedTiles) : null;
+                var crash = theme.CrashRock.HasValue ? FindCrashPlacement(incident, walls, occupiedTiles, theme.LargeImpact) : null;
                 if (theme.CrashRock.HasValue && crash == null)
                     continue;
 
@@ -192,8 +219,22 @@ public sealed class DerelictGenerationSystem : EntitySystem
                 continue;
 
             var incident = eligibleIncidents[random.Next(eligibleIncidents.Count)];
-            if (!ApplyTheme(grid, vessel, theme, incident, breaches, hasEvaKit, random))
+            if (!ApplyTheme(grid, vessel, theme, incident, breaches, hasEvaKit, random, out var voxOwned))
                 return false;
+
+            ShuffleLooseItems(grid, incident, looseItems, random);
+            DamageSolarPanels(incident, SolarPanels.SelectMany(id => equipmentByPrototype.GetValueOrDefault(id) ?? []));
+            if (vessel.Classes.Contains(VesselClass.Science))
+            {
+                var labs = ScienceAnchors.SelectMany(id => equipmentByPrototype.GetValueOrDefault(id) ?? [])
+                    .OrderBy(anchor => TileDistance(incident.Position, anchor.Position));
+                var lab = FindEquipmentIncidents(labs, floorTiles, blockedTiles).FirstOrDefault();
+                PlaceScienceCache(grid, lab ?? incident, random);
+            }
+
+            AgeWreck(grid, incident, floorTiles, blockedTiles, lightFixtures, random);
+            if (voxOwned)
+                FillNitrogenAtmosphere(grid, floorTiles);
 
             Log.Info($"Generated derelict {vessel.ID} with theme {theme.ID}, seed {seed}, incident at {incident.Position}");
             return true;
@@ -234,7 +275,7 @@ public sealed class DerelictGenerationSystem : EntitySystem
     }
 
     private IEnumerable<Incident> FindEquipmentIncidents(
-        List<Equipment> equipment,
+        IEnumerable<Equipment> equipment,
         HashSet<Vector2i> floorTiles,
         HashSet<Vector2i> blockedTiles)
     {
@@ -263,7 +304,8 @@ public sealed class DerelictGenerationSystem : EntitySystem
     private static CrashPlacement? FindCrashPlacement(
         Incident incident,
         Dictionary<Vector2i, EntityUid> walls,
-        HashSet<Vector2i> occupiedTiles)
+        HashSet<Vector2i> occupiedTiles,
+        bool largeImpact)
     {
         if (incident.Outward is not { } outward || occupiedTiles.Contains(incident.Position + outward))
             return null;
@@ -280,6 +322,9 @@ public sealed class DerelictGenerationSystem : EntitySystem
             var firstRockTile = flank + outward;
             var outerRockTile = firstRockTile + outward;
             Vector2i[] footprint = [firstRockTile, outerRockTile, firstRockTile + side, outerRockTile + side, outerRockTile + outward];
+            if (largeImpact)
+                footprint = [.. footprint, outerRockTile + outward + side, outerRockTile + side * 2, firstRockTile + side * 2];
+
             if (footprint.All(tile => !occupiedTiles.Contains(tile)))
                 return new CrashPlacement(flank, flankWall, footprint);
         }
@@ -294,8 +339,10 @@ public sealed class DerelictGenerationSystem : EntitySystem
         Incident incident,
         List<Incident> breaches,
         bool hasEvaKit,
-        Random random)
+        Random random,
+        out bool voxOwned)
     {
+        voxOwned = false;
         if (theme.EquipmentDamage is { } damage)
         {
             _damageable.TryChangeDamage(incident.Target, damage, ignoreResistances: true);
@@ -307,12 +354,17 @@ public sealed class DerelictGenerationSystem : EntitySystem
             if (incident.Crash is { } crash && theme.CrashRock is { } rock)
             {
                 Del(crash.FlankWall);
-                Spawn(InflatableWall, _map.GridTileToLocal(grid.Owner, grid.Comp, crash.Flank));
                 var terrain = (ContentTileDefinition) _tileDefinitions[CrashTerrainTile];
                 _map.SetTiles(grid.Owner, grid.Comp, crash.Footprint
                     .Select(tile => (tile, _tiles.GetVariantTile(terrain, random))).ToList());
-                foreach (var tile in crash.Footprint.Take(3))
-                    Spawn(rock, _map.GridTileToLocal(grid.Owner, grid.Comp, tile));
+                foreach (var tile in crash.Footprint.Take(theme.LargeImpact ? 5 : 3))
+                    Spawn(rock, TileCenter(grid, tile));
+
+                if (theme.ImpactGrowth is { } growth)
+                {
+                    Spawn(growth, TileCenter(grid, crash.Flank));
+                    Spawn(growth, TileCenter(grid, crash.Footprint[^1]));
+                }
             }
             else if (vessel.Category >= VesselSize.Medium && theme.MaxBreachWidth >= 2 && random.Next(2) == 0)
             {
@@ -322,6 +374,9 @@ public sealed class DerelictGenerationSystem : EntitySystem
                     Del(neighboringBreaches[random.Next(neighboringBreaches.Count)].Target);
             }
         }
+
+        if (theme.ImpactTrail && incident.Outward is { } outward)
+            PlaceImpactTrail(grid, incident, outward, random);
 
         if (incident.WreckedEquipment is { } wreckedEquipment && theme.EquipmentWreck is { } replacement)
         {
@@ -341,6 +396,7 @@ public sealed class DerelictGenerationSystem : EntitySystem
         }
 
         var placementIndex = 0;
+        var placementLimit = Math.Min(sceneTiles.Length, MaxAftermathEntities);
         if (theme.Casualty is { } casualtySettings)
         {
             if (!hasEvaKit)
@@ -353,59 +409,236 @@ public sealed class DerelictGenerationSystem : EntitySystem
                 (sceneTiles[0], sceneTiles[safeIndex]) = (sceneTiles[safeIndex], sceneTiles[0]);
             }
 
-            var casualty = _humanoids.SpawnRandomHumanoid(casualtySettings.Id, NextPlacement(), string.Empty, humanoid =>
-            {
-                if (theme.CasualtyBounty is { } bountyId)
-                    Comp<MedicalBountyComponent>(humanoid).Bounty = _prototypes.Index(bountyId);
-            });
-
-            // The breach will vent on later atmosphere updates, so its current pressure can still look safe.
-            if ((incident.Outward.HasValue || IsLowPressure(grid, sceneTiles[0])) &&
-                !TryEquipCasualtySuit(grid.Owner, casualty))
-            {
-                Del(casualty);
+            if (!TrySpawnCasualty(grid, theme, incident, sceneTiles[placementIndex++], casualtySettings.Id, out var body))
                 return false;
-            }
 
-            _mobStates.ChangeMobState(casualty, MobState.Dead);
-            if (theme.BloodUnderCasualty && TryComp<BloodstreamComponent>(casualty, out var bloodstream))
-            {
-                var blood = new Solution();
-                var bloodId = new ReagentId(bloodstream.BloodReagent.Id, _bloodstream.GetEntityBloodData(casualty));
-                blood.AddReagent(bloodId, CasualtyBloodVolume);
-                _puddles.TrySpillAt(casualty, blood, out _, sound: false);
-            }
+            voxOwned = TryComp<HumanoidAppearanceComponent>(body, out var appearance) && appearance.Species.Id == "Vox";
         }
 
         foreach (var prototype in theme.Aftermath)
             Spawn(prototype, NextPlacement());
 
-        if (theme.Threats.Count > 0)
+        EntityUid? firstThreat = null;
+        for (var threatIndex = 0; threatIndex < theme.ThreatCount && theme.Threats.Count > 0; threatIndex++)
         {
             var threat = Spawn(theme.Threats[random.Next(theme.Threats.Count)], NextPlacement());
             EnsureComp<NFSalvageMobRestrictionsComponent>(threat);
+            firstThreat ??= threat;
         }
 
-        if (theme.LootTable is { } lootTable)
+        if (theme.Casualty.HasValue && firstThreat is { } opponent && theme.DefenseWeapon is { } weapon &&
+            placementIndex < placementLimit && random.NextDouble() < 0.65)
         {
-            var availableLootTiles = Math.Min(sceneTiles.Length, MaxAftermathEntities) - placementIndex;
+            var weaponIndex = placementIndex;
+            for (var candidateIndex = placementIndex + 1; candidateIndex < placementLimit; candidateIndex++)
+            {
+                if (TileDistance(sceneTiles[candidateIndex], sceneTiles[0]) < TileDistance(sceneTiles[weaponIndex], sceneTiles[0]))
+                    weaponIndex = candidateIndex;
+            }
+
+            (sceneTiles[placementIndex], sceneTiles[weaponIndex]) = (sceneTiles[weaponIndex], sceneTiles[placementIndex]);
+            Spawn(weapon, NextPlacement());
+            if (TryComp<BloodstreamComponent>(opponent, out var bloodstream))
+                SpillBlood(opponent, bloodstream, Transform(opponent).Coordinates, 12);
+        }
+
+        if (!vessel.Classes.Contains(VesselClass.Science) && theme.LootTable is { } lootTable)
+        {
+            var availableLootTiles = placementLimit - placementIndex;
             foreach (var loot in _loot.GetSpawns(_prototypes.Index(lootTable), random).Take(availableLootTiles))
                 Spawn(loot, NextPlacement());
         }
 
         // Keep the main route open until the emergency door is placed. The door can be opened or deflated.
         if (incident.Outward.HasValue &&
-            (incident.Crash != null || theme.DamageControlChance > 0f && random.NextDouble() < theme.DamageControlChance))
+            theme.DamageControlChance > 0f && random.NextDouble() < theme.DamageControlChance)
         {
-            Spawn(InflatableDoor, _map.GridTileToLocal(grid.Owner, grid.Comp, incident.Position));
+            Spawn(InflatableDoor, TileCenter(grid, incident.Position));
+            if (incident.Crash is { } crash)
+                Spawn(InflatableWall, TileCenter(grid, crash.Flank));
         }
 
-        return true;
+        if (theme.Casualty is not { } additionalSettings || theme.AdditionalCasualtyChance <= 0f ||
+            placementIndex >= placementLimit || random.NextDouble() >= theme.AdditionalCasualtyChance)
+        {
+            return true;
+        }
+
+        // An exposed crewmember needs a separate stocked locker. Search again after the primary casualty was equipped.
+        var hasSpareKit = FindEvaKits(grid.Owner).Any();
+        var crewTile = sceneTiles[placementIndex..placementLimit]
+            .Where(tile => hasSpareKit || !RequiresEva(grid, incident, tile))
+            .OrderByDescending(tile => TileDistance(tile, sceneTiles[0]))
+            .Select(tile => (Vector2i?) tile)
+            .FirstOrDefault();
+        return crewTile is not { } secondTile || TrySpawnCasualty(grid, theme, incident, secondTile, additionalSettings.Id, out _);
 
         EntityCoordinates NextPlacement()
         {
-            return _map.GridTileToLocal(grid.Owner, grid.Comp, sceneTiles[placementIndex++]);
+            return TileCenter(grid, sceneTiles[placementIndex++]);
         }
+    }
+
+    private bool TrySpawnCasualty(Entity<MapGridComponent> grid, DerelictThemePrototype theme, Incident incident,
+        Vector2i tile, string settingsId, out EntityUid body)
+    {
+        body = _humanoids.SpawnRandomHumanoid(settingsId, TileCenter(grid, tile), string.Empty, humanoid =>
+        {
+            if (theme.CasualtyBounty is { } bountyId)
+                Comp<MedicalBountyComponent>(humanoid).Bounty = _prototypes.Index(bountyId);
+        });
+
+        if (RequiresEva(grid, incident, tile) && !TryEquipCasualtySuit(grid.Owner, body))
+        {
+            Del(body);
+            return false;
+        }
+
+        _mobStates.ChangeMobState(body, MobState.Dead);
+        var bloodloss = Comp<DamageableComponent>(body).Damage.DamageDict.GetValueOrDefault("Bloodloss");
+        SpillCasualtyBlood(grid, body, bloodloss, incident.SceneTiles, tile);
+        return true;
+    }
+
+    private bool RequiresEva(Entity<MapGridComponent> grid, Incident incident, Vector2i tile)
+    {
+        // The breach will vent on later atmosphere updates, so its current pressure can still look safe.
+        return incident.Outward.HasValue || IsLowPressure(grid, tile);
+    }
+
+    private EntityCoordinates TileCenter(Entity<MapGridComponent> grid, Vector2i tile)
+    {
+        return _map.GridTileToLocal(grid.Owner, grid.Comp, tile);
+    }
+
+    private void AgeWreck(Entity<MapGridComponent> grid, Incident incident, HashSet<Vector2i> floorTiles,
+        HashSet<Vector2i> blockedTiles, List<Equipment> lightFixtures, Random random)
+    {
+        var walkable = floorTiles.Where(tile => !blockedTiles.Contains(tile))
+            .OrderBy(tile => tile.X).ThenBy(tile => tile.Y).ToArray();
+        random.Shuffle(walkable.AsSpan());
+        var wearCount = Math.Clamp(walkable.Length / 3, 6, 48);
+        var damagedPlating = (ContentTileDefinition) _tileDefinitions[DamagedPlatingTile];
+        var damagedTiles = new List<(Vector2i, Tile)>();
+        foreach (var (wearIndex, tile) in walkable.OrderBy(incident.SceneTiles.Contains).Take(wearCount).Index())
+        {
+            var decal = WearDecals[wearIndex % WearDecals.Length];
+            _decals.TryAddDecal(decal, new EntityCoordinates(grid.Owner, tile * grid.Comp.TileSize), out _, cleanable: true);
+
+            if (decal != "Damaged")
+                continue;
+
+            var existing = (ContentTileDefinition) _tileDefinitions[_map.GetTileRef(grid.Owner, grid.Comp, tile).Tile.TypeId];
+            // Leave special surfaces and existing pressure boundaries intact.
+            if (existing.ID == "Plating" || existing.BaseTurf == "Plating")
+                damagedTiles.Add((tile, _tiles.GetVariantTile(damagedPlating, random)));
+        }
+
+        if (damagedTiles.Count > 0)
+            _map.SetTiles(grid.Owner, grid.Comp, damagedTiles);
+
+        var fixtures = lightFixtures.OrderBy(fixture => fixture.Position.X).ThenBy(fixture => fixture.Position.Y).ToArray();
+        random.Shuffle(fixtures.AsSpan());
+        foreach (var fixture in fixtures.Take(Math.Min(fixtures.Length / 2, 16)))
+            _lights.TryDestroyBulb(fixture.Entity);
+    }
+
+    private void PlaceImpactTrail(Entity<MapGridComponent> grid, Incident incident, Vector2i outward, Random random)
+    {
+        var damagedPlating = (ContentTileDefinition) _tileDefinitions[DamagedPlatingTile];
+        for (var distance = 0; distance <= SceneRadius; distance++)
+        {
+            var tile = incident.Position - outward * distance;
+            if (distance > 0 && !incident.SceneTiles.Contains(tile))
+                break;
+
+            _map.SetTile(grid.Owner, grid.Comp, tile, _tiles.GetVariantTile(damagedPlating, random));
+            var decalCoordinates = new EntityCoordinates(grid.Owner, tile * grid.Comp.TileSize);
+            _decals.TryAddDecal($"burnt{random.Next(1, 5)}", decalCoordinates, out _, cleanable: true);
+
+            if (distance == 1)
+                _transform.Unanchor(Spawn("Girder", TileCenter(grid, tile)));
+        }
+    }
+
+    private void SpillCasualtyBlood(Entity<MapGridComponent> grid, EntityUid body, FixedPoint2 bloodloss,
+        List<Vector2i> sceneTiles, Vector2i bodyTile)
+    {
+        if (bloodloss <= FixedPoint2.Zero || !TryComp<BloodstreamComponent>(body, out var bloodstream))
+            return;
+
+        // Bounty damage is measured in points. Use a unit per point up to a species-relative limit.
+        var volume = FixedPoint2.Min(bloodloss, bloodstream.BloodMaxVolume * 0.7f);
+        var trail = sceneTiles.Where(tile => tile != bodyTile)
+            .OrderBy(tile => TileDistance(tile, bodyTile)).Take(2).ToArray();
+
+        SpillBlood(body, bloodstream, TileCenter(grid, bodyTile), volume * (1f - trail.Length * 0.2f));
+        foreach (var tile in trail)
+            SpillBlood(body, bloodstream, TileCenter(grid, tile), volume * 0.2f);
+    }
+
+    private void SpillBlood(EntityUid source, BloodstreamComponent bloodstream, EntityCoordinates coordinates, FixedPoint2 volume)
+    {
+        if (!_solutions.TryGetSolution(source, bloodstream.BloodSolutionName, out var blood, out var solution) || solution.Volume <= 0)
+            return;
+
+        var spilled = _solutions.SplitSolution(blood.Value, volume);
+        _puddles.TrySpillAt(coordinates, spilled, out _, sound: false);
+    }
+
+    private void ShuffleLooseItems(Entity<MapGridComponent> grid, Incident incident, List<Equipment> items, Random random)
+    {
+        // Move loose floor stock within the incident's reachable area. Leave installed equipment and containers alone.
+        var candidates = items.Where(item => incident.SceneTiles.Contains(item.Position)).ToArray();
+        random.Shuffle(candidates.AsSpan());
+        foreach (var item in candidates.Take(3))
+        {
+            var destinations = incident.SceneTiles.Where(tile => tile != item.Position && TileDistance(tile, item.Position) <= 2).ToArray();
+            if (destinations.Length > 0)
+                _transform.SetCoordinates(item.Entity, TileCenter(grid, destinations[random.Next(destinations.Length)]));
+        }
+    }
+
+    private void DamageSolarPanels(Incident incident, IEnumerable<Equipment> panels)
+    {
+        var blunt = _prototypes.Index(BluntDamage);
+        foreach (var panel in panels.OrderBy(panel => TileDistance(incident.Position, panel.Position)).Take(3))
+        {
+            var breakAt = _destructible.DestroyedAt(panel.Entity);
+            if (!TryComp<DamageableComponent>(panel.Entity, out var damageable) ||
+                breakAt == FixedPoint2.MaxValue || damageable.TotalDamage >= breakAt)
+                continue;
+
+            var damage = new DamageSpecifier(blunt, breakAt - damageable.TotalDamage);
+            _damageable.TryChangeDamage(panel.Entity, damage, ignoreResistances: true);
+        }
+    }
+
+    private void PlaceScienceCache(Entity<MapGridComponent> grid, Incident lab, Random random)
+    {
+        var tiles = lab.SceneTiles.ToArray();
+        random.Shuffle(tiles.AsSpan());
+        Spawn("NFDerelictAnomaly", TileCenter(grid, tiles[0]));
+        Spawn("ArtifactFragment1", TileCenter(grid, tiles[Math.Min(1, tiles.Length - 1)]));
+        var lootIndex = 2;
+        foreach (var loot in _loot.GetSpawns(_prototypes.Index(ScienceLoot), random))
+            Spawn(loot, TileCenter(grid, tiles[Math.Min(lootIndex++, tiles.Length - 1)]));
+    }
+
+    private void FillNitrogenAtmosphere(Entity<MapGridComponent> grid, HashSet<Vector2i> floorTiles)
+    {
+        // The casualty is the former owner. Keep the original pressure and temperature, including any existing vacuum.
+        foreach (var tile in floorTiles)
+        {
+            if (_atmosphere.GetTileMixture(grid.Owner, null, tile, excite: true) is not { Immutable: false } air)
+                continue;
+
+            var moles = air.TotalMoles;
+            air.Clear();
+            air.SetMoles(Gas.Nitrogen, moles);
+        }
+
+        _shipyard.ConfigureShuttleAtmosphereDevices(grid.Owner, _prototypes.Index(NitrogenAtmosphere));
     }
 
     private bool IsLowPressure(Entity<MapGridComponent> grid, Vector2i tile)
