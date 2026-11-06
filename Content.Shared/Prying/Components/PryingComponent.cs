@@ -72,7 +72,7 @@ public record struct BeforePryEvent(EntityUid User, bool PryPowered, bool Force,
 /// Raised directed on an entity that has been pried.
 /// </summary>
 [ByRefEvent]
-public readonly record struct PriedEvent(EntityUid User)
+public readonly record struct PriedEvent(EntityUid User, bool OpenOnly = false) // Frontier: preserve the requested door state through completion.
 {
     public readonly EntityUid User = User;
 }

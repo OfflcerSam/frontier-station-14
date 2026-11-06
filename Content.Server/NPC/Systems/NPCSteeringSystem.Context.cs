@@ -5,7 +5,6 @@ using Content.Server.Destructible; // Frontier
 using Content.Server.NPC.Components;
 using Content.Server.NPC.Pathfinding;
 using Content.Shared.Climbing;
-using Content.Shared.Doors.Components; // Frontier
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
 using Content.Shared.NPC;
@@ -72,16 +71,6 @@ public sealed partial class NPCSteeringSystem
             var flags = steering.Flags;
             if ((flags & PathFlags.Smashing) == 0 || !HasComp<DestructibleComponent>(blocker))
                 return false;
-
-            // Use the same door action conditions as TryHandleFlags. Interact alone does not
-            // make an access-controlled or bump-open door eligible for normal activation here.
-            if (TryComp<DoorComponent>(blocker, out var door) &&
-                ((flags & PathFlags.Prying) != 0 ||
-                    (flags & PathFlags.Interact) != 0 && !door.BumpOpen &&
-                    (node.Data.Flags & PathfindingBreadcrumbFlag.Access) == 0))
-            {
-                return false;
-            }
 
             if ((flags & PathFlags.Climbing) == 0 || !HasComp<ClimbableComponent>(blocker))
                 smashTarget = blocker;
@@ -240,6 +229,19 @@ public sealed partial class NPCSteeringSystem
                 case SteeringObstacleStatus.Continuing:
                     ResetStuck(steering, ourCoordinates);
                     CheckPath(uid, steering, xform, needsPath, targetDistance);
+                    return true;
+                case SteeringObstacleStatus.DoorWorking:
+                    ResetStuck(steering, ourCoordinates);
+                    moveMultiplier = 0f;
+                    return true;
+                case SteeringObstacleStatus.Waiting:
+                    // Settling or waiting for a state change cannot extend the stuck deadline.
+                    if (_timing.CurTime - steering.LastStuckTime >= DoorWaitLimit)
+                    {
+                        steering.Status = SteeringStatus.NoPath;
+                        return false;
+                    }
+                    moveMultiplier = 0f;
                     return true;
                 case SteeringObstacleStatus.Approaching:
                     // Keep the node and let the usual stuck check bound attempts to reach it.

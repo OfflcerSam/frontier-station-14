@@ -59,17 +59,17 @@ public sealed partial class PathfindingSystem
             var isAccess = (end.Data.Flags & PathfindingBreadcrumbFlag.Access) != 0x0;
             var isClimb = (end.Data.Flags & PathfindingBreadcrumbFlag.Climb) != 0x0;
 
-            // TODO: Handling power + door prying
             // Door we should be able to open
             if (isDoor && !isAccess && (request.Flags & PathFlags.Interact) != 0x0)
             {
                 modifier += 0.5f;
             }
-            // Door we can force open one way or another
-            else if (isDoor && isAccess && (request.Flags & PathFlags.Prying) != 0x0)
+            // Frontier: unpowered doors can require prying even without a reader.
+            else if (isDoor && (request.Flags & PathFlags.Prying) != 0x0)
             {
                 modifier += 10f;
             }
+            // End Frontier
             else if ((request.Flags & PathFlags.Smashing) != 0x0 && end.Data.Damage > 0f)
             {
                 modifier += 10f + end.Data.Damage / 100f;

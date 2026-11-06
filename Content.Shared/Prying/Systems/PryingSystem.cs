@@ -103,6 +103,28 @@ public sealed class PryingSystem : EntitySystem
         return StartPry(target, user, null, modifier, out id);
     }
 
+    // Frontier: steering needs the result of starting work and requests an open door.
+    public const float PryOpenRange = 1.5f;
+
+    public bool TryPryOpen(EntityUid target, EntityUid user, out DoAfterId? id)
+    {
+        id = null;
+        if (!TryComp<DoorComponent>(target, out var door) || door.State != DoorState.Closed ||
+            !TryComp<PryingComponent>(user, out var prying) || !prying.Enabled ||
+            !HasComp<DoAfterComponent>(user) || !CanPry(target, user, out _, prying))
+        {
+            return false;
+        }
+
+        // A rejected do-after may still return an ID. Publish only an accepted start.
+        if (!StartPry(target, user, user, prying.SpeedModifier, out var started, openOnly: true))
+            return false;
+
+        id = started;
+        return true;
+    }
+    // End Frontier
+
     private bool CanPry(EntityUid target, EntityUid user, out string? message, PryingComponent? comp = null, PryUnpoweredComponent? unpoweredComp = null)
     {
         BeforePryEvent canev;
@@ -129,17 +151,22 @@ public sealed class PryingSystem : EntitySystem
         return !canev.Cancelled;
     }
 
-    private bool StartPry(EntityUid target, EntityUid user, EntityUid? tool, float toolModifier, [NotNullWhen(true)] out DoAfterId? id)
+    private bool StartPry(EntityUid target, EntityUid user, EntityUid? tool, float toolModifier, [NotNullWhen(true)] out DoAfterId? id, bool openOnly = false) // Frontier
     {
         var modEv = new GetPryTimeModifierEvent(user);
 
         RaiseLocalEvent(target, ref modEv);
-        var doAfterArgs = new DoAfterArgs(EntityManager, user, modEv.BaseTime * modEv.PryTimeModifier / toolModifier, new DoorPryDoAfterEvent(), target, target, tool)
+        var doAfterArgs = new DoAfterArgs(EntityManager, user, modEv.BaseTime * modEv.PryTimeModifier / toolModifier, new DoorPryDoAfterEvent { OpenOnly = openOnly }, target, target, tool) // Frontier
         {
             BreakOnDamage = true,
             BreakOnMove = true,
             NeedHand = tool != user,
         };
+
+        // Frontier: match the range that steering uses to approach the door.
+        if (openOnly)
+            doAfterArgs.DistanceThreshold = PryOpenRange;
+        // End Frontier
 
         if (tool != user && tool != null)
         {
@@ -161,6 +188,11 @@ public sealed class PryingSystem : EntitySystem
 
         TryComp<PryingComponent>(args.Used, out var comp);
 
+        // Frontier: another opener may have satisfied the request during the do-after.
+        if (args.OpenOnly && (door.State != DoorState.Closed || comp is not { Enabled: true }))
+            return;
+        // End Frontier
+
         if (!CanPry(uid, args.User, out var message, comp))
         {
             if (!string.IsNullOrWhiteSpace(message))
@@ -173,10 +205,17 @@ public sealed class PryingSystem : EntitySystem
             _audioSystem.PlayPredicted(comp.UseSound, args.Used.Value, args.User);
         }
 
-        var ev = new PriedEvent(args.User);
+        var ev = new PriedEvent(args.User, args.OpenOnly); // Frontier
         RaiseLocalEvent(uid, ref ev);
     }
 }
 
 [Serializable, NetSerializable]
-public sealed partial class DoorPryDoAfterEvent : SimpleDoAfterEvent;
+// Frontier: copy the requested state with the replicated do-after.
+public sealed partial class DoorPryDoAfterEvent : SimpleDoAfterEvent
+{
+    public bool OpenOnly { get; init; }
+
+    public override DoAfterEvent Clone() => new DoorPryDoAfterEvent { OpenOnly = OpenOnly };
+}
+// End Frontier

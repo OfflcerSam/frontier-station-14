@@ -259,7 +259,7 @@ public abstract partial class SharedDoorSystem : EntitySystem
             _adminLog.Add(LogType.Action, LogImpact.Medium, $"{ToPrettyString(args.User)} pried {ToPrettyString(uid)} open");
             StartOpening(uid, door, args.User, true);
         }
-        else if (door.State == DoorState.Open)
+        else if (door.State == DoorState.Open && !args.OpenOnly) // Frontier: a desired-open pry never closes the door.
         {
             _adminLog.Add(LogType.Action, LogImpact.Medium, $"{ToPrettyString(args.User)} pried {ToPrettyString(uid)} closed");
             StartClosing(uid, door, args.User, true);

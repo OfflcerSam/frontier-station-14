@@ -43,81 +43,49 @@ public sealed partial class NPCSteeringSystem
         var obstacleEnts = new List<EntityUid>();
         if (FindObstacleEntities(uid, poly, obstacleEnts) != null)
         {
-            if (component.ObstacleActionTarget is { } target && !obstacleEnts.Contains(target))
-                CancelObstacleAction(component);
+            // Finish or retire the current action before selecting another collider on this node.
+            EntityUid? handledDoor = null;
+            if (component.ObstacleActionTarget is { } target)
+            {
+                if (!obstacleEnts.Contains(target))
+                {
+                    CancelObstacleAction(component);
+                }
+                else if (TryComp<DoorComponent>(target, out var door))
+                {
+                    var status = TryHandleDoor(uid, component, target, door, moving);
+                    if (status != SteeringObstacleStatus.Failed)
+                        return status;
+                    handledDoor = target;
+                }
+                else
+                {
+                    switch (_doAfter.GetStatus(component.DoAfterId))
+                    {
+                        case DoAfterStatus.Running:
+                            return SteeringObstacleStatus.Continuing;
+                        case DoAfterStatus.Cancelled:
+                            return SteeringObstacleStatus.Failed;
+                    }
+                }
+            }
+
+            foreach (var ent in obstacleEnts)
+            {
+                if (ent == handledDoor || !TryComp<DoorComponent>(ent, out var door))
+                    continue;
+
+                var status = TryHandleDoor(uid, component, ent, door, moving);
+                if (status != SteeringObstacleStatus.Failed)
+                    return status;
+            }
 
             var id = component.DoAfterId;
-
-            // Still doing what we were doing before.
-            var doAfterStatus = _doAfter.GetStatus(id);
-
-            switch (doAfterStatus)
-            {
-                case DoAfterStatus.Running:
-                    return SteeringObstacleStatus.Continuing;
-                case DoAfterStatus.Cancelled:
-                    return SteeringObstacleStatus.Failed;
-            }
-
-            var isDoor = obstacleEnts.Exists(ent => HasComp<DoorComponent>(ent));
-            var isAccessRequired = (poly.Data.Flags & PathfindingBreadcrumbFlag.Access) != 0x0;
             var isClimbable = obstacleEnts.Exists(ent => HasComp<ClimbableComponent>(ent));
-
             // End Frontier
 
-            // Just walk into it stupid
-            if (isDoor && !isAccessRequired)
-            {
-                var doorQuery = GetEntityQuery<DoorComponent>();
-
-                // ... At least if it's not a bump open.
-                foreach (var ent in obstacleEnts)
-                {
-                    if (!doorQuery.TryGetComponent(ent, out var door))
-                        continue;
-
-                    if (!door.BumpOpen && (component.Flags & PathFlags.Interact) != 0x0)
-                    {
-                        if (door.State != DoorState.Opening)
-                        {
-                            if (moving) // Frontier: settle before interacting, including when a door is also smashable.
-                                return SteeringObstacleStatus.Continuing;
-
-                            _interaction.InteractionActivate(uid, ent);
-                            return SteeringObstacleStatus.Continuing;
-                        }
-                    }
-                }
-
-                // If we get to here then didn't succeed for reasons.
-            }
-
-            if ((component.Flags & PathFlags.Prying) != 0x0 && isDoor)
-            {
-                if (moving) // Frontier: settle before starting a pry that breaks on movement.
-                    return SteeringObstacleStatus.Continuing;
-
-                var doorQuery = GetEntityQuery<DoorComponent>();
-
-                // Get the relevant obstacle
-                foreach (var ent in obstacleEnts)
-                {
-                    if (doorQuery.TryGetComponent(ent, out var door) && door.State != DoorState.Open)
-                    {
-                        // TODO: Use the verb.
-
-                        if (door.State != DoorState.Opening)
-                            _pryingSystem.TryPry(ent, uid, out id, uid);
-
-                        component.DoAfterId = id;
-                        component.ObstacleActionTarget = id == null ? null : ent; // Frontier: bind the action to its blocker.
-                        return SteeringObstacleStatus.Continuing;
-                    }
-                }
-
-            }
             // Try climbing obstacles
-            else if ((component.Flags & PathFlags.Climbing) != 0x0 && isClimbable)
+            if ((component.Flags & PathFlags.Climbing) != 0x0 && isClimbable) // Frontier: try after door actions decline.
             {
                 if (moving) // Frontier: settle before starting a climb.
                     return SteeringObstacleStatus.Continuing;
@@ -151,7 +119,7 @@ public sealed partial class NPCSteeringSystem
 
             }
             // Frontier: wait through attack cooldowns, but fail if the obstacle cannot be damaged.
-            else if ((component.Flags & PathFlags.Smashing) != 0x0)
+            if ((component.Flags & PathFlags.Smashing) != 0x0)
             {
                 return SmashObstacle(uid, obstacleEnts);
             }
@@ -248,6 +216,10 @@ public sealed partial class NPCSteeringSystem
         Completed,
         Failed,
         Continuing,
-        Approaching // Frontier: stay on the current node and move into attack range.
+        // Frontier: keep the current node while approaching or working on a door.
+        Approaching,
+        DoorWorking,
+        Waiting
+        // End Frontier
     }
 }

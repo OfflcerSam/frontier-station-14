@@ -141,6 +141,14 @@ public sealed partial class NPCSteeringComponent : Component
     /// </summary>
     [DataField]
     public EntityUid? ObstacleActionTarget;
+
+    // Frontier: one delayed retry when an accepted pry ends without clearing its blocker.
+    // A known interrupted door with no deadline has exhausted its retry.
+    public EntityUid? InterruptedDoor;
+
+    [AutoPausedField]
+    public TimeSpan? DoorRetryAt;
+    // End Frontier
 }
 
 public enum SteeringStatus : byte

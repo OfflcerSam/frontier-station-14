@@ -195,6 +195,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         // A new movement plan takes ownership even if it uses the same destination.
         CancelPathRequest(steering);
         CancelObstacleAction(steering);
+        steering.InterruptedDoor = null;
         steering.CurrentPath.Clear();
         if (path != null)
         {
@@ -225,6 +226,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
 
             CancelPathRequest(component);
             CancelObstacleAction(component);
+            component.InterruptedDoor = null;
             component.CurrentPath.Clear();
             component.FailedPathCount = 0;
             component.Status = SteeringStatus.Moving;
@@ -280,6 +282,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     {
         base.Update(frameTime);
 
+        PruneDoorPries(); // Frontier: retire finished and cancelled ownership once per tick.
         if (!_enabled)
             return;
 
@@ -432,6 +435,15 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             SetDirection(uid, mover, steering, steering.LastSteerDirection, false);
             return;
         }
+
+        // Frontier: a stationary action or a coasting NPC needs no avoidance vectors.
+        if (moveMultiplier == 0f)
+        {
+            steering.LastSteerDirection = Vector2.Zero;
+            SetDirection(uid, mover, steering, Vector2.Zero, false);
+            return;
+        }
+        // End Frontier
 
         // Avoid static objects like walls
         CollisionAvoidance(uid, offsetRot, worldPos, agentRadius, layer, mask, xform, danger, smashTarget); // Frontier
