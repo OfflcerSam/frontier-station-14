@@ -1,9 +1,11 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server.Examine;
+using Content.Server.Destructible; // Frontier
 using Content.Server.NPC.Components;
 using Content.Server.NPC.Pathfinding;
 using Content.Shared.Climbing;
+using Content.Shared.Doors.Components; // Frontier
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
 using Content.Shared.NPC;
@@ -11,6 +13,7 @@ using Content.Shared.Physics;
 using Robust.Shared.Map;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
+using ClimbableComponent = Content.Shared.Climbing.Components.ClimbableComponent; // Frontier
 using ClimbingComponent = Content.Shared.Climbing.Components.ClimbingComponent;
 
 namespace Content.Server.NPC.Systems;
@@ -41,12 +44,18 @@ public sealed partial class NPCSteeringSystem
     private bool IsFreeSpace(
         EntityUid uid,
         NPCSteeringComponent steering,
-        PathPoly node)
+        PathPoly node,
+        out EntityUid? smashTarget) // Frontier: identify the collider steering needs to approach.
     {
-        if (node.Data.IsFreeSpace)
+        smashTarget = null; // Frontier
+        // Frontier: a fixture can block the route without having any special action flags.
+        if (node.Data.IsFreeSpace && (node.Data.CollisionLayer | node.Data.CollisionMask) == 0)
         {
+            if (steering.DoAfterId != null)
+                CancelObstacleAction(steering);
             return true;
         }
+        // End Frontier
         // Handle the case where the node is a climb, we can climb, and we are climbing.
         else if ((node.Data.Flags & PathfindingBreadcrumbFlag.Climb) != 0x0 &&
             (steering.Flags & PathFlags.Climbing) != 0x0 &&
@@ -56,30 +65,33 @@ public sealed partial class NPCSteeringSystem
             return true;
         }
 
-        // TODO: Ideally for "FreeSpace" we check all entities on the tile and build flags dynamically (pathfinder refactor in future).
-        var ents = _entSetPool.Get();
-        _lookup.GetLocalEntitiesIntersecting(node.GraphUid, node.Box.Enlarged(-0.04f), ents, flags: LookupFlags.Static);
-        var result = true;
-
-        if (ents.Count > 0)
+        // Frontier: use the same blocker lookup as obstacle actions. The navmesh may still
+        // show an object that moved away before the next rebuild.
+        if (FindObstacleEntities(uid, node) is { } blocker)
         {
-            var fixtures = _fixturesQuery.GetComponent(uid);
-            var physics = _physicsQuery.GetComponent(uid);
+            var flags = steering.Flags;
+            if ((flags & PathFlags.Smashing) == 0 || !HasComp<DestructibleComponent>(blocker))
+                return false;
 
-            foreach (var intersecting in ents)
+            // Use the same door action conditions as TryHandleFlags. Interact alone does not
+            // make an access-controlled or bump-open door eligible for normal activation here.
+            if (TryComp<DoorComponent>(blocker, out var door) &&
+                ((flags & PathFlags.Prying) != 0 ||
+                    (flags & PathFlags.Interact) != 0 && !door.BumpOpen &&
+                    (node.Data.Flags & PathfindingBreadcrumbFlag.Access) == 0))
             {
-                if (!_physics.IsCurrentlyHardCollidable((uid, fixtures, physics), intersecting))
-                {
-                    continue;
-                }
-
-                result = false;
-                break;
+                return false;
             }
+
+            if ((flags & PathFlags.Climbing) == 0 || !HasComp<ClimbableComponent>(blocker))
+                smashTarget = blocker;
+
+            return false;
         }
 
-        _entSetPool.Return(ents);
-        return result;
+        CancelObstacleAction(steering);
+        return true;
+        // End Frontier
     }
 
     /// <summary>
@@ -98,8 +110,10 @@ public sealed partial class NPCSteeringSystem
         Span<float> interest,
         float frameTime,
         ref bool forceSteer, // Wizden#38846
-        ref float moveMultiplier) // Wizden#38846
+        ref float moveMultiplier, // Wizden#38846
+        out EntityUid? smashTarget) // Frontier: suppress avoidance of an eligible smash blocker.
     {
+        smashTarget = null; // Frontier
         var ourCoordinates = xform.Coordinates;
         var destinationCoordinates = steering.Coordinates;
         var inLos = true;
@@ -154,8 +168,8 @@ public sealed partial class NPCSteeringSystem
             return true;
         }
 
-        // Grab the target position, either the next path node or our end goal..
-        var targetCoordinates = steering.DirectMove ? steering.Coordinates : GetTargetCoordinates(steering);
+        // Grab the target position, either the next path node or our end goal.
+        var targetCoordinates = GetTargetCoordinates(steering, out var invalidatedPath); // Frontier: recover invalid routes before checking coordinates.
         // End Wizden#38846
 
         if (!targetCoordinates.IsValid(EntityManager))
@@ -164,21 +178,10 @@ public sealed partial class NPCSteeringSystem
             return false;
         }
 
-        var needsPath = false;
-
-        // If the next node is invalid then get new ones
-        if (!targetCoordinates.IsValid(EntityManager))
-        {
-            if (!directMove && steering.CurrentPath.TryPeek(out var poly) && // Wizden#38846
-                (poly.Data.Flags & PathfindingBreadcrumbFlag.Invalid) != 0x0)
-            {
-                steering.CurrentPath.Dequeue();
-                // Try to get the next node temporarily.
-                targetCoordinates = GetTargetCoordinates(steering);
-                needsPath = true;
-                ResetStuck(steering, ourCoordinates);
-            }
-        }
+        // Frontier: resume movement and schedule a replacement search for invalid routes.
+        steering.Status = SteeringStatus.Moving;
+        var needsPath = invalidatedPath;
+        // End Frontier
 
         // Check if mapids match.
         var targetMap = _transform.ToMapCoordinates(targetCoordinates);
@@ -194,6 +197,7 @@ public sealed partial class NPCSteeringSystem
 
         // Need to be pretty close if it's just a node to make sure LOS for door bashes or the likes.
         bool arrived;
+        bool? nodeFree = null; // Frontier: reuse the live blocker check within this update.
 
         if (targetCoordinates.Equals(steering.Coordinates))
         {
@@ -203,7 +207,7 @@ public sealed partial class NPCSteeringSystem
         }
         // If next node is a free tile then get within its bounds.
         // This is to avoid popping it too early
-        else if (steering.CurrentPath.TryPeek(out var node) && IsFreeSpace(uid, steering, node))
+        else if (steering.CurrentPath.TryPeek(out var node) && (nodeFree = IsFreeSpace(uid, steering, node, out smashTarget)) == true) // Frontier
         {
             arrived = node.Box.Contains(ourCoordinates.Position);
         }
@@ -214,57 +218,55 @@ public sealed partial class NPCSteeringSystem
             arrived = direction.Length() <= SharedInteractionSystem.InteractionRange - 0.05f;
         }
 
-        // Are we in range
-        if (arrived)
+        // Frontier: a smashable blocker can still require a closer approach.
+        if (arrived && !directMove && steering.CurrentPath.TryPeek(out var obstacleNode) &&
+            !(nodeFree ?? IsFreeSpace(uid, steering, obstacleNode, out smashTarget)))
         {
-            // Node needs some kind of special handling like access or smashing.
-            if (!directMove && steering.CurrentPath.TryPeek(out var node) && !IsFreeSpace(uid, steering, node)) // Wizden#38846
+            SteeringObstacleStatus status;
+            lock (_obstacles)
             {
-                // Ignore stuck while handling obstacles.
-                ResetStuck(steering, ourCoordinates);
-                SteeringObstacleStatus status;
-
-                // Breaking behaviours and the likes.
-                lock (_obstacles)
-                {
-                    // We're still coming to a stop so wait for the do_after.
-                    if (body.LinearVelocity.LengthSquared() > 0.01f)
-                    {
-                        return true;
-                    }
-
-                    status = TryHandleFlags(uid, steering, node);
-                }
-
-                // TODO: Need to handle re-pathing in case the target moves around.
-                switch (status)
-                {
-                    case SteeringObstacleStatus.Completed:
-                        steering.DoAfterId = null;
-                        break;
-                    case SteeringObstacleStatus.Failed:
-                        steering.DoAfterId = null;
-                        // TODO: Blacklist the poly for next query
-                        steering.Status = SteeringStatus.NoPath;
-                        return false;
-                    case SteeringObstacleStatus.Continuing:
-                        CheckPath(uid, steering, xform, needsPath, targetDistance);
-                        return true;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                status = TryHandleFlags(uid, steering, obstacleNode, body.LinearVelocity.LengthSquared() > 0.01f);
             }
 
+            switch (status)
+            {
+                case SteeringObstacleStatus.Completed:
+                    CancelObstacleAction(steering);
+                    break;
+                case SteeringObstacleStatus.Failed:
+                    CancelObstacleAction(steering);
+                    steering.Status = SteeringStatus.NoPath;
+                    return false;
+                case SteeringObstacleStatus.Continuing:
+                    ResetStuck(steering, ourCoordinates);
+                    CheckPath(uid, steering, xform, needsPath, targetDistance);
+                    return true;
+                case SteeringObstacleStatus.Approaching:
+                    // Keep the node and let the usual stuck check bound attempts to reach it.
+                    arrived = false;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        // End Frontier
+
+        if (arrived)
+        {
             // Distance should already be handled above.
             // It was just a node, not the target, so grab the next destination (either the target or next node).
             if (!directMove && steering.CurrentPath.Count > 0) // Wizden#38846
             {
                 forceSteer = true;
                 steering.CurrentPath.Dequeue();
+                smashTarget = null; // Frontier: the old node no longer owns the approach.
 
                 // Alright just adjust slightly and grab the next node so we don't stop moving for a tick.
                 // TODO: If it's the last node just grab the target instead.
-                targetCoordinates = GetTargetCoordinates(steering);
+                // Frontier: handle invalidation after advancing past a node as well.
+                targetCoordinates = GetTargetCoordinates(steering, out invalidatedPath);
+                needsPath |= invalidatedPath;
+                // End Frontier
 
                 if (!targetCoordinates.IsValid(EntityManager))
                 {
@@ -334,7 +336,7 @@ public sealed partial class NPCSteeringSystem
 
         // TODO: Probably need partial planning support i.e. patch from the last node to where the target moved to.
         if (!directMove) // Wizden#38846
-            CheckPath(uid, steering, xform, needsPath, targetDistance);
+            CheckPath(uid, steering, xform, needsPath, targetDistance, invalidatedPath); // Frontier: force a search for an invalid route.
 
         // whether we should want to brake right now
         var haveToBrake = finalInRange && velocityHigh; // Wizden#38846
@@ -433,13 +435,13 @@ public sealed partial class NPCSteeringSystem
         component.LastStuckTime = _timing.CurTime;
     }
 
-    private void CheckPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, bool needsPath, float targetDistance)
+    // Frontier: propagate route invalidation and detach cancelled requests.
+    private void CheckPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, bool needsPath, float targetDistance, bool invalidatedPath = false)
     {
         if (!_pathfinding)
         {
             steering.CurrentPath.Clear();
-            steering.PathfindToken?.Cancel();
-            steering.PathfindToken = null;
+            CancelPathRequest(steering);
             return;
         }
 
@@ -460,9 +462,10 @@ public sealed partial class NPCSteeringSystem
         // Request the new path.
         if (needsPath)
         {
-            RequestPath(uid, steering, xform, targetDistance);
+            RequestPath(uid, steering, xform, targetDistance, invalidatedPath);
         }
     }
+    // End Frontier
 
     /// <summary>
     /// We may be pathfinding and moving at the same time in which case early nodes may be out of date.
@@ -534,18 +537,26 @@ public sealed partial class NPCSteeringSystem
     /// <summary>
     /// Get the coordinates we should be heading towards.
     /// </summary>
-    private EntityCoordinates GetTargetCoordinates(NPCSteeringComponent steering)
+    // Frontier: discard invalid route heads and cancel their obstacle work.
+    private EntityCoordinates GetTargetCoordinates(NPCSteeringComponent steering, out bool invalidatedPath)
     {
-        // Depending on what's going on we may return the target or a pathfind node.
+        invalidatedPath = false;
 
         // Even if we're at the last node may not be able to head to target in case we get stuck on a corner or the likes.
-        if (_pathfinding && steering.CurrentPath.Count >= 1 && steering.CurrentPath.TryPeek(out var nextTarget))
+        if (_pathfinding && !steering.DirectMove && steering.CurrentPath.TryPeek(out var nextTarget))
         {
-            return GetCoordinates(nextTarget);
+            if (nextTarget.IsValid() && !TerminatingOrDeleted(nextTarget.GraphUid))
+                return nextTarget.Coordinates;
+
+            // A replacement node may no longer be connected to the rest of this route.
+            steering.CurrentPath.Clear();
+            CancelObstacleAction(steering);
+            invalidatedPath = true;
         }
 
         return steering.Coordinates;
     }
+    // End Frontier
 
     /// <summary>
     /// Gets the fraction this value is between min and max
@@ -577,7 +588,8 @@ public sealed partial class NPCSteeringSystem
         int layer,
         int mask,
         TransformComponent xform,
-        Span<float> danger)
+        Span<float> danger,
+        EntityUid? smashTarget) // Frontier
     {
         var objectRadius = 0.25f;
         var detectionRadius = MathF.Max(0.35f, agentRadius + objectRadius);
@@ -586,6 +598,11 @@ public sealed partial class NPCSteeringSystem
 
         foreach (var ent in ents)
         {
+            // Frontier: approach this eligible blocker. An attack can choose another reachable
+            // blocker on the node. Physics and avoidance of other entities remain active.
+            if (ent == smashTarget)
+                continue;
+
             // TODO: If we can access the door or smth.
             if (!_physicsQuery.TryGetComponent(ent, out var otherBody) ||
                 !otherBody.Hard ||

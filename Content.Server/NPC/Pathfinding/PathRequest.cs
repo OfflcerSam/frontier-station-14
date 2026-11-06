@@ -17,6 +17,11 @@ public abstract class PathRequest
     public Task<PathResult> Task => Tcs.Task;
     public readonly TaskCompletionSource<PathResult> Tcs;
 
+    /// <summary>
+    /// Frontier: signals cancellation to the pathfinding update, which owns queue removal and task completion.
+    /// </summary>
+    public readonly CancellationToken CancellationToken;
+
     public List<PathPoly> Polys = new();
 
     public bool Started = false;
@@ -44,7 +49,10 @@ public abstract class PathRequest
         Flags = flags;
         CollisionLayer = layer;
         CollisionMask = mask;
-        Tcs = new TaskCompletionSource<PathResult>(cancelToken);
+        // Frontier: store the token separately from task state.
+        CancellationToken = cancelToken;
+        Tcs = new TaskCompletionSource<PathResult>();
+        // End Frontier
     }
 }
 

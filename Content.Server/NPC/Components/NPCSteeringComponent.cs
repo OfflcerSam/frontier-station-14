@@ -81,6 +81,10 @@ public sealed partial class NPCSteeringComponent : Component
     [DataField("lineOfSightTimeRequired")]
     public float LineOfSightTimeRequired = 0.5f;
 
+    /// <summary>
+    /// Frontier: identifies the current pending search. A completion must still own the slot before it
+    /// clears it or applies a result. Changing goals detaches the old search before cancelling it.
+    /// </summary>
     [ViewVariables] public CancellationTokenSource? PathfindToken = null;
 
     /// <summary>
@@ -118,7 +122,7 @@ public sealed partial class NPCSteeringComponent : Component
     public const int FailedPathLimit = 3;
 
     /// <summary>
-    /// How many times we've failed to pathfind. Once this hits the limit we'll stop steering.
+    /// Frontier: consecutive search failures for the current goal. A new goal or an accepted route resets this count.
     /// </summary>
     [ViewVariables] public int FailedPathCount;
 
@@ -131,6 +135,12 @@ public sealed partial class NPCSteeringComponent : Component
     /// </summary>
     [DataField("doAfterId")]
     public DoAfterId? DoAfterId = null;
+
+    /// <summary>
+    /// Frontier: the blocker the current obstacle action is working on.
+    /// </summary>
+    [DataField]
+    public EntityUid? ObstacleActionTarget;
 }
 
 public enum SteeringStatus : byte

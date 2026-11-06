@@ -3,10 +3,10 @@ using Content.Server.NPC.Components;
 using Content.Server.NPC.Pathfinding;
 using Content.Shared.Climbing;
 using Content.Shared.CombatMode;
+using Content.Shared.Damage; // Frontier
 using Content.Shared.DoAfter;
 using Content.Shared.Doors.Components;
 using Content.Shared.NPC;
-using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Utility;
@@ -37,29 +37,15 @@ public sealed partial class NPCSteeringSystem
      */
 
 
-    private SteeringObstacleStatus TryHandleFlags(EntityUid uid, NPCSteeringComponent component, PathPoly poly)
+    private SteeringObstacleStatus TryHandleFlags(EntityUid uid, NPCSteeringComponent component, PathPoly poly, bool moving) // Frontier: only stop for actions that require it.
     {
-        DebugTools.Assert(!poly.Data.IsFreeSpace);
-        // TODO: Store PathFlags on the steering comp
-        // and be able to re-check it.
-
-        var layer = 0;
-        var mask = 0;
-
-        if (TryComp<FixturesComponent>(uid, out var manager))
+        // Frontier: handle the current colliders rather than an anchored or stale navmesh snapshot.
+        var obstacleEnts = new List<EntityUid>();
+        if (FindObstacleEntities(uid, poly, obstacleEnts) != null)
         {
-            (layer, mask) = _physics.GetHardCollision(uid, manager);
-        }
-        else
-        {
-            return SteeringObstacleStatus.Failed;
-        }
+            if (component.ObstacleActionTarget is { } target && !obstacleEnts.Contains(target))
+                CancelObstacleAction(component);
 
-        // TODO: Should cache the fact we're doing this somewhere.
-        // See https://github.com/space-wizards/space-station-14/issues/11475
-        if ((poly.Data.CollisionLayer & mask) != 0x0 ||
-            (poly.Data.CollisionMask & layer) != 0x0)
-        {
             var id = component.DoAfterId;
 
             // Still doing what we were doing before.
@@ -73,12 +59,11 @@ public sealed partial class NPCSteeringSystem
                     return SteeringObstacleStatus.Failed;
             }
 
-            var obstacleEnts = new List<EntityUid>();
-
-            GetObstacleEntities(poly, mask, layer, obstacleEnts);
-            var isDoor = (poly.Data.Flags & PathfindingBreadcrumbFlag.Door) != 0x0;
+            var isDoor = obstacleEnts.Exists(ent => HasComp<DoorComponent>(ent));
             var isAccessRequired = (poly.Data.Flags & PathfindingBreadcrumbFlag.Access) != 0x0;
-            var isClimbable = (poly.Data.Flags & PathfindingBreadcrumbFlag.Climb) != 0x0;
+            var isClimbable = obstacleEnts.Exists(ent => HasComp<ClimbableComponent>(ent));
+
+            // End Frontier
 
             // Just walk into it stupid
             if (isDoor && !isAccessRequired)
@@ -95,6 +80,9 @@ public sealed partial class NPCSteeringSystem
                     {
                         if (door.State != DoorState.Opening)
                         {
+                            if (moving) // Frontier: settle before interacting, including when a door is also smashable.
+                                return SteeringObstacleStatus.Continuing;
+
                             _interaction.InteractionActivate(uid, ent);
                             return SteeringObstacleStatus.Continuing;
                         }
@@ -106,6 +94,9 @@ public sealed partial class NPCSteeringSystem
 
             if ((component.Flags & PathFlags.Prying) != 0x0 && isDoor)
             {
+                if (moving) // Frontier: settle before starting a pry that breaks on movement.
+                    return SteeringObstacleStatus.Continuing;
+
                 var doorQuery = GetEntityQuery<DoorComponent>();
 
                 // Get the relevant obstacle
@@ -119,16 +110,18 @@ public sealed partial class NPCSteeringSystem
                             _pryingSystem.TryPry(ent, uid, out id, uid);
 
                         component.DoAfterId = id;
+                        component.ObstacleActionTarget = id == null ? null : ent; // Frontier: bind the action to its blocker.
                         return SteeringObstacleStatus.Continuing;
                     }
                 }
 
-                if (obstacleEnts.Count == 0)
-                    return SteeringObstacleStatus.Completed;
             }
             // Try climbing obstacles
             else if ((component.Flags & PathFlags.Climbing) != 0x0 && isClimbable)
             {
+                if (moving) // Frontier: settle before starting a climb.
+                    return SteeringObstacleStatus.Continuing;
+
                 if (TryComp<ClimbingComponent>(uid, out var climbing))
                 {
                     if (climbing.IsClimbing)
@@ -150,81 +143,111 @@ public sealed partial class NPCSteeringSystem
                             _climb.TryClimb(uid, uid, ent, out id, table, climbing))
                         {
                             component.DoAfterId = id;
+                            component.ObstacleActionTarget = id == null ? null : ent; // Frontier: bind the action to its blocker.
                             return SteeringObstacleStatus.Continuing;
                         }
                     }
                 }
 
-                if (obstacleEnts.Count == 0)
-                    return SteeringObstacleStatus.Completed;
             }
-            // Try smashing obstacles.
+            // Frontier: wait through attack cooldowns, but fail if the obstacle cannot be damaged.
             else if ((component.Flags & PathFlags.Smashing) != 0x0)
             {
-                if (_melee.TryGetWeapon(uid, out _, out var meleeWeapon) && meleeWeapon.NextAttack <= _timing.CurTime && TryComp<CombatModeComponent>(uid, out var combatMode))
-                {
-                    _combat.SetInCombatMode(uid, true, combatMode);
-                    var destructibleQuery = GetEntityQuery<DestructibleComponent>();
-
-                    // TODO: This is a hack around grilles and windows.
-                    _random.Shuffle(obstacleEnts);
-                    var attackResult = false;
-
-                    foreach (var ent in obstacleEnts)
-                    {
-                        // TODO: Validate we can damage it
-                        if (destructibleQuery.HasComponent(ent))
-                        {
-                            attackResult = _melee.AttemptLightAttack(uid, uid, meleeWeapon, ent);
-                            break;
-                        }
-                    }
-
-                    _combat.SetInCombatMode(uid, false, combatMode);
-
-                    // Blocked or the likes?
-                    if (!attackResult)
-                        return SteeringObstacleStatus.Failed;
-
-                    if (obstacleEnts.Count == 0)
-                        return SteeringObstacleStatus.Completed;
-
-                    return SteeringObstacleStatus.Continuing;
-                }
+                return SmashObstacle(uid, obstacleEnts);
             }
+            // End Frontier
 
             return SteeringObstacleStatus.Failed;
         }
 
+        CancelObstacleAction(component); // Frontier: the blocker moved or disappeared.
         return SteeringObstacleStatus.Completed;
     }
 
-    private void GetObstacleEntities(PathPoly poly, int mask, int layer, List<EntityUid> ents)
+    // Frontier: check current hard fixture collisions for both the free-space and action checks.
+    internal EntityUid? FindObstacleEntities(EntityUid uid, PathPoly poly, List<EntityUid>? obstacles = null)
     {
-        // TODO: Can probably re-use this from pathfinding or something
-        if (!TryComp<MapGridComponent>(poly.GraphUid, out var grid))
+        var candidates = _entSetPool.Get();
+        try
         {
-            return;
+            // Inset the lookup so fixtures touching the edge of an adjacent node do not count.
+            _lookup.GetLocalEntitiesIntersecting(poly.GraphUid, poly.Box.Enlarged(-0.04f), candidates,
+                flags: LookupFlags.Dynamic | LookupFlags.Static);
+
+            EntityUid? first = null;
+            foreach (var ent in candidates)
+            {
+                if (ent == uid ||
+                    !_fixturesQuery.TryGetComponent(ent, out var fixtures) ||
+                    !PathfindingSystem.IsBodyRelevant(fixtures) ||
+                    !_physics.IsCurrentlyHardCollidable(uid, (ent, fixtures, null)))
+                {
+                    continue;
+                }
+
+                if (obstacles == null)
+                    return ent;
+
+                obstacles.Add(ent);
+                first ??= ent;
+            }
+
+            return first;
+        }
+        finally
+        {
+            _entSetPool.Return(candidates);
+        }
+    }
+
+    private SteeringObstacleStatus SmashObstacle(EntityUid uid, List<EntityUid> obstacles)
+    {
+        if (!_melee.TryGetWeapon(uid, out var weapon, out var melee) ||
+            !TryComp<CombatModeComponent>(uid, out var combatMode))
+        {
+            return SteeringObstacleStatus.Failed;
         }
 
-        foreach (var ent in _mapSystem.GetLocalAnchoredEntities(poly.GraphUid, grid, poly.Box))
+        // Vary the first target where a grille and a window occupy the same tile.
+        _random.Shuffle(obstacles);
+        var needsApproach = false;
+        foreach (var obstacle in obstacles)
         {
-            if (!_physicsQuery.TryGetComponent(ent, out var body) ||
-                !body.Hard ||
-                !body.CanCollide ||
-                (body.CollisionMask & layer) == 0x0 && (body.CollisionLayer & mask) == 0x0)
+            if (!HasComp<DestructibleComponent>(obstacle) || !TryComp<DamageableComponent>(obstacle, out var damage))
+                continue;
+
+            // Pick a reachable fixture before swinging. The attack API can report a dispatched
+            // swing even when the target is behind another blocker.
+            if (!_interaction.InRangeUnobstructed(uid, obstacle, melee.Range))
             {
+                needsApproach = true;
                 continue;
             }
 
-            ents.Add(ent);
+            if (melee.NextAttack > _timing.CurTime)
+                return SteeringObstacleStatus.Continuing;
+
+            var wasInCombat = combatMode.IsInCombatMode;
+            var previousDamage = damage.TotalDamage;
+            _combat.SetInCombatMode(uid, true, combatMode);
+            var hit = _melee.AttemptLightAttack(uid, weapon, melee, obstacle);
+            _combat.SetInCombatMode(uid, wasInCombat, combatMode);
+
+            if (hit && (TerminatingOrDeleted(obstacle) || damage.TotalDamage > previousDamage))
+                return SteeringObstacleStatus.Continuing;
+
+            return SteeringObstacleStatus.Failed;
         }
+
+        return needsApproach ? SteeringObstacleStatus.Approaching : SteeringObstacleStatus.Failed;
     }
+    // End Frontier
 
     private enum SteeringObstacleStatus : byte
     {
         Completed,
         Failed,
-        Continuing
+        Continuing,
+        Approaching // Frontier: stay on the current node and move into attack range.
     }
 }

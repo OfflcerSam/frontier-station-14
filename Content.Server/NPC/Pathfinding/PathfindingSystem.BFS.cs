@@ -8,11 +8,7 @@ public sealed partial class PathfindingSystem
 {
     private PathResult UpdateBFSPath(IRobustRandom random, BFSPathRequest request)
     {
-        if (request.Task.IsCanceled)
-        {
-            return PathResult.NoPath;
-        }
-
+        // Frontier: request cancellation is handled by the queue before dispatch and completion.
         // TODO: Need partial planning that uses best node.
         PathPoly? currentNode = null;
 

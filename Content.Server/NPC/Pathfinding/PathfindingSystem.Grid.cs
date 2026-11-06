@@ -218,7 +218,7 @@ public sealed partial class PathfindingSystem
         }
     }
 
-    private bool IsBodyRelevant(FixturesComponent fixtures)
+    internal static bool IsBodyRelevant(FixturesComponent fixtures) // Frontier: share the filter with live obstacle lookup.
     {
         foreach (var fixture in fixtures.Fixtures.Values)
         {
@@ -277,23 +277,20 @@ public sealed partial class PathfindingSystem
             return;
         }
 
-        var gridUid = ev.Component.GridUid;
-        var oldGridUid = ev.OldPosition.EntityId == ev.NewPosition.EntityId
-            ? gridUid
-            : _transform.GetGrid((ev.Entity.Owner, ev.Component));
-
-        if (oldGridUid != null && oldGridUid != gridUid)
-        {
-            var aabb = _lookup.GetAABBNoContainer(ev.Sender, ev.OldPosition.Position, ev.OldRotation);
-            DirtyChunkArea(oldGridUid.Value, aabb);
-        }
-
-        if (gridUid != null)
-        {
-            var aabb = _lookup.GetAABBNoContainer(ev.Sender, ev.NewPosition.Position, ev.NewRotation);
-            DirtyChunkArea(gridUid.Value, aabb);
-        }
+        // Frontier: breadcrumbs include direct grid children. Each move coordinate is already
+        // local to its own parent, including the departed grid after a transfer.
+        DirtyObstaclePosition(ev.Sender, ev.OldPosition, ev.OldRotation);
+        DirtyObstaclePosition(ev.Sender, ev.NewPosition, ev.NewRotation);
     }
+
+    private void DirtyObstaclePosition(EntityUid uid, EntityCoordinates position, Angle rotation)
+    {
+        if (!HasComp<GridPathfindingComponent>(position.EntityId))
+            return;
+
+        DirtyChunkArea(position.EntityId, _lookup.GetAABBNoContainer(uid, position.Position, rotation));
+    }
+    // End Frontier
 
     private void OnGridInit(GridInitializeEvent ev)
     {
@@ -326,7 +323,8 @@ public sealed partial class PathfindingSystem
 
         var currentTime = _timing.CurTime;
 
-        if (comp.NextUpdate < currentTime && !MetaData(gridUid).EntityPaused)
+        // Frontier: keep the deadline for a batch that already has dirty chunks.
+        if (comp.DirtyChunks.Count == 0 && !MetaData(gridUid).EntityPaused)
             comp.NextUpdate = currentTime + UpdateCooldown;
 
         var chunks = comp.DirtyChunks;
@@ -341,21 +339,20 @@ public sealed partial class PathfindingSystem
 
         var currentTime = _timing.CurTime;
 
-        if (comp.NextUpdate < currentTime)
+        // Frontier: coalesce both footprints without letting continuous movement postpone rebuilding.
+        if (comp.DirtyChunks.Count == 0)
             comp.NextUpdate = currentTime + UpdateCooldown;
 
         var chunks = comp.DirtyChunks;
 
-        // This assumes you never have bounds equal to or larger than 2 * ChunkSize.
-        var corners = new Vector2[] { aabb.BottomLeft, aabb.TopRight, aabb.BottomRight, aabb.TopLeft };
-        foreach (var corner in corners)
+        var min = GetOrigin(aabb.BottomLeft);
+        var max = GetOrigin(aabb.TopRight);
+        for (var x = min.X; x <= max.X; x++)
         {
-            var sampledPoint = new Vector2i(
-                (int) Math.Floor((corner.X) / ChunkSize),
-                (int) Math.Floor((corner.Y) / ChunkSize));
-
-            chunks.Add(sampledPoint);
+            for (var y = min.Y; y <= max.Y; y++)
+                chunks.Add(new Vector2i(x, y));
         }
+        // End Frontier
     }
 
     private GridPathfindingChunk GetChunk(Vector2i origin, EntityUid uid, GridPathfindingComponent? component = null)
@@ -426,7 +423,7 @@ public sealed partial class PathfindingSystem
                 tilePolys.Clear();
 
                 var tile = _maps.GetTileRef(grid.Owner, grid.Comp, tilePos);
-                var flags = tile.Tile.IsEmpty ? PathfindingBreadcrumbFlag.Space : PathfindingBreadcrumbFlag.None;
+                var tileFlags = tile.Tile.IsEmpty ? PathfindingBreadcrumbFlag.Space : PathfindingBreadcrumbFlag.None; // Frontier: tile-wide flags only.
                 // var isBorder = x < 0 || y < 0 || x == ChunkSize - 1 || y == ChunkSize - 1;
 
                 tileEntities.Clear();
@@ -461,6 +458,7 @@ public sealed partial class PathfindingSystem
 
                         // Subtile
                         var localPos = new Vector2(StepOffset + gridOrigin.X + x + (float) subX / SubStep, StepOffset + gridOrigin.Y + y + (float) subY / SubStep);
+                        var flags = tileFlags; // Frontier: door, access and climb flags belong to this sample.
                         var collisionMask = 0x0;
                         var collisionLayer = 0x0;
                         var damage = 0f;
@@ -474,10 +472,8 @@ public sealed partial class PathfindingSystem
 
                             foreach (var fixture in fixtures.Fixtures.Values)
                             {
-                                // Don't need to re-do it.
-                                if (!fixture.Hard ||
-                                    (collisionMask & fixture.CollisionMask) == fixture.CollisionMask &&
-                                    (collisionLayer & fixture.CollisionLayer) == fixture.CollisionLayer)
+                                // Frontier: equal collision bits can still describe different obstacle actions.
+                                if (!fixture.Hard)
                                 {
                                     continue;
                                 }

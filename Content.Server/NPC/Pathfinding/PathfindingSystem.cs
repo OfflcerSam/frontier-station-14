@@ -110,6 +110,20 @@ namespace Content.Server.NPC.Pathfinding
             };
 
             UpdateGrid(options);
+
+            // Frontier: synchronize queue access and retire cancelled searches.
+            // Enqueue takes the same lock so workers can read by index until all searches in this batch finish.
+            // Workers must return their results without taking this lock or waiting on the update thread.
+            lock (_pathRequests)
+                UpdatePathRequests(options);
+        }
+
+        private void UpdatePathRequests(ParallelOptions options)
+        {
+            RemoveCancelledRequests();
+            if (_pathRequests.Count == 0)
+                return;
+
             _stopwatch.Restart();
             var amount = Math.Min(PathTickLimit, _pathRequests.Count);
             var results = ArrayPool<PathResult>.Shared.Rent(amount);
@@ -125,6 +139,11 @@ namespace Content.Server.NPC.Pathfinding
                 }
 
                 var request = _pathRequests[i];
+                if (request.CancellationToken.IsCancellationRequested)
+                {
+                    results[i] = PathResult.NoPath;
+                    return;
+                }
 
                 try
                 {
@@ -149,12 +168,21 @@ namespace Content.Server.NPC.Pathfinding
 
             var offset = 0;
 
-            // then, single-threaded cleanup.
+            // Only the update thread removes requests and completes their tasks. Recheck cancellation
+            // here because a caller can cancel while a worker is searching.
             for (var i = 0; i < amount; i++)
             {
                 var resultIndex = i + offset;
                 var path = _pathRequests[resultIndex];
                 var result = results[i];
+
+                if (path.CancellationToken.IsCancellationRequested)
+                {
+                    _pathRequests.RemoveAt(resultIndex);
+                    offset--;
+                    path.Tcs.TrySetCanceled(path.CancellationToken);
+                    continue;
+                }
 
                 if (path.Task.Exception != null)
                 {
@@ -172,7 +200,7 @@ namespace Content.Server.NPC.Pathfinding
                         // Don't use RemoveSwap because we still want to try and process them in order.
                         _pathRequests.RemoveAt(resultIndex);
                         offset--;
-                        path.Tcs.SetResult(result);
+                        path.Tcs.TrySetResult(result);
                         SendRoute(path);
                         break;
                     default:
@@ -182,6 +210,40 @@ namespace Content.Server.NPC.Pathfinding
 
             ArrayPool<PathResult>.Shared.Return(results);
         }
+
+        private void RemoveCancelledRequests()
+        {
+            // Drain the whole queue before applying the search budget so cancelled requests cannot
+            // delay live requests behind them. Compact in place to preserve the order of live work.
+            List<PathRequest>? cancelled = null;
+            var remaining = 0;
+            for (var i = 0; i < _pathRequests.Count; i++)
+            {
+                var request = _pathRequests[i];
+                if (request.CancellationToken.IsCancellationRequested)
+                {
+                    (cancelled ??= new List<PathRequest>()).Add(request);
+                    continue;
+                }
+
+                if (remaining != i)
+                    _pathRequests[remaining] = request;
+
+                remaining++;
+            }
+
+            if (cancelled == null)
+                return;
+
+            _pathRequests.RemoveRange(remaining, cancelled.Count);
+
+            // Finish mutating the list before completing tasks. A continuation can enqueue another
+            // request inline on this thread.
+            foreach (var request in cancelled)
+                request.Tcs.TrySetCanceled(request.CancellationToken);
+        }
+
+        // End Frontier
 
         /// <summary>
         /// Creates neighbouring edges at both locations, each leading to the other.
@@ -346,8 +408,10 @@ namespace Content.Server.NPC.Pathfinding
         }
 
         /// <summary>
-        /// Gets a path in a thread-safe way.
+        /// Frontier: queues a path with synchronized access to the request list. Entity lookups used to
+        /// construct the request still require a context where ECS reads are allowed.
         /// </summary>
+        // Frontier: use the same synchronized queue as other callers.
         public async Task<PathResultEvent> GetPathSafe(
             EntityUid entity,
             EntityCoordinates start,
@@ -357,7 +421,7 @@ namespace Content.Server.NPC.Pathfinding
             PathFlags flags = PathFlags.None)
         {
             var request = GetRequest(entity, start, end, range, cancelToken, flags);
-            return await GetPath(request, true);
+            return await GetPath(request);
         }
 
         /// <summary>
@@ -475,43 +539,28 @@ namespace Content.Server.NPC.Pathfinding
             return flags;
         }
 
-        private async Task<PathResultEvent> GetPath(
-            PathRequest request, bool safe = false)
+        // Frontier: synchronize enqueueing and preserve the NoPath result on cancellation.
+        private async Task<PathResultEvent> GetPath(PathRequest request)
         {
-            // We could maybe try an initial quick run to avoid forcing time-slicing over ticks.
-            // For now it seems okay and it shouldn't block on 1 NPC anyway.
+            if (request.CancellationToken.IsCancellationRequested)
+                return new PathResultEvent(PathResult.NoPath, []);
 
-            if (safe)
-            {
-                lock (_pathRequests)
-                {
-                    _pathRequests.Add(request);
-                }
-            }
-            else
-            {
+            lock (_pathRequests)
                 _pathRequests.Add(request);
-            }
 
-            await request.Task;
-
-            if (request.Task.Exception != null)
+            try
             {
-                throw request.Task.Exception;
+                var result = await request.Task;
+                return new PathResultEvent(result, request.Polys);
             }
-
-            if (!request.Task.IsCompletedSuccessfully)
+            catch (OperationCanceledException) when (request.CancellationToken.IsCancellationRequested)
             {
-                return new PathResultEvent(PathResult.NoPath, new List<PathPoly>());
+                // Callers already treat NoPath as an unsuccessful search, including during plan shutdown.
+                return new PathResultEvent(PathResult.NoPath, []);
             }
-
-            // Same context as do_after and not synchronously blocking soooo
-#pragma warning disable RA0004
-            var ev = new PathResultEvent(request.Task.Result, request.Polys);
-#pragma warning restore RA0004
-
-            return ev;
         }
+
+        // End Frontier
 
         #region Debug handlers
 

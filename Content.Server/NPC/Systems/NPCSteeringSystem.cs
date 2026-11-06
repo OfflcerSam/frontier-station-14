@@ -10,6 +10,7 @@ using Content.Server.NPC.Pathfinding;
 using Content.Shared.CCVar;
 using Content.Shared.Climbing.Systems;
 using Content.Shared.CombatMode;
+using Content.Shared.DoAfter; // Frontier
 using Content.Shared.Interaction;
 using Content.Shared.Movement.Components;
 using Content.Shared.Movement.Events;
@@ -62,7 +63,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     [Dependency] private readonly NpcFactionSystem _npcFaction = default!;
     [Dependency] private readonly PathfindingSystem _pathfindingSystem = default!;
     [Dependency] private readonly PryingSystem _pryingSystem = default!;
-    [Dependency] private readonly SharedMapSystem _mapSystem = default!;
+    // Frontier: obstacle lookup uses the physics broadphase instead of the anchored entity list.
     [Dependency] private readonly SharedInteractionSystem _interaction = default!;
     [Dependency] private readonly SharedMeleeWeaponSystem _melee = default!;
     [Dependency] private readonly SharedMoverController _mover = default!;
@@ -127,8 +128,10 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             foreach (var (comp, mover) in EntityQuery<NPCSteeringComponent, InputMoverComponent>())
             {
                 mover.CurTickSprintMovement = Vector2.Zero;
-                comp.PathfindToken?.Cancel();
-                comp.PathfindToken = null;
+                // Frontier: retire pending navigation when disabled.
+                CancelPathRequest(comp);
+                CancelObstacleAction(comp);
+                // End Frontier
             }
         }
 
@@ -143,8 +146,10 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         {
             foreach (var comp in EntityQuery<NPCSteeringComponent>(true))
             {
-                comp.PathfindToken?.Cancel();
-                comp.PathfindToken = null;
+                // Frontier: retire pending navigation when disabled.
+                CancelPathRequest(comp);
+                CancelObstacleAction(comp);
+                // End Frontier
             }
         }
     }
@@ -160,12 +165,50 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             _subscribedSessions.Remove(args.SenderSession);
     }
 
+    // Frontier: detach navigation work before replacing or removing steering.
     private void OnSteeringShutdown(EntityUid uid, NPCSteeringComponent component, ComponentShutdown args)
     {
-        // Cancel any active pathfinding jobs as they're irrelevant.
-        component.PathfindToken?.Cancel();
-        component.PathfindToken = null;
+        CancelPathRequest(component);
+        CancelObstacleAction(component);
     }
+
+    private static void CancelPathRequest(NPCSteeringComponent component)
+    {
+        // Relinquish ownership immediately. The pathfinding update may retire the request later.
+        var request = component.PathfindToken;
+        component.PathfindToken = null;
+        request?.Cancel();
+    }
+
+    private void CancelObstacleAction(NPCSteeringComponent component)
+    {
+        // Cancellation raises events synchronously. Detach the action before notifying listeners.
+        var action = component.DoAfterId;
+        component.DoAfterId = null;
+        component.ObstacleActionTarget = null;
+        if (_doAfter.GetStatus(action) == DoAfterStatus.Running)
+            _doAfter.Cancel(action);
+    }
+
+    internal void SetPlannedPath(EntityUid uid, NPCSteeringComponent steering, List<PathPoly>? path = null)
+    {
+        // A new movement plan takes ownership even if it uses the same destination.
+        CancelPathRequest(steering);
+        CancelObstacleAction(steering);
+        steering.CurrentPath.Clear();
+        if (path != null)
+        {
+            foreach (var node in path)
+                steering.CurrentPath.Enqueue(node);
+        }
+
+        steering.FailedPathCount = 0;
+        steering.Status = SteeringStatus.Moving;
+        // Same-goal registration preserves the old timer. Give the replacement plan time to move.
+        ResetStuck(steering, Transform(uid).Coordinates);
+    }
+
+    // End Frontier
 
     /// <summary>
     /// Adds the AI to the steering system to move towards a specific target
@@ -174,12 +217,20 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     {
         if (Resolve(uid, ref component, false))
         {
+            // Frontier: preserve same-goal failures and reset state only when the goal changes.
+            // Callers can register the same goal every tick. Only a new goal or an explicit
+            // replacement plan should restart a failed attempt.
             if (component.Coordinates.Equals(coordinates))
                 return component;
 
-            component.PathfindToken?.Cancel();
-            component.PathfindToken = null;
+            CancelPathRequest(component);
+            CancelObstacleAction(component);
             component.CurrentPath.Clear();
+            component.FailedPathCount = 0;
+            component.Status = SteeringStatus.Moving;
+            component.LineOfSightTimer = 0;
+            component.ForceMove = false;
+            // End Frontier
         }
         else
         {
@@ -222,9 +273,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             RaiseLocalEvent(uid, ref ev);
         }
 
-        component.PathfindToken?.Cancel();
-        component.PathfindToken = null;
-        RemComp<NPCSteeringComponent>(uid);
+        RemComp<NPCSteeringComponent>(uid); // Frontier: shutdown handles cancellation.
     }
 
     public override void Update(float frameTime)
@@ -314,27 +363,21 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         float frameTime,
         TimeSpan curTime)
     {
-        if (Deleted(steering.Coordinates.EntityId))
-        {
-            SetDirection(uid, mover, steering, Vector2.Zero);
+        // Frontier: retire pending work when steering stops.
+        if (TerminatingOrDeleted(steering.Coordinates.EntityId) || !mover.CanMove)
             steering.Status = SteeringStatus.NoPath;
-            return;
-        }
 
-        // No path set from pathfinding or the likes.
         if (steering.Status == SteeringStatus.NoPath)
         {
+            // Frontier: retire abandoned work before stopping movement.
+            CancelPathRequest(steering);
+            CancelObstacleAction(steering);
+            // End Frontier
             SetDirection(uid, mover, steering, Vector2.Zero);
             return;
         }
 
-        // Can't move at all, just noop input.
-        if (!mover.CanMove)
-        {
-            SetDirection(uid, mover, steering, Vector2.Zero);
-            steering.Status = SteeringStatus.NoPath;
-            return;
-        }
+        // End Frontier
 
         Interlocked.Increment(ref _activeSteeringCount);
 
@@ -366,8 +409,13 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         var forceSteer = true;
         var moveMultiplier = 1f; // multiplier to acceleration we should actually move with // Wizden#38846
 
-        if (steering.CanSeek && !TrySeek(uid, mover, steering, body, xform, offsetRot, moveSpeed, acceleration, friction, interest, frameTime, ref forceSteer, ref moveMultiplier)) // Wizden#38846
+        EntityUid? smashTarget = null; // Frontier
+        if (steering.CanSeek && !TrySeek(uid, mover, steering, body, xform, offsetRot, moveSpeed, acceleration, friction, interest, frameTime, ref forceSteer, ref moveMultiplier, out smashTarget)) // Wizden#38846, Frontier
         {
+            // Frontier: retire abandoned work before stopping movement.
+            CancelPathRequest(steering);
+            CancelObstacleAction(steering);
+            // End Frontier
             SetDirection(uid, mover, steering, Vector2.Zero);
             return;
         }
@@ -386,7 +434,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         }
 
         // Avoid static objects like walls
-        CollisionAvoidance(uid, offsetRot, worldPos, agentRadius, layer, mask, xform, danger);
+        CollisionAvoidance(uid, offsetRot, worldPos, agentRadius, layer, mask, xform, danger, smashTarget); // Frontier
         DebugTools.Assert(!float.IsNaN(danger[0]));
 
         Separation(uid, offsetRot, worldPos, agentRadius, layer, mask, body, xform, danger);
@@ -432,11 +480,12 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     /// <summary>
     /// Get a new job from the pathfindingsystem
     /// </summary>
-    private async void RequestPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, float targetDistance)
+    // Frontier: tie path completions to the current goal and steering instance.
+    private async void RequestPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, float targetDistance, bool invalidatedPath)
     {
-        // If we already have a pathfinding request then don't grab another.
-        // If we're in range then just beeline them; this can avoid stutter stepping and is an easy way to look nicer.
-        if (steering.Pathfind || targetDistance < steering.RepathRange)
+        // Keep one pending search per goal. Normally we steer directly over short distances,
+        // but an invalidated route needs a replacement search even when the destination is close.
+        if (steering.Pathfind || (!invalidatedPath && targetDistance < steering.RepathRange))
             return;
 
         // Short-circuit with no path.
@@ -451,22 +500,48 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         {
             steering.CurrentPath.Clear();
             steering.CurrentPath.Enqueue(targetPoly);
+            steering.FailedPathCount = 0;
             return;
         }
 
-        steering.PathfindToken = new CancellationTokenSource();
-
-        var flags = _pathfindingSystem.GetFlags(uid);
+        using var request = new CancellationTokenSource();
+        steering.PathfindToken = request;
+        var destination = steering.Coordinates;
 
         var result = await _pathfindingSystem.GetPathSafe(
             uid,
             xform.Coordinates,
-            steering.Coordinates,
+            destination,
             steering.Range,
-            steering.PathfindToken.Token,
-            flags);
+            request.Token,
+            _pathfindingSystem.GetFlags(uid));
+
+        CompletePathRequest(uid, steering, request, destination, result);
+    }
+
+    internal void CompletePathRequest(
+        EntityUid uid,
+        NPCSteeringComponent steering,
+        CancellationTokenSource request,
+        EntityCoordinates destination,
+        PathResultEvent result)
+    {
+        // Check ownership before clearing the marker or updating failure state. An older result
+        // may arrive after a new search has claimed the slot.
+        if (steering.PathfindToken != request)
+            return;
 
         steering.PathfindToken = null;
+
+        if (request.IsCancellationRequested ||
+            TerminatingOrDeleted(uid) ||
+            !TryComp(uid, out NPCSteeringComponent? current) || current != steering ||
+            !steering.Coordinates.Equals(destination) ||
+            TerminatingOrDeleted(destination.EntityId) ||
+            steering.Status == SteeringStatus.NoPath)
+        {
+            return;
+        }
 
         if (result.Result == PathResult.NoPath)
         {
@@ -481,12 +556,21 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             return;
         }
 
-        var targetPos = _transform.ToMapCoordinates(steering.Coordinates);
-        var ourPos = _transform.GetMapCoordinates(uid, xform: xform);
+        // A navmesh update can invalidate polygons between the search and its continuation.
+        foreach (var poly in result.Path)
+        {
+            if (!poly.IsValid() || TerminatingOrDeleted(poly.GraphUid))
+                return;
+        }
 
+        var targetPos = _transform.ToMapCoordinates(destination);
+        var ourPos = _transform.GetMapCoordinates(uid);
         PrunePath(uid, ourPos, targetPos.Position - ourPos.Position, result.Path);
         steering.CurrentPath = new Queue<PathPoly>(result.Path);
+        steering.FailedPathCount = 0;
     }
+
+    // End Frontier
 
     // TODO: Move these to movercontroller
 

@@ -13,11 +13,7 @@ public sealed partial class PathfindingSystem
             return PathResult.Path;
         }
 
-        if (request.Task.IsCanceled)
-        {
-            return PathResult.NoPath;
-        }
-
+        // Frontier: request cancellation is handled by the queue before dispatch and completion.
         // TODO: Need partial planning that uses best node.
         PathPoly? currentNode = null;
 

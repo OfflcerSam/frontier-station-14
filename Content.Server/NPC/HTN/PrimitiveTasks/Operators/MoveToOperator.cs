@@ -182,8 +182,8 @@ public sealed partial class MoveToOperator : HTNOperator, IHtnConditionalShutdow
         // see if we want to just move directly first
         if (blackboard.TryGetValue<bool>(DirectMoveTargetKey, out var doDirectMove, _entManager) && doDirectMove)
         {
-            comp.Coordinates = targetCoordinates;
             comp.DirectMove = true;
+            _steering.SetPlannedPath(uid, comp); // Frontier: replace pending work with direct movement.
         }
         else if (blackboard.TryGetValue<PathResultEvent>(PathfindKey, out var result, _entManager))
         {
@@ -195,7 +195,7 @@ public sealed partial class MoveToOperator : HTNOperator, IHtnConditionalShutdow
                 _steering.PrunePath(uid, mapCoords, _transform.ToMapCoordinates(targetCoordinates).Position - mapCoords.Position, result.Path);
             }
 
-            comp.CurrentPath = new Queue<PathPoly>(result.Path);
+            _steering.SetPlannedPath(uid, comp, result.Path); // Frontier: transfer route ownership to the plan.
         }
         comp.InRangeMaxSpeed = BrakeMaxVelocity; // Wizden#38846
     }
