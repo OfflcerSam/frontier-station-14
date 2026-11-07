@@ -224,6 +224,14 @@ public sealed class WorldControllerSystem : EntitySystem
         return CreateChunkEntity(chunk, map, controller);
     }
 
+    // Frontier: checking NPC eligibility must not create new chunk entities.
+    internal bool IsChunkLoaded(WorldControllerComponent controller, Vector2i coordinates)
+    {
+        return controller.Chunks.TryGetValue(coordinates, out var chunk) &&
+            TryComp<LoadedChunkComponent>(chunk, out var loaded) && loaded.Loaders != null;
+    }
+    // End Frontier
+
     /// <summary>
     ///     Constructs a new chunk entity, attaching it to the map.
     /// </summary>

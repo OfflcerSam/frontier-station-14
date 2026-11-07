@@ -9,7 +9,7 @@ namespace Content.Server.NPC.Queries;
 public sealed partial class UtilityService
 {
     /// <summary>
-    /// Identifier to use for this service. This is used to track its cooldown.
+    /// Identifier for this service in the task definition. // Frontier: cooldowns are tracked per task entry.
     /// </summary>
     [DataField("id", required: true)]
     public string ID = string.Empty;
@@ -20,11 +20,13 @@ public sealed partial class UtilityService
     [DataField("proto", required: true, customTypeSerializer:typeof(PrototypeIdSerializer<UtilityQueryPrototype>))]
     public string Prototype = string.Empty;
 
+    // Frontier: each running task samples its own interval for each service.
     [DataField("minCooldown")]
     public float MinCooldown = 0.25f;
 
     [DataField("maxCooldown")]
     public float MaxCooldown = 0.60f;
+    // End Frontier
 
     /// <summary>
     /// Key to update with the utility query.

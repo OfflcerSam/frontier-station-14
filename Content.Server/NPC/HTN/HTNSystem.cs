@@ -2,7 +2,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Content.Server.Administration.Managers;
-using Robust.Shared.CPUJob.JobQueues;
 using Robust.Shared.CPUJob.JobQueues.Queues;
 using Content.Server.NPC.HTN.PrimitiveTasks;
 using Content.Server.NPC.Systems;
@@ -20,7 +19,7 @@ using Robust.Server.GameObjects; // Frontier
 
 namespace Content.Server.NPC.HTN;
 
-public sealed class HTNSystem : EntitySystem
+public sealed partial class HTNSystem : EntitySystem // Frontier
 {
     [Dependency] private readonly IAdminManager _admin = default!;
     [Dependency] private readonly IPrototypeManager _prototypeManager = default!;
@@ -30,7 +29,6 @@ public sealed class HTNSystem : EntitySystem
     [Dependency] private readonly WorldControllerSystem _world = default!;
     [Dependency] private readonly TransformSystem _transform = default!;
     private EntityQuery<WorldControllerComponent> _mapQuery;
-    private EntityQuery<LoadedChunkComponent> _loadedQuery;
     // Frontier
 
     private readonly JobQueue _planQueue = new(0.004);
@@ -42,7 +40,7 @@ public sealed class HTNSystem : EntitySystem
     {
         base.Initialize();
         _mapQuery = GetEntityQuery<WorldControllerComponent>(); // Frontier
-        _loadedQuery = GetEntityQuery<LoadedChunkComponent>(); // Frontier
+        InitializeScheduler(); // Frontier
         SubscribeLocalEvent<HTNComponent, MobStateChangedEvent>(_npc.OnMobStateChange);
         SubscribeLocalEvent<HTNComponent, MapInitEvent>(_npc.OnNPCMapInit);
         SubscribeLocalEvent<HTNComponent, PlayerAttachedEvent>(_npc.OnPlayerNPCAttach);
@@ -74,17 +72,10 @@ public sealed class HTNSystem : EntitySystem
 
         while (query.MoveNext(out var comp))
         {
-            comp.PlanningToken?.Cancel();
-            comp.PlanningToken = null;
-
-            if (comp.Plan != null)
-            {
-                var currentOperator = comp.Plan.CurrentOperator;
-                ShutdownTask(currentOperator, comp.Blackboard, HTNOperatorStatus.Failed);
-                ShutdownPlan(comp);
-                comp.Plan = null;
-                RequestPlan(comp);
-            }
+            // Frontier: pending jobs also hold references to old prototypes.
+            StopNPC(comp);
+            Replan(comp);
+            // End Frontier
         }
 
         // Add dependencies for all operators.
@@ -140,9 +131,8 @@ public sealed class HTNSystem : EntitySystem
 
     private void OnHTNShutdown(EntityUid uid, HTNComponent component, ComponentShutdown args)
     {
+        Unschedule(component); // Frontier
         _npc.OnNPCShutdown(uid, component, args);
-        component.PlanningToken?.Cancel();
-        component.PlanningJob = null;
     }
 
     /// <summary>
@@ -161,18 +151,7 @@ public sealed class HTNSystem : EntitySystem
         ent.Comp.Enabled = state;
         ent.Comp.PlanAccumulator = planCooldown;
 
-        ent.Comp.PlanningToken?.Cancel();
-        ent.Comp.PlanningToken = null;
-
-        if (ent.Comp.Plan != null)
-        {
-            var currentOperator = ent.Comp.Plan.CurrentOperator;
-
-            ShutdownTask(currentOperator, ent.Comp.Blackboard, HTNOperatorStatus.Failed);
-            ShutdownPlan(ent.Comp);
-
-            ent.Comp.Plan = null;
-        }
+        StopNPC(ent.Comp); // Frontier: retire any result from before the change.
 
         if (ent.Comp.Enabled && ent.Comp.PlanAccumulator <= 0)
             RequestPlan(ent.Comp);
@@ -184,130 +163,9 @@ public sealed class HTNSystem : EntitySystem
     [PublicAPI]
     public void Replan(HTNComponent component)
     {
+        CancelPlanning(component); // Frontier: an explicit replan invalidates the previous snapshot.
         component.PlanAccumulator = 0f;
-    }
-
-    public void UpdateNPC(ref int count, int maxUpdates, float frameTime)
-    {
-        _planQueue.Process();
-        var query = EntityQueryEnumerator<ActiveNPCComponent, HTNComponent>();
-
-        // Move ahead "count" entries in the query.
-        // This is to ensure that if we didn't process all the npcs the first time,
-        // we get to the remaining ones instead of iterating over the beginning again.
-        for (var i = 0; i < count; i++)
-        {
-            query.MoveNext(out _, out _);
-        }
-
-        // the amount of updates we've processed during this iteration.
-        var updates = 0;
-        while (query.MoveNext(out var uid, out _, out var comp))
-        {
-            // If we're over our max count or it's not MapInit then ignore the NPC.
-            if (updates >= maxUpdates)
-            {
-                // Intentional return. We don't want to go to the end logic and reset count.
-                return;
-            }
-
-            if (!comp.Enabled)
-                continue;
-
-            if (!IsNPCActive(uid))  // Frontier
-                continue; // Frontier
-
-            if (comp.PlanningJob != null)
-            {
-                if (comp.PlanningJob.Exception != null)
-                {
-                    Log.Fatal($"Received exception on planning job for {uid}!");
-                    _npc.SleepNPC(uid);
-                    var exc = comp.PlanningJob.Exception;
-                    RemComp<HTNComponent>(uid);
-                    throw exc;
-                }
-
-                // If a new planning job has finished then handle it.
-                if (comp.PlanningJob.Status != JobStatus.Finished)
-                    continue;
-
-                var newPlanBetter = false;
-
-                // If old traversal is better than new traversal then ignore the new plan
-                if (comp.Plan != null && comp.PlanningJob.Result != null)
-                {
-                    var oldMtr = comp.Plan.BranchTraversalRecord;
-                    var mtr = comp.PlanningJob.Result.BranchTraversalRecord;
-
-                    for (var i = 0; i < oldMtr.Count; i++)
-                    {
-                        if (i < mtr.Count && oldMtr[i] > mtr[i])
-                        {
-                            newPlanBetter = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (comp.Plan == null || newPlanBetter)
-                {
-                    comp.CheckServices = false;
-
-                    if (comp.Plan != null)
-                    {
-                        ShutdownTask(comp.Plan.CurrentOperator, comp.Blackboard, HTNOperatorStatus.BetterPlan);
-                        ShutdownPlan(comp);
-                    }
-
-                    comp.Plan = comp.PlanningJob.Result;
-
-                    // Startup the first task and anything else we need to do.
-                    if (comp.Plan != null)
-                    {
-                        StartupTask(comp.Plan.Tasks[comp.Plan.Index], comp.Blackboard, comp.Plan.Effects[comp.Plan.Index]);
-                    }
-
-                    // Send debug info
-                    foreach (var session in _subscribers)
-                    {
-                        var text = new StringBuilder();
-
-                        if (comp.Plan != null)
-                        {
-                            text.AppendLine($"BTR: {string.Join(", ", comp.Plan.BranchTraversalRecord)}");
-                            text.AppendLine($"tasks:");
-                            var root = comp.RootTask;
-                            var btr = new List<int>();
-                            var level = -1;
-                            AppendDebugText(root, text, comp.Plan.BranchTraversalRecord, btr, ref level);
-                        }
-
-                        RaiseNetworkEvent(new HTNMessage()
-                        {
-                            Uid = GetNetEntity(uid),
-                            Text = text.ToString(),
-                        }, session.Channel);
-                    }
-                }
-                // Keeping old plan
-                else
-                {
-                    comp.CheckServices = true;
-                }
-
-                comp.PlanningJob = null;
-                comp.PlanningToken = null;
-            }
-
-            Update(comp, frameTime);
-            count++;
-            updates++;
-        }
-
-        // only reset our counter back to 0 if we finish iterating.
-        // otherwise it lets us know where we left off.
-        count = 0;
+        component.ReplanRequested = true; // Frontier: explicitly requested replans also apply to nonconstant plans.
     }
 
     // Frontier: skip handling entities on unloaded chunks
@@ -318,9 +176,9 @@ public sealed class HTNSystem : EntitySystem
         if (!_mapQuery.TryGetComponent(transform.MapUid, out var worldComponent))
             return true;
 
-        var chunk = _world.GetOrCreateChunk(WorldGen.WorldToChunkCoords(_transform.GetWorldPosition(transform)).Floored(), transform.MapUid.Value, worldComponent);
+        var coordinates = WorldGen.WorldToChunkCoords(_transform.GetWorldPosition(transform)).Floored();
 
-        return _loadedQuery.TryGetComponent(chunk, out var loaded) && loaded.Loaders is not null;
+        return _world.IsChunkLoaded(worldComponent, coordinates);
     }
     // End Frontier: skip handling entities on unloaded chunks
 
@@ -368,14 +226,16 @@ public sealed class HTNSystem : EntitySystem
         throw new NotImplementedException();
     }
 
-    private void Update(HTNComponent component, float frameTime)
+    // Frontier: the planner and running task have separate elapsed intervals.
+    private void Update(HTNComponent component, float elapsed, float taskElapsed, bool wasPlanning)
     {
         // If we're not planning then countdown to next one.
-        if (component.PlanningJob == null)
-            component.PlanAccumulator -= frameTime;
+        if (!wasPlanning)
+            component.PlanAccumulator -= elapsed;
 
         // We'll still try re-planning occasionally even when we're updating in case new data comes in.
-        if ((component.ConstantlyReplan || component.Plan is null) && component.PlanAccumulator <= 0f)
+        if ((component.ConstantlyReplan || component.Plan is null || component.ReplanRequested) &&
+            component.PlanAccumulator <= 0f)
         {
             RequestPlan(component);
         }
@@ -388,55 +248,56 @@ public sealed class HTNSystem : EntitySystem
         var status = HTNOperatorStatus.Finished;
 
         // Continuously run operators until we can't anymore.
-        while (status != HTNOperatorStatus.Continuing && component.Plan != null)
+        while (status != HTNOperatorStatus.Continuing && component.Plan is { } plan)
         {
             // Run the existing operator
-            var currentOperator = component.Plan.CurrentOperator;
-            var currentTask = component.Plan.CurrentTask;
+            var currentOperator = plan.CurrentOperator;
             var blackboard = component.Blackboard;
 
-            // Service still on cooldown.
-            if (component.CheckServices)
-            {
-                foreach (var service in currentTask.Services)
-                {
-                    var serviceResult = _utility.GetEntities(blackboard, service.Prototype);
-                    blackboard.SetValue(service.Key, serviceResult.GetHighest());
-                }
+            UpdateServices(component, plan.CurrentTask, taskElapsed);
+            if (component.Plan != plan)
+                return;
 
-                component.CheckServices = false;
-            }
-
-            status = currentOperator.Update(blackboard, frameTime);
+            status = currentOperator.Update(blackboard, taskElapsed);
+            if (component.Plan != plan)
+                return;
 
             switch (status)
             {
                 case HTNOperatorStatus.Continuing:
                     break;
                 case HTNOperatorStatus.Failed:
+                    CancelPlanning(component);
                     ShutdownTask(currentOperator, blackboard, status);
-                    ShutdownPlan(component);
+                    if (component.Plan == plan)
+                        ShutdownPlan(component);
                     break;
                 // Operator completed so go to the next one.
                 case HTNOperatorStatus.Finished:
+                    CancelPlanning(component);
                     ShutdownTask(currentOperator, blackboard, status);
-                    component.Plan.Index++;
+                    if (component.Plan != plan)
+                        return;
+
+                    plan.Index++;
 
                     // Plan finished!
-                    if (component.Plan.Tasks.Count <= component.Plan.Index)
+                    if (plan.Tasks.Count <= plan.Index)
                     {
                         ShutdownPlan(component);
                         break;
                     }
 
-                    ConditionalShutdown(component.Plan, currentOperator, blackboard, HTNPlanState.TaskFinished);
-                    StartupTask(component.Plan.Tasks[component.Plan.Index], component.Blackboard, component.Plan.Effects[component.Plan.Index]);
+                    StartupTask(component, plan.CurrentTask, plan.Effects[plan.Index]);
+                    // Only the task that was running between turns can consume that time.
+                    taskElapsed = 0f;
                     break;
                 default:
                     throw new InvalidOperationException();
             }
         }
     }
+    // End Frontier
 
     public void ShutdownTask(HTNOperator currentOperator, NPCBlackboard blackboard, HTNOperatorStatus status)
     {
@@ -452,9 +313,17 @@ public sealed class HTNSystem : EntitySystem
     public void ShutdownPlan(HTNComponent component)
     {
         DebugTools.Assert(component.Plan != null);
+        // Frontier: results planned against the ended task must never be installed.
+        var plan = component.Plan;
+        component.Plan = null;
+        component.ServiceCooldowns?.Clear();
+        CancelPlanning(component);
+        if (plan == null)
+            return;
+        // End Frontier
         var blackboard = component.Blackboard;
 
-        foreach (var task in component.Plan.Tasks)
+        foreach (var task in plan.Tasks) // Frontier
         {
             if (task.Operator is IHtnConditionalShutdown conditional &&
                 (conditional.ShutdownState & HTNPlanState.PlanFinished) != 0x0)
@@ -464,29 +333,17 @@ public sealed class HTNSystem : EntitySystem
 
             task.Operator.PlanShutdown(component.Blackboard);
         }
-
-        component.Plan = null;
-    }
-
-    /// <summary>
-    /// Shuts down the current operator conditionally.
-    /// </summary>
-    private void ConditionalShutdown(HTNPlan plan, HTNOperator currentOperator, NPCBlackboard blackboard, HTNPlanState state)
-    {
-        if (currentOperator is not IHtnConditionalShutdown conditional)
-            return;
-
-        if ((conditional.ShutdownState & state) == 0x0)
-            return;
-
-        conditional.ConditionalShutdown(blackboard);
     }
 
     /// <summary>
     /// Starts a new primitive task. Will apply effects from planning if applicable.
     /// </summary>
-    private void StartupTask(HTNPrimitiveTask primitive, NPCBlackboard blackboard, Dictionary<string, object>? effects)
+    private void StartupTask(HTNComponent component, HTNPrimitiveTask primitive, Dictionary<string, object>? effects) // Frontier
     {
+        // Frontier: a new task gets its own utility service intervals.
+        component.ServiceCooldowns?.Clear();
+        var blackboard = component.Blackboard;
+        // End Frontier
         // We may have planner only tasks where we want to reuse their data during update
         // e.g. if we pathfind to an enemy to know if we can attack it, we don't want to do another pathfind immediately
         if (effects != null && primitive.ApplyEffectsOnStartup)

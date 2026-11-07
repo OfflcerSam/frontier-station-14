@@ -28,14 +28,28 @@ namespace Content.Server.NPC.Systems
         [Dependency] private readonly HTNSystem _htn = default!;
         [Dependency] private readonly MobStateSystem _mobState = default!;
 
+        // Frontier: resuming the scheduler must not charge time spent globally disabled.
+        private bool _enabled = true;
+
         /// <summary>
         /// Whether any NPCs are allowed to run at all.
         /// </summary>
-        public bool Enabled { get; set; } = true;
+        public bool Enabled
+        {
+            get => _enabled;
+            set
+            {
+                if (_enabled == value)
+                    return;
+
+                _enabled = value;
+                if (!value)
+                    _htn.SuspendScheduler();
+            }
+        }
+        // End Frontier
 
         private int _maxUpdates;
-
-        private int _count;
 
         /// <inheritdoc />
         public override void Initialize()
@@ -117,17 +131,7 @@ namespace Content.Server.NPC.Systems
                 return;
             }
 
-            // Don't bother with an event
-            if (TryComp<HTNComponent>(uid, out var htn))
-            {
-                if (htn.Plan != null)
-                {
-                    var currentOperator = htn.Plan.CurrentOperator;
-                    _htn.ShutdownTask(currentOperator, htn.Blackboard, HTNOperatorStatus.Failed);
-                    _htn.ShutdownPlan(htn);
-                    htn.Plan = null;
-                }
-            }
+            _htn.StopNPC(component); // Frontier: cancel a pending replacement as well as the current plan.
 
             Log.Debug($"Sleeping {ToPrettyString(uid)}");
             RemComp<ActiveNPCComponent>(uid);
@@ -142,7 +146,7 @@ namespace Content.Server.NPC.Systems
                 return;
 
             // Add your system here.
-            _htn.UpdateNPC(ref _count, _maxUpdates, frameTime);
+            _htn.UpdateNPC(_maxUpdates, frameTime); // Frontier: HTN owns the stable rotation.
 
             ActiveGauge.Set(Count<ActiveNPCComponent>());
         }

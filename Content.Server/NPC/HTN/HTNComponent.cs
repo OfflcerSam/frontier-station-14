@@ -3,7 +3,7 @@ using Content.Server.NPC.Components;
 
 namespace Content.Server.NPC.HTN;
 
-[RegisterComponent]
+[RegisterComponent, AutoGenerateComponentPause] // Frontier: exclude paused time from scheduled elapsed time.
 public sealed partial class HTNComponent : NPCComponent
 {
     /// <summary>
@@ -14,7 +14,7 @@ public sealed partial class HTNComponent : NPCComponent
     public HTNCompoundTask RootTask = default!;
 
     /// <summary>
-    /// Check any active services for our current plan. This is used to find new targets for example without changing our plan.
+    /// Whether the current task's utility services run on their configured intervals. // Frontier
     /// </summary>
     [DataField("checkServices")]
     public bool CheckServices = true;
@@ -56,4 +56,15 @@ public sealed partial class HTNComponent : NPCComponent
     /// </summary>
     [DataField]
     public bool Enabled = true;
+
+    // Frontier: awake actors own one entry in the stable scheduler rotation.
+    internal LinkedListNode<Entity<HTNComponent>>? ScheduleNode;
+    internal long SchedulerTurn;
+
+    [AutoPausedField]
+    internal TimeSpan? LastScheduledAt;
+
+    internal List<float>? ServiceCooldowns;
+    internal bool ReplanRequested;
+    // End Frontier
 }
