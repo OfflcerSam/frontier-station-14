@@ -14,6 +14,7 @@
   name: SI Wayfarer
   description: A former passenger spaceliner converted for salvage duty, while still retaining some service accommodations.
   price: 160000 # ~122992 (calculated) * ~1.20 (markup) = ~147590.4
+  minPriceMarkup: 1.20
   category: Large
   group: Shipyard
   shuttlePath: /Maps/_NF/Shuttles/wayfarer.yml
