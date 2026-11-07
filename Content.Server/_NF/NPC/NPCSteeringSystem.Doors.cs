@@ -7,6 +7,7 @@ using Content.Shared.Doors.Systems;
 using Content.Shared.Prying.Components;
 using Content.Shared.Prying.Systems;
 using Content.Shared.Tag;
+using Robust.Shared.Profiling;
 
 namespace Content.Server.NPC.Systems;
 
@@ -15,6 +16,7 @@ public sealed partial class NPCSteeringSystem
     [Dependency] private readonly ActionBlockerSystem _doorActionBlocker = default!;
     [Dependency] private readonly SharedDoorSystem _doors = default!;
     [Dependency] private readonly TagSystem _doorTags = default!;
+    [Dependency] private readonly ProfManager _doorProfile = default!;
 
     private static readonly TimeSpan DoorRetryDelay = TimeSpan.FromMilliseconds(300);
     private static readonly TimeSpan DoorWaitLimit = TimeSpan.FromSeconds(3);
@@ -85,7 +87,10 @@ public sealed partial class NPCSteeringSystem
         if (moving || steering.InterruptedDoor == target && _timing.CurTime < steering.DoorRetryAt)
             return SteeringObstacleStatus.Waiting;
 
-        if (!_pryingSystem.TryPryOpen(target, uid, out var action))
+        var accepted = _pryingSystem.TryPryOpen(target, uid, out var action);
+        if (_doorProfile.IsEnabled)
+            _doorProfile.WriteValue("NPC pry accepted", accepted ? 1 : 0);
+        if (!accepted)
             return SteeringObstacleStatus.Failed;
 
         // An instant pry may already have opened the door by the time this returns.

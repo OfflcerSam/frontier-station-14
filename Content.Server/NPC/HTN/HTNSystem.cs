@@ -377,6 +377,7 @@ public sealed partial class HTNSystem : EntitySystem // Frontier
             component.Blackboard.ShallowClone(), branchTraversal, cancelToken.Token);
 
         _planQueue.EnqueueJob(job);
+        component.PlanEnqueuedTick = _schedulerTiming.CurTick.Value; // Frontier: profile request-to-application latency.
         component.PlanningJob = job;
         component.PlanningToken = cancelToken;
     }

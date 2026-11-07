@@ -17,6 +17,7 @@ using Content.Shared.Weapons.Ranged.Events;
 using Robust.Shared.Containers;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Systems;
+using Robust.Shared.Profiling;
 
 namespace Content.Server.NPC.Systems;
 
@@ -30,6 +31,7 @@ public sealed partial class NPCCombatSystem
     [Dependency] private readonly WeldableSystem _storageWelds = default!;
     [Dependency] private readonly SharedPhysicsSystem _storagePhysics = default!;
     [Dependency] private readonly PathfindingSystem _storagePaths = default!;
+    [Dependency] private readonly ProfManager _storageProfile = default!;
 
     private const float StorageSightRange = 14f;
     private const CollisionGroup StorageShotMask = CollisionGroup.Impassable | CollisionGroup.InteractImpassable |
@@ -160,9 +162,12 @@ public sealed partial class NPCCombatSystem
             }
 
             attempt.TriedOpen = true;
-            if (_storageActions.CanInteract(uid, storage) &&
+            var opened = _storageActions.CanInteract(uid, storage) &&
                 (!attempt.Locked || _storageLocks.TryUnlock(storage, uid, lockComp)) &&
-                _storage.TryOpenStorage(uid, storage, silent: true) && _storage.IsOpen(storage))
+                _storage.TryOpenStorage(uid, storage, silent: true) && _storage.IsOpen(storage);
+            if (_storageProfile.IsEnabled)
+                _storageProfile.WriteValue("NPC storage opened", opened ? 1 : 0);
+            if (opened)
             {
                 return true;
             }

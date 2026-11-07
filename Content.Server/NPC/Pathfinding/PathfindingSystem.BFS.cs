@@ -6,118 +6,98 @@ namespace Content.Server.NPC.Pathfinding;
 
 public sealed partial class PathfindingSystem
 {
-    private PathResult UpdateBFSPath(IRobustRandom random, BFSPathRequest request)
+    // Frontier: bound the sampled neighborhood across all slices, including discovered endpoints.
+    internal PathResult UpdateBFSPath(IRobustRandom random, BFSPathRequest request, int? sliceLimit = null)
     {
-        // Frontier: request cancellation is handled by the queue before dispatch and completion.
-        // TODO: Need partial planning that uses best node.
-        PathPoly? currentNode = null;
-
-        // First run
-        if (!request.Started)
-        {
-            request.Frontier = new PriorityQueue<(float, PathPoly)>(PathPolyComparer);
-            request.Started = true;
-        }
-        // Re-validate nodes
-        else
-        {
-            // Theoretically this shouldn't be happening, but practically...
-            if (request.Frontier.Count == 0)
-            {
-                return PathResult.NoPath;
-            }
-
-            (_, currentNode) = request.Frontier.Peek();
-
-            if (!currentNode.IsValid())
-            {
-                return PathResult.NoPath;
-            }
-
-            // Re-validate parents too.
-            if (request.CameFrom.TryGetValue(currentNode, out var parentNode) && !parentNode.IsValid())
-            {
-                return PathResult.NoPath;
-            }
-        }
-
         DebugTools.Assert(!request.Task.IsCompleted);
         request.Stopwatch.Restart();
 
-        var startNode = GetPoly(request.Start);
-
-        if (startNode == null)
+        if (request.StartNode == null)
         {
-            return PathResult.NoPath;
-        }
-
-        request.Frontier.Add((0.0f, startNode));
-        request.CostSoFar[startNode] = 0.0f;
-        var count = 0;
-
-        while (request.Frontier.Count > 0 && count < NodeLimit && count < request.ExpansionLimit)
-        {
-            // Handle whether we need to pause if we've taken too long
-            if (count % 20 == 0 && count > 0 && request.Stopwatch.Elapsed > PathTime)
-            {
-                // I had this happen once in testing but I don't think it should be possible?
-                DebugTools.Assert(request.Frontier.Count > 0);
-                return PathResult.Continuing;
-            }
-
-            count++;
-
-            // Actual pathfinding here
-            (_, currentNode) = request.Frontier.Take();
-
-            foreach (var neighbor in currentNode.Neighbors)
-            {
-                var tileCost = GetTileCost(request, currentNode, neighbor);
-
-                if (tileCost.Equals(0f))
-                {
-                    continue;
-                }
-
-                // f = g + h
-                // gScore is distance to the start node
-                // hScore is distance to the end node
-                var gScore = request.CostSoFar[currentNode] + tileCost;
-                if (request.CostSoFar.TryGetValue(neighbor, out var nextValue) && gScore >= nextValue)
-                {
-                    continue;
-                }
-
-                request.CameFrom[neighbor] = currentNode;
-                request.CostSoFar[neighbor] = gScore;
-                request.Frontier.Add((gScore, neighbor));
-            }
-        }
-
-        if (request.CostSoFar.Count == 0)
-        {
-            return PathResult.NoPath;
-        }
-
-        // Pick a random node to use?
-        (currentNode, _) = random.Pick(request.CostSoFar);
-
-        var route = ReconstructPath(request.CameFrom, currentNode);
-        var path = new Queue<EntityCoordinates>(route.Count);
-
-        foreach (var node in route)
-        {
-            // Due to partial planning some nodes may have been invalidated.
-            if (!node.IsValid())
-            {
+            var start = GetPoly(request.Start);
+            if (start == null)
                 return PathResult.NoPath;
-            }
 
-            path.Enqueue(node.Coordinates);
+            InitializeSearch(request, start);
         }
 
-        DebugTools.Assert(route.Count > 0);
-        request.Polys = route;
+        var startNode = request.StartNode!;
+        if (!startNode.IsValid())
+            return PathResult.NoPath;
+
+        var range = Math.Max(0f, request.ExpansionRange);
+        var sliceStart = request.Expansions;
+        var expansionLimit = Math.Min(NodeLimit, request.ExpansionLimit);
+        while (request.Frontier.Count > 0 && request.Expansions < expansionLimit)
+        {
+            if (ShouldYield(request, sliceStart, sliceLimit))
+                return PathResult.Continuing;
+
+            request.Expansions++;
+            var (_, current) = request.Frontier.Take();
+            if (!current.IsValid())
+                return PathResult.NoPath;
+
+            var currentCost = request.CostSoFar[current];
+            foreach (var neighbor in current.Neighbors)
+            {
+                var tileCost = GetTileCost(request, current, neighbor);
+                if (tileCost == 0f)
+                    continue;
+
+                var cost = currentCost + tileCost;
+                if (request.CostSoFar.TryGetValue(neighbor, out var previous) && cost >= previous)
+                    continue;
+
+                if (!WithinWanderRadius(request.Start, neighbor, range))
+                    continue;
+
+                request.CameFrom[neighbor] = current;
+                request.CostSoFar[neighbor] = cost;
+                request.Frontier.Add((cost, neighbor));
+            }
+        }
+
+        if (WithinWanderRadius(request.Start, startNode, range))
+            return CompleteWander(request, random.Pick(request.CostSoFar).Key, range);
+
+        // An off-center actor can explore from its containing polygon, but its center may not be a legal endpoint.
+        var candidates = request.CostSoFar.Count - 1;
+        if (candidates == 0)
+            return PathResult.NoPath;
+
+        var pick = random.Next(candidates);
+        foreach (var (node, _) in request.CostSoFar)
+        {
+            if (!ReferenceEquals(node, startNode) && pick-- == 0)
+                return CompleteWander(request, node, range);
+        }
+
+        throw new InvalidOperationException("The wander search lost its selected endpoint.");
+    }
+
+    private PathResult CompleteWander(BFSPathRequest request, PathPoly endpoint, float range)
+    {
+        if (CompleteSearch(request, endpoint) != PathResult.Path)
+            return PathResult.NoPath;
+
+        // Portal endpoints may move relative to the start grid between search slices.
+        for (var i = 1; i < request.Polys.Count; i++)
+        {
+            if (WithinWanderRadius(request.Start, request.Polys[i], range))
+                continue;
+
+            request.Polys.Clear();
+            return PathResult.NoPath;
+        }
+
         return PathResult.Path;
     }
+
+    private bool WithinWanderRadius(EntityCoordinates start, PathPoly node, float range)
+    {
+        return start.TryDelta(EntityManager, _transform, node.Coordinates, out var delta) &&
+            delta.LengthSquared() <= range * range;
+    }
+    // End Frontier
 }

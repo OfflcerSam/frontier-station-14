@@ -78,7 +78,7 @@ public sealed partial class PickNearbyInjectableOperator : HTNOperator
                 var pathRange = SharedInteractionSystem.InteractionRange - 1f;
                 var path = await _pathfinding.GetPath(owner, entity, pathRange, cancelToken);
 
-                if (path.Result == PathResult.NoPath)
+                if (path.Result != PathResult.Path) // Frontier: budget exhaustion supplies no usable route.
                     continue;
 
                 return (true, new Dictionary<string, object>()

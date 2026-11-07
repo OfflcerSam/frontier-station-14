@@ -3,6 +3,7 @@ using Content.Server.NPC.HTN.PrimitiveTasks;
 using Content.Server.NPC.Queries;
 using Content.Shared.NPC;
 using Robust.Shared.CPUJob.JobQueues;
+using Robust.Shared.Profiling;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
@@ -11,6 +12,7 @@ namespace Content.Server.NPC.HTN;
 public sealed partial class HTNSystem
 {
     [Dependency] private readonly IGameTiming _schedulerTiming = default!;
+    [Dependency] private readonly ProfManager _htnProfile = default!;
     [Dependency] private readonly IRobustRandom _serviceRandom = default!;
 
     // Rotate existing nodes in place so skipping an actor never changes where the next tick resumes.
@@ -97,7 +99,10 @@ public sealed partial class HTNSystem
 
     public void UpdateNPC(int maxUpdates, float frameTime)
     {
+        var planning = _htnProfile.IsEnabled ? ProfSampler.StartNew() : default;
         _planQueue.Process();
+        if (_htnProfile.IsEnabled)
+            _htnProfile.WriteValue("NPC HTN planner", planning);
         var now = _schedulerTiming.CurTime;
         var turn = ++_schedulerTurn;
         var remaining = _schedule.Count;
@@ -149,6 +154,8 @@ public sealed partial class HTNSystem
         component.PlanningToken?.Dispose();
         component.PlanningToken = null;
         component.ReplanRequested = false;
+        if (_htnProfile.IsEnabled)
+            _htnProfile.WriteValue("NPC HTN completion age", (int) (_schedulerTiming.CurTick.Value - component.PlanEnqueuedTick));
 
         if (job.Exception is { } exception)
         {

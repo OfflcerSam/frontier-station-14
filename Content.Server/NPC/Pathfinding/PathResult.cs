@@ -6,4 +6,5 @@ public enum PathResult : byte
     PartialPath,
     Path,
     Continuing,
+    BudgetExceeded, // Frontier: the search stopped with unexplored work.
 }

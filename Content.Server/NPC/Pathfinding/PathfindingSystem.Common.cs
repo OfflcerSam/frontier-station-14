@@ -3,6 +3,7 @@ using Content.Shared.Maps;
 using Content.Shared.NPC;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Spawners;
+using Robust.Shared.Utility; // Frontier
 
 namespace Content.Server.NPC.Pathfinding;
 
@@ -13,7 +14,7 @@ public sealed partial class PathfindingSystem
      */
 
     /// <summary>
-    /// Maximum amount of nodes we're allowed to expand.
+    /// Maximum number of frontier entries a request can process across all slices. // Frontier
     /// </summary>
     private const int NodeLimit = 512;
 
@@ -27,20 +28,47 @@ public sealed partial class PathfindingSystem
 
     private static readonly PathComparer PathPolyComparer = new();
 
-    private List<PathPoly> ReconstructPath(Dictionary<PathPoly, PathPoly> path, PathPoly currentNodeRef)
+    // Frontier: both searches seed once and report only a validated route.
+    private static void InitializeSearch(PathRequest request, PathPoly start)
     {
-        var running = new List<PathPoly> { currentNodeRef };
-        while (path.ContainsKey(currentNodeRef))
+        request.StartNode = start;
+        request.Frontier = new PriorityQueue<(float, PathPoly)>(PathPolyComparer);
+        request.Frontier.Add((0f, start));
+        request.CostSoFar.Add(start, 0f);
+    }
+
+    private static bool ShouldYield(PathRequest request, int sliceStart, int? sliceLimit)
+    {
+        var sliceWork = request.Expansions - sliceStart;
+        // A fixed slice is used by headless tests to verify the same search at different yields.
+        return sliceLimit is { } limit
+            ? sliceWork >= limit
+            : sliceWork > 0 && sliceWork % 20 == 0 && request.Stopwatch.Elapsed > PathTime;
+    }
+
+    private static PathResult CompleteSearch(PathRequest request, PathPoly endpoint)
+    {
+        var route = request.Polys;
+        var node = endpoint;
+        while (true)
         {
-            var previousCurrent = currentNodeRef;
-            currentNodeRef = path[currentNodeRef];
-            path.Remove(previousCurrent);
-            running.Add(currentNodeRef);
+            // Navmesh updates can invalidate an earlier link between slices.
+            if (!node.IsValid())
+            {
+                route.Clear();
+                return PathResult.NoPath;
+            }
+
+            route.Add(node);
+            if (!request.CameFrom.TryGetValue(node, out var parent))
+                break;
+            node = parent;
         }
 
-        running.Reverse();
-        return running;
+        route.Reverse();
+        return PathResult.Path;
     }
+    // End Frontier
 
     private float GetTileCost(PathRequest request, PathPoly start, PathPoly end)
     {

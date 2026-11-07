@@ -1,6 +1,5 @@
 using System.Numerics;
 using System.Threading;
-using System.Threading.Tasks;
 using Content.Server.Administration.Managers;
 using Content.Server.DoAfter;
 using Content.Server.Gravity; // Wizden#38846
@@ -96,6 +95,8 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     private object _obstacles = new();
 
     private int _activeSteeringCount;
+    // Frontier: snapshot matching actors, since steering callbacks can change components.
+    private readonly List<(EntityUid, NPCSteeringComponent, InputMoverComponent, TransformComponent)> _steeringBatch = new();
 
     public override void Initialize()
     {
@@ -288,43 +289,26 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         if (!_enabled)
             return;
 
-        // Not every mob has the modifier component so do it as a separate query.
-        var npcs = new (EntityUid, NPCSteeringComponent, InputMoverComponent, TransformComponent)[Count<ActiveNPCComponent>()];
-
+        // Frontier: reuse the snapshot and execute on the update thread. The old loop had one worker.
         var query = EntityQueryEnumerator<ActiveNPCComponent, NPCSteeringComponent, InputMoverComponent, TransformComponent>();
-        var index = 0;
-
         while (query.MoveNext(out var uid, out _, out var steering, out var mover, out var xform))
-        {
-            npcs[index] = (uid, steering, mover, xform);
-            index++;
-        }
+            _steeringBatch.Add((uid, steering, mover, xform));
 
-        // Dependency issues across threads.
-        var options = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = 1,
-        };
         var curTime = _timing.CurTime;
-
         _activeSteeringCount = 0;
 
-        Parallel.For(0, index, options, i =>
+        try
         {
-            var (uid, steering, mover, xform) = npcs[i];
-            Steer(uid, steering, mover, xform, frameTime, curTime);
-        });
+            foreach (var (uid, steering, mover, xform) in _steeringBatch)
+                Steer(uid, steering, mover, xform, frameTime, curTime);
 
-        ActiveSteeringGauge.Set(_activeSteeringCount);
+            ActiveSteeringGauge.Set(_activeSteeringCount);
+            if (_subscribedSessions.Count == 0)
+                return;
 
-        if (_subscribedSessions.Count > 0)
-        {
-            var data = new List<NPCSteeringDebugData>(index);
-
-            for (var i = 0; i < index; i++)
+            var data = new List<NPCSteeringDebugData>(_steeringBatch.Count);
+            foreach (var (uid, steering, mover, _) in _steeringBatch)
             {
-                var (uid, steering, mover, _) = npcs[i];
-
                 data.Add(new NPCSteeringDebugData(
                     GetNetEntity(uid),
                     mover.CurTickSprintMovement,
@@ -335,9 +319,13 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
 
             var filter = Filter.Empty();
             filter.AddPlayers(_subscribedSessions);
-
             RaiseNetworkEvent(new NPCSteeringDebugEvent(data), filter);
         }
+        finally
+        {
+            _steeringBatch.Clear();
+        }
+        // End Frontier
     }
 
     private void SetDirection(EntityUid uid, InputMoverComponent component, NPCSteeringComponent steering, Vector2 value, bool clear = true)
@@ -386,7 +374,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
 
         // End Frontier
 
-        Interlocked.Increment(ref _activeSteeringCount);
+        _activeSteeringCount++; // Frontier: steering runs on the update thread.
 
         var agentRadius = steering.Radius;
         var worldPos = _transform.GetWorldPosition(xform);
@@ -559,7 +547,8 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             return;
         }
 
-        if (result.Result == PathResult.NoPath)
+        // Exhaustion supplies no route and counts against the existing bounded retry policy.
+        if (result.Result is PathResult.NoPath or PathResult.BudgetExceeded)
         {
             steering.CurrentPath.Clear();
             steering.FailedPathCount++;

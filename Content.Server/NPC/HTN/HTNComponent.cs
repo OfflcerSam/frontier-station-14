@@ -66,5 +66,6 @@ public sealed partial class HTNComponent : NPCComponent
 
     internal List<float>? ServiceCooldowns;
     internal bool ReplanRequested;
+    internal uint PlanEnqueuedTick;
     // End Frontier
 }

@@ -397,11 +397,12 @@ public sealed partial class PathfindingSystem
 
     private void BuildBreadcrumbs(GridPathfindingChunk chunk, Entity<MapGridComponent> grid)
     {
-        var sw = new Stopwatch();
-        sw.Start();
+        // Frontier: the system profiler times the full parallel rebuild.
         var points = chunk.Points;
         var gridOrigin = chunk.Origin * ChunkSize;
         var tileEntities = new ValueList<EntityUid>();
+        // Frontier: each chunk worker reuses its own lookup set across all tile samples.
+        var available = new HashSet<EntityUid>();
         var chunkPolys = chunk.BufferPolygons;
 
         for (var i = 0; i < chunkPolys.Length; i++)
@@ -427,7 +428,11 @@ public sealed partial class PathfindingSystem
                 // var isBorder = x < 0 || y < 0 || x == ChunkSize - 1 || y == ChunkSize - 1;
 
                 tileEntities.Clear();
-                var available = _lookup.GetLocalEntitiesIntersecting(tile, flags: LookupFlags.Dynamic | LookupFlags.Static);
+                // Frontier: use the same tile bounds and flags without allocating a set for each tile.
+                available.Clear();
+                _lookup.GetLocalEntitiesIntersecting(tile.GridUid, tile.GridIndices, available,
+                    flags: LookupFlags.Dynamic | LookupFlags.Static, gridComp: grid.Comp);
+                // End Frontier
 
                 foreach (var ent in available)
                 {
@@ -624,7 +629,6 @@ public sealed partial class PathfindingSystem
             }
         }
 
-        // Log.Debug($"Built breadcrumbs in {sw.Elapsed.TotalMilliseconds}ms");
         SendBreadcrumbs(chunk, grid);
     }
 
@@ -702,9 +706,7 @@ public sealed partial class PathfindingSystem
 
     private void BuildNavmesh(GridPathfindingChunk chunk, Entity<GridPathfindingComponent> pathfinding)
     {
-        var sw = new Stopwatch();
-        sw.Start();
-
+        // Frontier: use the system-level rebuild sample for these worker operations.
         var chunkPolys = chunk.Polygons;
         var component = pathfinding.Comp;
         component.Chunks.TryGetValue(chunk.Origin + new Vector2i(-1, 0), out var leftChunk);
@@ -811,7 +813,6 @@ public sealed partial class PathfindingSystem
             }
         }
 
-        // Log.Debug($"Built navmesh in {sw.Elapsed.TotalMilliseconds}ms");
         SendPolys(chunk, pathfinding, chunkPolys);
     }
 

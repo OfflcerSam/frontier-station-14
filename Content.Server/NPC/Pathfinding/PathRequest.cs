@@ -24,14 +24,18 @@ public abstract class PathRequest
 
     public List<PathPoly> Polys = new();
 
-    public bool Started = false;
-
     #region Pathfinding state
 
     public readonly Stopwatch Stopwatch = new();
     public PriorityQueue<ValueTuple<float, PathPoly>> Frontier = default!;
     public readonly Dictionary<PathPoly, float> CostSoFar = new();
     public readonly Dictionary<PathPoly, PathPoly> CameFrom = new();
+    // Frontier: searches keep their original seed and work budget across slices.
+    internal PathPoly? StartNode;
+    internal int Expansions;
+    internal int ProfiledExpansions;
+    internal uint EnqueuedTick;
+    // End Frontier
 
     #endregion
 
@@ -59,6 +63,10 @@ public abstract class PathRequest
 public sealed class AStarPathRequest : PathRequest
 {
     public EntityCoordinates End;
+    // Frontier: keep the resolved goal polygon and exact position in the same grid frame.
+    internal PathPoly? EndNode;
+    internal EntityCoordinates EndPoint;
+    // End Frontier
 
     /// <summary>
     /// How close we need to be to the end node to be considered as arrived.

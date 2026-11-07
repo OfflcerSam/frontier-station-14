@@ -18,6 +18,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Player;
+using Robust.Shared.Profiling; // Frontier
 using Robust.Shared.Random;
 using Robust.Shared.Threading;
 using Robust.Shared.Timing;
@@ -43,6 +44,7 @@ namespace Content.Server.NPC.Pathfinding
         [Dependency] private readonly IAdminManager _adminManager = default!;
         [Dependency] private readonly IGameTiming _timing = default!;
         [Dependency] private readonly IParallelManager _parallel = default!;
+        [Dependency] private readonly ProfManager _pathProfile = default!; // Frontier
         [Dependency] private readonly IPlayerManager _playerManager = default!;
         [Dependency] private readonly IRobustRandom _random = default!;
         [Dependency] private readonly DestructibleSystem _destructible = default!;
@@ -109,7 +111,12 @@ namespace Content.Server.NPC.Pathfinding
                 MaxDegreeOfParallelism = _parallel.ParallelProcessCount,
             };
 
+            // Frontier: separate navmesh rebuild cost from search dispatch in engine profiles.
+            var rebuild = _pathProfile.IsEnabled ? ProfSampler.StartNew() : default;
             UpdateGrid(options);
+            if (_pathProfile.IsEnabled)
+                _pathProfile.WriteValue("NPC navmesh rebuild", rebuild);
+            // End Frontier
 
             // Frontier: synchronize queue access and retire cancelled searches.
             // Enqueue takes the same lock so workers can read by index until all searches in this batch finish.
@@ -176,6 +183,16 @@ namespace Content.Server.NPC.Pathfinding
                 var path = _pathRequests[resultIndex];
                 var result = results[i];
 
+                // Frontier: the profiler is written only on the update thread, after workers finish.
+                if (_pathProfile.IsEnabled)
+                {
+                    _pathProfile.WriteValue("NPC path expansions", path.Expansions - path.ProfiledExpansions);
+                    path.ProfiledExpansions = path.Expansions;
+                    if (result != PathResult.Continuing && !path.CancellationToken.IsCancellationRequested)
+                        _pathProfile.WriteValue("NPC path completion age", (int) (_timing.CurTick.Value - path.EnqueuedTick));
+                }
+                // End Frontier
+
                 if (path.CancellationToken.IsCancellationRequested)
                 {
                     _pathRequests.RemoveAt(resultIndex);
@@ -196,6 +213,7 @@ namespace Content.Server.NPC.Pathfinding
                     case PathResult.PartialPath:
                     case PathResult.Path:
                     case PathResult.NoPath:
+                    case PathResult.BudgetExceeded: // Frontier: terminal without a proved route.
                         SendDebug(path);
                         // Don't use RemoveSwap because we still want to try and process them in order.
                         _pathRequests.RemoveAt(resultIndex);
@@ -338,12 +356,7 @@ namespace Content.Server.NPC.Pathfinding
             }
 
             var request = new BFSPathRequest(maxRange, limit, start.Coordinates, flags, layer, mask, cancelToken);
-            var path = await GetPath(request);
-
-            if (path.Result != PathResult.Path)
-                return new PathResultEvent(PathResult.NoPath, new List<PathPoly>());
-
-            return new PathResultEvent(PathResult.Path, path.Path);
+            return await GetPath(request); // Frontier: preserve the search result.
         }
 
         /// <summary>
@@ -546,7 +559,10 @@ namespace Content.Server.NPC.Pathfinding
                 return new PathResultEvent(PathResult.NoPath, []);
 
             lock (_pathRequests)
+            {
+                request.EnqueuedTick = _timing.CurTick.Value;
                 _pathRequests.Add(request);
+            }
 
             try
             {
