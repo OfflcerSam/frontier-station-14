@@ -1,10 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.NPC.Components;
+using Content.Server.NPC.Systems; // Frontier
 using Content.Shared.CombatMode;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Robust.Shared.Audio;
+using Robust.Shared.Map; // Frontier
 
 namespace Content.Server.NPC.HTN.PrimitiveTasks.Operators.Combat.Ranged;
 
@@ -20,6 +22,11 @@ public sealed partial class GunOperator : HTNOperator, IHtnConditionalShutdown
     /// </summary>
     [DataField("targetKey", required: true)]
     public string TargetKey = default!;
+
+    // Frontier: only gun plans with a background MoveTo opt into steering ownership.
+    [DataField]
+    public string? PursuitTargetKey;
+    // End Frontier
 
     /// <summary>
     /// Minimum damage state that the target has to be in for us to consider attacking.
@@ -63,8 +70,11 @@ public sealed partial class GunOperator : HTNOperator, IHtnConditionalShutdown
     {
         base.Startup(blackboard);
 
-        var ranged = _entManager.EnsureComponent<NPCRangedCombatComponent>(blackboard.GetValue<EntityUid>(NPCBlackboard.Owner));
-        ranged.Target = blackboard.GetValue<EntityUid>(TargetKey);
+        // Frontier: initialize the same target state used when the utility service switches targets.
+        var owner = blackboard.GetValue<EntityUid>(NPCBlackboard.Owner);
+        var ranged = _entManager.EnsureComponent<NPCRangedCombatComponent>(owner);
+        SetTarget(owner, ranged, blackboard, blackboard.GetValue<EntityUid>(TargetKey));
+        // End Frontier
         ranged.UseOpaqueForLOSChecks = UseOpaqueForLOSChecks;
 
         if (blackboard.TryGetValue<float>(NPCBlackboard.RotateSpeed, out var rotSpeed, _entManager))
@@ -95,7 +105,8 @@ public sealed partial class GunOperator : HTNOperator, IHtnConditionalShutdown
         if (_entManager.TryGetComponent<NPCRangedCombatComponent>(owner, out var combat) &&
             blackboard.TryGetValue<EntityUid>(TargetKey, out var target, _entManager))
         {
-            combat.Target = target;
+            if (combat.Target != target) // Frontier: preserve aim and steering when the same entity moves.
+                SetTarget(owner, combat, blackboard, target); // Frontier
 
             // Success
             if (_entManager.TryGetComponent<MobStateComponent>(combat.Target, out var mobState) &&
@@ -138,4 +149,22 @@ public sealed partial class GunOperator : HTNOperator, IHtnConditionalShutdown
 
         return status;
     }
+
+    // Frontier: keep the coordinate key in sync with the active pursuit and its target.
+    private void SetTarget(EntityUid owner, NPCRangedCombatComponent combat, NPCBlackboard blackboard, EntityUid target)
+    {
+        EntityCoordinates? previous = null;
+        if (PursuitTargetKey is { } key && blackboard.TryGetValue<EntityCoordinates>(key, out var coordinates, _entManager))
+            previous = coordinates;
+
+        var goal = _entManager.System<NPCCombatSystem>().SetRangedTarget((owner, combat), target, previous);
+        if (PursuitTargetKey is not { } pursuitKey || previous == null)
+            return;
+
+        if (goal is { } destination)
+            blackboard.SetValue(pursuitKey, destination);
+        else
+            blackboard.Remove<EntityCoordinates>(pursuitKey);
+    }
+    // End Frontier
 }

@@ -1,5 +1,7 @@
+using System.Numerics; // Frontier
 using Content.Server.NPC.Systems;
 using Robust.Shared.Audio;
+using Robust.Shared.Map; // Frontier
 
 namespace Content.Server.NPC.Components;
 
@@ -68,5 +70,11 @@ public sealed partial class NPCRangedCombatComponent : Component
     /// </summary>
     [ViewVariables(VVAccess.ReadWrite)]
     public float MissChance = 0.25f;
+
+    // Only the movement goal associated with this ranged plan may drive pursuit.
+    internal EntityCoordinates? PursuitGoal;
+
+    // Keep one sampled offset while turning. The projection itself follows the live target.
+    internal (EntityUid Gun, Vector2 Offset)? PreparedShot;
     // End Frontier
 }

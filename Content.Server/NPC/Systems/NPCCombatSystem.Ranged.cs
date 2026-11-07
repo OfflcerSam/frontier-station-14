@@ -1,3 +1,4 @@
+using System.Numerics; // Frontier
 using Content.Server.NPC.Components;
 using Content.Shared.CombatMode;
 using Content.Shared.Interaction;
@@ -6,7 +7,7 @@ using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Weapons.Ranged.Events;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Components;
-using Robust.Shared.Random; //Frontier
+using Robust.Shared.Random; // Frontier
 
 namespace Content.Server.NPC.Systems;
 
@@ -70,27 +71,24 @@ public sealed partial class NPCCombatSystem
             if (comp.Status == CombatStatus.Unspecified)
                 continue;
 
-            if (_steeringQuery.TryGetComponent(uid, out var steering) && steering.Status == SteeringStatus.NoPath)
+            // Frontier: only the current target's movement goal can fail or force pursuit.
+            NPCSteeringComponent? steering = null;
+            if (comp.PursuitGoal is { } goal && _steeringQuery.TryComp(uid, out var pursuit) &&
+                pursuit.Coordinates.Equals(goal))
             {
-                comp.Status = CombatStatus.TargetUnreachable;
-                comp.ShootAccumulator = 0f;
-                continue;
+                steering = pursuit;
             }
 
-            if (!_xformQuery.TryGetComponent(comp.Target, out var targetXform) ||
-                !_physicsQuery.TryGetComponent(comp.Target, out var targetBody))
+            if (steering?.Status == SteeringStatus.NoPath ||
+                !_xformQuery.TryComp(comp.Target, out var targetXform) ||
+                !_physicsQuery.TryComp(comp.Target, out var targetBody) ||
+                targetXform.MapID != xform.MapID)
             {
                 comp.Status = CombatStatus.TargetUnreachable;
-                comp.ShootAccumulator = 0f;
+                ResetRangedPerception(comp);
                 continue;
             }
-
-            if (targetXform.MapID != xform.MapID)
-            {
-                comp.Status = CombatStatus.TargetUnreachable;
-                comp.ShootAccumulator = 0f;
-                continue;
-            }
+            // End Frontier
 
             if (_combatQuery.TryGetComponent(uid, out var combatMode))
             {
@@ -100,7 +98,7 @@ public sealed partial class NPCCombatSystem
             if (!_gun.TryGetGun(uid, out var gunUid, out var gun))
             {
                 comp.Status = CombatStatus.NoWeapon;
-                comp.ShootAccumulator = 0f;
+                ResetRangedPerception(comp); // Frontier: abandon aim for the missing weapon.
                 continue;
             }
 
@@ -109,6 +107,10 @@ public sealed partial class NPCCombatSystem
 
             if (ammoEv.Count == 0)
             {
+                // Frontier: reacquire line of sight before firing after recharge.
+                comp.PreparedShot = null;
+                comp.LOSAccumulator = 0f;
+                // End Frontier
                 // Recharging then?
                 if (_rechargeQuery.HasComponent(gunUid))
                 {
@@ -124,21 +126,13 @@ public sealed partial class NPCCombatSystem
 
             var worldPos = _transform.GetWorldPosition(xform);
             var targetPos = _transform.GetWorldPosition(targetXform);
-            
-            // Frontier -- Ranged NPC miss chance
-            if (_random.Prob(comp.MissChance))
-            {
-                targetPos = targetPos + _random.NextVector2(1.0f, 2.0f);
-            }
-            // End Frontier
 
-            // We'll work out the projected spot of the target and shoot there instead of where they are.
-            var distance = (targetPos - worldPos).Length();
+            var distance = (targetPos - worldPos).Length(); // Frontier: perception uses the real target position.
             var oldInLos = comp.TargetInLOS;
 
             // TODO: Should be doing these raycasts in parallel
             // Ideally we'd have 2 steps, 1. to go over the normal details for shooting and then 2. to handle beep / rotate / shoot
-            if (comp.LOSAccumulator < 0f)
+            if (comp.LOSAccumulator <= 0f) // Frontier: check immediately after a target change.
             {
                 comp.LOSAccumulator += UnoccludedCooldown;
 
@@ -150,9 +144,10 @@ public sealed partial class NPCCombatSystem
             if (!comp.TargetInLOS)
             {
                 comp.ShootAccumulator = 0f;
+                comp.PreparedShot = null; // Frontier: discard the shot when line of sight is lost.
                 comp.Status = CombatStatus.NotInSight;
 
-                if (TryComp(uid, out steering))
+                if (steering != null) // Frontier: stationary guns do not control unrelated movement.
                 {
                     steering.ForceMove = true;
                 }
@@ -165,6 +160,7 @@ public sealed partial class NPCCombatSystem
                 _audio.PlayPvs(comp.SoundTargetInLOS, uid);
             }
 
+            comp.Status = CombatStatus.Normal; // Frontier: visibility is independent of the gun's readiness.
             comp.ShootAccumulator += frameTime;
 
             if (comp.ShootAccumulator < comp.ShootDelay)
@@ -173,7 +169,21 @@ public sealed partial class NPCCombatSystem
             }
 
             var mapVelocity = targetBody.LinearVelocity;
-            var targetSpot = targetPos + mapVelocity * distance / ShootSpeed;
+            // Frontier: sample only for a ready weapon. Keep the offset while turning and
+            // continue to update the lead from the target's real position and velocity.
+            var canShoot = Enabled && _gun.CanShoot(gun);
+            if (!Enabled || comp.PreparedShot?.Gun != gunUid)
+                comp.PreparedShot = null;
+
+            if (canShoot && comp.PreparedShot == null)
+            {
+                var offset = _random.Prob(comp.MissChance) ? _random.NextVector2(1f, 2f) : Vector2.Zero;
+                comp.PreparedShot = (gunUid, offset);
+            }
+
+            var targetSpot = targetPos + mapVelocity * distance / ShootSpeed +
+                (comp.PreparedShot?.Offset ?? Vector2.Zero);
+            // End Frontier
 
             // If we have a max rotation speed then do that.
             var goalRotation = (targetSpot - worldPos).ToWorldAngle();
@@ -192,7 +202,7 @@ public sealed partial class NPCCombatSystem
 
             // TODO: Check if we can face
 
-            if (!Enabled || !_gun.CanShoot(gun))
+            if (!canShoot) // Frontier
                 continue;
 
             EntityCoordinates targetCordinates;
@@ -206,13 +216,7 @@ public sealed partial class NPCCombatSystem
                 targetCordinates = new EntityCoordinates(xform.MapUid!.Value, targetSpot);
             }
 
-            comp.Status = CombatStatus.Normal;
-
-            if (gun.NextFire > _timing.CurTime)
-            {
-                return;
-            }
-
+            comp.PreparedShot = null; // Frontier: the next attack attempt gets its own sample.
             _gun.AttemptShoot(uid, gunUid, gun, targetCordinates, comp.Target);
         }
     }

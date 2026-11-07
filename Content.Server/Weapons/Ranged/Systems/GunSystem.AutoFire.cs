@@ -40,7 +40,7 @@ public sealed partial class GunSystem
             {
                 var parent = TransformSystem.GetParentUid(uid);
                 if (HasComp<DamageableComponent>(parent))
-                    AttemptShoot(parent, uid, gun, gun.ShootCoordinates ?? new EntityCoordinates(uid, gun.DefaultDirection));
+                    AttemptShoot(parent, uid, gun, gun.ShootCoordinates ?? new EntityCoordinates(uid, gun.DefaultDirection), gun.Target); // Frontier: keep the burst's target.
                 else
                     AttemptShoot(uid, gun);
             }

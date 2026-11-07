@@ -28,6 +28,7 @@
               key: Target
           operator: !type:GunOperator
             targetKey: Target
+            pursuitTargetKey: TargetCoordinates # Frontier: retarget the background MoveTo with the gun.
           services:
             - !type:UtilityService
               id: RangedService
