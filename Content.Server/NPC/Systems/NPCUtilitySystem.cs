@@ -1,5 +1,6 @@
 using Content.Server.Fluids.EntitySystems;
 using Content.Server.Hands.Systems;
+using Content.Server.NPC.Pathfinding; // Frontier
 using Content.Server.NPC.Queries;
 using Content.Server.NPC.Queries.Considerations;
 using Content.Server.NPC.Queries.Curves;
@@ -12,6 +13,7 @@ using Content.Shared.Examine;
 using Content.Shared.Fluids.Components;
 using Content.Shared.Inventory;
 using Content.Shared.Mobs;
+using Content.Shared.Mobs.Components; // Frontier
 using Content.Shared.Mobs.Systems;
 using Content.Shared.NPC.Systems;
 using Content.Shared.Nutrition.Components;
@@ -39,6 +41,8 @@ namespace Content.Server.NPC.Systems;
 public sealed class NPCUtilitySystem : EntitySystem
 {
     [Dependency] private readonly NPCRetaliationSystem _retaliation = default!; // Frontier
+    [Dependency] private readonly NPCCombatSystem _storageCombat = default!; // Frontier
+    [Dependency] private readonly PathfindingSystem _storagePaths = default!; // Frontier
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly ContainerSystem _container = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
@@ -228,6 +232,17 @@ public sealed class NPCUtilitySystem : EntitySystem
             {
                 if (_container.TryGetContainingContainer(targetUid, out var container))
                 {
+                    // Frontier: retain a known occupant only if the exterior storage can be handled.
+                    if (HasComp<MobStateComponent>(targetUid))
+                    {
+                        var isCurrent = blackboard.TryGetValue<EntityUid>("Target", out var known, EntityManager) && known == targetUid;
+                        return _storageCombat.FindStorageBlocker(targetUid, out var blocker) && blocker is { } storage &&
+                            (isCurrent || _storageCombat.RemembersStorageTarget(owner, targetUid, storage)) &&
+                            _storageCombat.CanKeepStorageTarget(owner, targetUid, storage,
+                                _storagePaths.GetFlags(blackboard)) ? 1f : 0f;
+                    }
+                    // End Frontier
+
                     if (container.Owner == owner)
                         return 0f;
 
@@ -321,6 +336,17 @@ public sealed class NPCUtilitySystem : EntitySystem
             {
                 var radius = blackboard.GetValueOrDefault<float>(blackboard.GetVisionRadiusKey(EntityManager), EntityManager);
                 const float bufferRange = 0.5f;
+
+                // Frontier: verify the exterior of known storage instead of requiring sight of its occupant.
+                var isCurrent = blackboard.TryGetValue<EntityUid>("Target", out var known, EntityManager) && known == targetUid;
+                if ((isCurrent || _storageCombat.RemembersStorageTarget(owner, targetUid)) &&
+                    _storageCombat.FindStorageBlocker(targetUid, out var storage))
+                {
+                    return storage is { } blocker && (isCurrent || _storageCombat.RemembersStorageTarget(owner, targetUid, blocker)) &&
+                        _examine.InRangeUnOccluded(owner, blocker, radius + bufferRange)
+                        ? 1f : 0f;
+                }
+                // End Frontier
 
                 if (!_retaliation.RequiresObservedTarget(owner) && // Frontier: unseen targets use a separate investigation.
                     blackboard.TryGetValue<EntityUid>("Target", out var currentTarget, EntityManager) &&

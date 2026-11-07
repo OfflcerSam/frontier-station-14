@@ -39,6 +39,11 @@ public sealed class NPCJukeSystem : EntitySystem
 
     private void OnJukeSteering(EntityUid uid, NPCJukeComponent component, ref NPCSteeringEvent args)
     {
+        // Frontier: storage movement owns the approach or firing position.
+        if (TryComp<NPCStorageCombatComponent>(uid, out var storage) && storage.Goal != null)
+            return;
+        // End Frontier
+
         if (component.JukeType == JukeType.AdjacentTile)
         {
             if (_npcRangedQuery.TryGetComponent(uid, out var ranged) &&

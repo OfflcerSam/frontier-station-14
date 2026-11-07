@@ -7,6 +7,7 @@ using Content.Shared.Damage; // Frontier
 using Content.Shared.DoAfter;
 using Content.Shared.Doors.Components;
 using Content.Shared.NPC;
+using Content.Shared.Weapons.Melee; // Frontier
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Utility;
@@ -192,26 +193,46 @@ public sealed partial class NPCSteeringSystem
                 continue;
             }
 
-            if (melee.NextAttack > _timing.CurTime)
-                return SteeringObstacleStatus.Continuing;
-
-            var wasInCombat = combatMode.IsInCombatMode;
-            var previousDamage = damage.TotalDamage;
-            _combat.SetInCombatMode(uid, true, combatMode);
-            var hit = _melee.AttemptLightAttack(uid, weapon, melee, obstacle);
-            _combat.SetInCombatMode(uid, wasInCombat, combatMode);
-
-            if (hit && (TerminatingOrDeleted(obstacle) || damage.TotalDamage > previousDamage))
-                return SteeringObstacleStatus.Continuing;
-
-            return SteeringObstacleStatus.Failed;
+            return SmashReachableObstacle(uid, obstacle, weapon, melee, combatMode, damage);
         }
 
         return needsApproach ? SteeringObstacleStatus.Approaching : SteeringObstacleStatus.Failed;
     }
+
+    internal SteeringObstacleStatus SmashObstacle(EntityUid uid, EntityUid obstacle)
+    {
+        if (!_melee.TryGetWeapon(uid, out var weapon, out var melee) ||
+            !TryComp<CombatModeComponent>(uid, out var combatMode) ||
+            !HasComp<DestructibleComponent>(obstacle) || !TryComp<DamageableComponent>(obstacle, out var damage))
+        {
+            return SteeringObstacleStatus.Failed;
+        }
+
+        if (!_interaction.InRangeUnobstructed(uid, obstacle, melee.Range))
+            return SteeringObstacleStatus.Approaching;
+
+        return SmashReachableObstacle(uid, obstacle, weapon, melee, combatMode, damage);
+    }
+
+    private SteeringObstacleStatus SmashReachableObstacle(EntityUid uid, EntityUid obstacle, EntityUid weapon,
+        MeleeWeaponComponent melee, CombatModeComponent combatMode, DamageableComponent damage)
+    {
+        if (melee.NextAttack > _timing.CurTime)
+            return SteeringObstacleStatus.Continuing;
+
+        var wasInCombat = combatMode.IsInCombatMode;
+        var previousDamage = damage.TotalDamage;
+        _combat.SetInCombatMode(uid, true, combatMode);
+        var hit = _melee.AttemptLightAttack(uid, weapon, melee, obstacle);
+        _combat.SetInCombatMode(uid, wasInCombat, combatMode);
+
+        return hit && (TerminatingOrDeleted(obstacle) || damage.TotalDamage > previousDamage)
+            ? SteeringObstacleStatus.Continuing
+            : SteeringObstacleStatus.Failed;
+    }
     // End Frontier
 
-    private enum SteeringObstacleStatus : byte
+    internal enum SteeringObstacleStatus : byte // Frontier: share obstacle attack outcomes with storage combat.
     {
         Completed,
         Failed,

@@ -11,7 +11,15 @@ public sealed partial class NPCCombatSystem
     {
         var (uid, combat) = ent;
         if (combat.Target != target)
+        {
+            // A fresh GunOperator can resume the same known storage after HTN teardown.
+            var resumesStorage = !combat.Target.IsValid() && TryComp<NPCStorageCombatComponent>(uid, out var attempt) &&
+                attempt.Hostile == target;
+            if (!resumesStorage)
+                EndStorageMovement(uid, restorePursuit: true, forget: true);
+
             _retaliation.RetireObservation(uid, combat.Target);
+        }
         combat.Target = target;
         combat.PursuitGoal = null;
         ResetRangedPerception(combat);

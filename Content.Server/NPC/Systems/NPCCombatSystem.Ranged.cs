@@ -56,6 +56,7 @@ public sealed partial class NPCCombatSystem
 
     private void OnRangedShutdown(EntityUid uid, NPCRangedCombatComponent component, ComponentShutdown args)
     {
+        EndStorageMovement(uid, restorePursuit: false, forget: false); // Frontier
         _retaliation.RetireObservation(uid, component.Target); // Frontier: retain a lost sighting during HTN teardown.
         if (TryComp<CombatModeComponent>(uid, out var combat))
         {
@@ -71,6 +72,15 @@ public sealed partial class NPCCombatSystem
         {
             if (comp.Status == CombatStatus.Unspecified)
                 continue;
+
+            // Frontier: the container can be opened or attacked while the hostile remains the combat target.
+            if (HandleCombatStorage(uid, comp.Target, comp, frameTime, out var storageStatus))
+            {
+                comp.Status = storageStatus;
+                ResetRangedPerception(comp);
+                continue;
+            }
+            // End Frontier
 
             // Frontier: only the current target's movement goal can fail or force pursuit.
             NPCSteeringComponent? steering = null;

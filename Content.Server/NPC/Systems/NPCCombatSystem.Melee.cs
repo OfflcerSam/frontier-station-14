@@ -20,6 +20,7 @@ public sealed partial class NPCCombatSystem
 
     private void OnMeleeShutdown(EntityUid uid, NPCMeleeCombatComponent component, ComponentShutdown args)
     {
+        EndStorageMovement(uid, restorePursuit: false, forget: false); // Frontier
         _retaliation.RetireObservation(uid, component.Target); // Frontier: retain a lost sighting during HTN teardown.
         if (TryComp<CombatModeComponent>(uid, out var combatMode))
         {
@@ -60,6 +61,14 @@ public sealed partial class NPCCombatSystem
     private void Attack(EntityUid uid, NPCMeleeCombatComponent component, TimeSpan curTime, EntityQuery<PhysicsComponent> physicsQuery, EntityQuery<TransformComponent> xformQuery)
     {
         component.Status = CombatStatus.Normal;
+
+        // Frontier: handle the container before running attack or perception checks on its occupant.
+        if (HandleCombatStorage(uid, component.Target, null, 0f, out var storageStatus))
+        {
+            component.Status = storageStatus;
+            return;
+        }
+        // End Frontier
 
         if (!_melee.TryGetWeapon(uid, out var weaponUid, out var weapon))
         {
