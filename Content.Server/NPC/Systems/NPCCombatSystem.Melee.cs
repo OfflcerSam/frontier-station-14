@@ -20,6 +20,7 @@ public sealed partial class NPCCombatSystem
 
     private void OnMeleeShutdown(EntityUid uid, NPCMeleeCombatComponent component, ComponentShutdown args)
     {
+        _retaliation.RetireObservation(uid, component.Target); // Frontier: retain a lost sighting during HTN teardown.
         if (TryComp<CombatModeComponent>(uid, out var combatMode))
         {
             _combat.SetInCombatMode(uid, false, combatMode);
@@ -78,6 +79,16 @@ public sealed partial class NPCCombatSystem
             component.Status = CombatStatus.TargetUnreachable;
             return;
         }
+
+        // Frontier: an unseen target can only leave a fixed investigation point.
+        if (!_retaliation.CanPursueVisibleTarget(uid, component.Target))
+        {
+            if (TryComp<NPCSteeringComponent>(uid, out var pursuit) && pursuit.Coordinates.EntityId == component.Target)
+                _steering.Unregister(uid, pursuit);
+            component.Status = CombatStatus.NotInSight;
+            return;
+        }
+        // End Frontier
 
         if (distance > TargetMeleeLostRange)
         {

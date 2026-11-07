@@ -2,6 +2,7 @@ using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
+using Robust.Shared.Map; // Frontier
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared.Projectiles;
@@ -26,6 +27,9 @@ public sealed partial class ProjectileComponent : Component
     /// </summary>
     [DataField, AutoNetworkedField]
     public EntityUid? Shooter;
+
+    // Frontier: server-side location of the shot or reflection, relative to the grid or map.
+    public EntityCoordinates? LaunchCoordinates;
 
     /// <summary>
     ///     Weapon used to shoot.

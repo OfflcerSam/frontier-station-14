@@ -444,6 +444,7 @@
   components:
   - type: NPCRetaliation
     attackMemoryLength: 10
+    investigateThreats: true
   - type: MobMover
   - type: StandingState
   - type: RandomHumanoidAppearance
@@ -504,6 +505,7 @@
   components:
   - type: NPCRetaliation
     attackMemoryLength: 10
+    investigateThreats: true
   - type: Reactive
     groups:
       Flammable: [Touch]
@@ -571,6 +573,7 @@
   components:
   - type: NPCRetaliation
     attackMemoryLength: 10
+    investigateThreats: true
   - type: Reactive
     groups:
       Flammable: [Touch]

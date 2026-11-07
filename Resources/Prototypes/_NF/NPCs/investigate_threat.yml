@@ -1,0 +1,6 @@
+- type: htnCompound
+  id: NFInvestigateThreatCompound
+  branches:
+    - tasks:
+        - !type:HTNPrimitiveTask
+          operator: !type:InvestigateThreatOperator

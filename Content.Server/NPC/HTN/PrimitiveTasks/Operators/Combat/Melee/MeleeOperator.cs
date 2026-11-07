@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Content.Server.NPC.Components;
+using Content.Server.NPC.Systems; // Frontier
 using Content.Shared.CombatMode;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
@@ -92,7 +93,11 @@ public sealed partial class MeleeOperator : HTNOperator, IHtnConditionalShutdown
             blackboard.TryGetValue<EntityUid>(TargetKey, out var target, _entManager) &&
             target != EntityUid.Invalid)
         {
-            combat.Target = target;
+            if (combat.Target != target) // Frontier: finish the previous target's observation before replacing it.
+            {
+                _entManager.System<NPCRetaliationSystem>().RetireObservation(owner, combat.Target);
+                combat.Target = target;
+            }
 
             // Success
             if (_entManager.TryGetComponent<MobStateComponent>(target, out var mobState) &&

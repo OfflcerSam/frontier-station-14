@@ -45,11 +45,14 @@ public sealed class ProjectileSystem : SharedProjectileSystem
             return;
         }
 
-        var ev = new ProjectileHitEvent(component.Damage * _damageableSystem.UniversalProjectileDamageModifier, target, component.Shooter);
+        // Frontier: the projectile can outlive its shooter. Downstream damage handlers need a valid origin.
+        var origin = TerminatingOrDeleted(component.Shooter) ? null : component.Shooter;
+        var ev = new ProjectileHitEvent(component.Damage * _damageableSystem.UniversalProjectileDamageModifier, target, origin);
+        // End Frontier
         RaiseLocalEvent(uid, ref ev);
         // Frontier - raise event on shooter too, when available
         var damage = ev.Damage;
-        if (component.Shooter is { } shooter)
+        if (origin is { } shooter)
         {
             var ev2 = new ApplyClothingDamageModifierEvent(shooter, DamageContext.Ranged, ev.Damage);
             RaiseLocalEvent(shooter, ref ev2);
@@ -64,10 +67,15 @@ public sealed class ProjectileSystem : SharedProjectileSystem
             damageRequired -= damageableComponent.TotalDamage;
             damageRequired = FixedPoint2.Max(damageRequired, FixedPoint2.Zero);
         }
-        var modifiedDamage = _damageableSystem.TryChangeDamage(target, damage, component.IgnoreResistances, damageable: damageableComponent, origin: component.Shooter, armorPenetration: component.ArmorPenetration); // Frontier ev.Damage<damage && Goobstation added ArmorPenetration
+        // Frontier: use the launch point even if the shooter moved before impact.
+        var modifiedDamage = _damageableSystem.TryChangeDamage(target, damage, component.IgnoreResistances,
+            damageable: damageableComponent, origin: origin,
+            armorPenetration: component.ArmorPenetration, // Goobstation
+            originCoordinates: component.LaunchCoordinates);
+        // End Frontier
         var deleted = Deleted(target);
 
-        if (modifiedDamage is not null && Exists(component.Shooter))
+        if (modifiedDamage is not null && origin is { } creditedShooter) // Frontier
         {
             if (modifiedDamage.AnyPositive() && !deleted)
             {
@@ -76,7 +84,7 @@ public sealed class ProjectileSystem : SharedProjectileSystem
 
             _adminLogger.Add(LogType.BulletHit,
                 LogImpact.Medium,
-                $"Projectile {ToPrettyString(uid):projectile} shot by {ToPrettyString(component.Shooter!.Value):user} hit {otherName:target} and dealt {modifiedDamage.GetTotal():damage} damage");
+                $"Projectile {ToPrettyString(uid):projectile} shot by {ToPrettyString(creditedShooter):user} hit {otherName:target} and dealt {modifiedDamage.GetTotal():damage} damage"); // Frontier
         }
 
         // If penetration is to be considered, we need to do some checks to see if the projectile should stop.

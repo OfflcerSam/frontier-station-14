@@ -11,6 +11,7 @@ using Content.Shared.Radiation.Events;
 using Content.Shared.Rejuvenate;
 using Robust.Shared.Configuration;
 using Robust.Shared.GameStates;
+using Robust.Shared.Map; // Frontier
 using Robust.Shared.Network;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
@@ -149,7 +150,7 @@ namespace Content.Shared.Damage
         ///     The damage changed event is used by other systems, such as damage thresholds.
         /// </remarks>
         public void DamageChanged(EntityUid uid, DamageableComponent component, DamageSpecifier? damageDelta = null,
-            bool interruptsDoAfters = true, EntityUid? origin = null)
+            bool interruptsDoAfters = true, EntityUid? origin = null, EntityCoordinates? originCoordinates = null) // Frontier
         {
             component.Damage.GetDamagePerGroup(_prototypeManager, component.DamagePerGroup);
             component.TotalDamage = component.Damage.GetTotal();
@@ -163,7 +164,7 @@ namespace Content.Shared.Damage
 
             // TODO DAMAGE
             // byref struct event.
-            RaiseLocalEvent(uid, new DamageChangedEvent(component, damageDelta, interruptsDoAfters, origin));
+            RaiseLocalEvent(uid, new DamageChangedEvent(component, damageDelta, interruptsDoAfters, origin, originCoordinates)); // Frontier
         }
 
         /// <summary>
@@ -179,7 +180,9 @@ namespace Content.Shared.Damage
         ///     null if the user had no applicable components that can take damage.
         /// </returns>
         public DamageSpecifier? TryChangeDamage(EntityUid? uid, DamageSpecifier damage, bool ignoreResistances = false,
-            bool interruptsDoAfters = true, DamageableComponent? damageable = null, EntityUid? origin = null, float armorPenetration = 0f) // Goobstation added ArmorPenetration
+            bool interruptsDoAfters = true, DamageableComponent? damageable = null, EntityUid? origin = null,
+            float armorPenetration = 0f, // Goobstation added ArmorPenetration
+            EntityCoordinates? originCoordinates = null) // Frontier: optional snapshot of where the attack came from.
         {
             if (!uid.HasValue || !_damageableQuery.Resolve(uid.Value, ref damageable, false))
             {
@@ -240,7 +243,7 @@ namespace Content.Shared.Damage
             }
 
             if (delta.DamageDict.Count > 0)
-                DamageChanged(uid.Value, damageable, delta, interruptsDoAfters, origin);
+                DamageChanged(uid.Value, damageable, delta, interruptsDoAfters, origin, originCoordinates); // Frontier
 
             return delta;
         }
@@ -435,11 +438,17 @@ namespace Content.Shared.Damage
         /// </summary>
         public readonly EntityUid? Origin;
 
-        public DamageChangedEvent(DamageableComponent damageable, DamageSpecifier? damageDelta, bool interruptsDoAfters, EntityUid? origin)
+        // Frontier: a projectile can arrive after its shooter has moved.
+        public readonly EntityCoordinates? OriginCoordinates;
+
+        public DamageChangedEvent(DamageableComponent damageable, DamageSpecifier? damageDelta, bool interruptsDoAfters,
+            EntityUid? origin, EntityCoordinates? originCoordinates = null)
+        // End Frontier
         {
             Damageable = damageable;
             DamageDelta = damageDelta;
             Origin = origin;
+            OriginCoordinates = originCoordinates; // Frontier
 
             if (DamageDelta == null)
                 return;

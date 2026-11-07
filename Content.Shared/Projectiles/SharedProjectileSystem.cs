@@ -208,6 +208,11 @@ public abstract partial class SharedProjectileSystem : EntitySystem
 
     public void SetShooter(EntityUid id, ProjectileComponent component, EntityUid shooterId)
     {
+        // Frontier: take a fresh snapshot even when the same shooter reuses a projectile.
+        if (_net.IsServer)
+            component.LaunchCoordinates = _transform.GetMoverCoordinates(id);
+        // End Frontier
+
         if (component.Shooter == shooterId)
             return;
 

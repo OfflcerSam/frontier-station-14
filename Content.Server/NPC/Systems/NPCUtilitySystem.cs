@@ -38,6 +38,7 @@ namespace Content.Server.NPC.Systems;
 /// </summary>
 public sealed class NPCUtilitySystem : EntitySystem
 {
+    [Dependency] private readonly NPCRetaliationSystem _retaliation = default!; // Frontier
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly ContainerSystem _container = default!;
     [Dependency] private readonly EntityLookupSystem _lookup = default!;
@@ -321,7 +322,8 @@ public sealed class NPCUtilitySystem : EntitySystem
                 var radius = blackboard.GetValueOrDefault<float>(blackboard.GetVisionRadiusKey(EntityManager), EntityManager);
                 const float bufferRange = 0.5f;
 
-                if (blackboard.TryGetValue<EntityUid>("Target", out var currentTarget, EntityManager) &&
+                if (!_retaliation.RequiresObservedTarget(owner) && // Frontier: unseen targets use a separate investigation.
+                    blackboard.TryGetValue<EntityUid>("Target", out var currentTarget, EntityManager) &&
                     currentTarget == targetUid &&
                     TryComp(owner, out TransformComponent? xform) &&
                     TryComp(targetUid, out TransformComponent? targetXform) &&

@@ -75,6 +75,11 @@
     - tasks:
         - !type:HTNCompoundTask
           task: MeleeCombatCompound
+    # Frontier: investigate a remembered threat before idling.
+    - tasks:
+        - !type:HTNCompoundTask
+          task: NFInvestigateThreatCompound
+    # End Frontier
     - tasks:
         - !type:HTNCompoundTask
           task: IdleCompound
@@ -88,6 +93,11 @@
     - tasks:
         - !type:HTNCompoundTask
           task: MeleeCombatCompound
+    # Frontier: investigate a remembered threat before idling.
+    - tasks:
+        - !type:HTNCompoundTask
+          task: NFInvestigateThreatCompound
+    # End Frontier
     - tasks:
         - !type:HTNCompoundTask
           task: IdleCompound

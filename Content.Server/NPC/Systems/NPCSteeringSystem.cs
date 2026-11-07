@@ -196,6 +196,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         CancelPathRequest(steering);
         CancelObstacleAction(steering);
         steering.InterruptedDoor = null;
+        steering.Investigation = null;
         steering.CurrentPath.Clear();
         if (path != null)
         {
@@ -227,6 +228,7 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
             CancelPathRequest(component);
             CancelObstacleAction(component);
             component.InterruptedDoor = null;
+            component.Investigation = null;
             component.CurrentPath.Clear();
             component.FailedPathCount = 0;
             component.Status = SteeringStatus.Moving;
@@ -367,7 +369,9 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
         TimeSpan curTime)
     {
         // Frontier: retire pending work when steering stops.
-        if (TerminatingOrDeleted(steering.Coordinates.EntityId) || !mover.CanMove)
+        if (TerminatingOrDeleted(steering.Coordinates.EntityId) || !mover.CanMove ||
+            steering.Investigation is { } investigation &&
+            (curTime >= investigation.ExpiresAt || TerminatingOrDeleted(investigation.Source)))
             steering.Status = SteeringStatus.NoPath;
 
         if (steering.Status == SteeringStatus.NoPath)

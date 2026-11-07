@@ -2,9 +2,9 @@ using Content.Server.NPC.Components;
 using Content.Shared.CombatMode;
 using Content.Shared.Damage;
 using Content.Shared.Mobs.Components;
-using Content.Shared.NPC.Components;
 using Content.Shared.NPC.Systems;
-using Robust.Shared.Collections;
+using Robust.Shared.Map; // Frontier
+using Robust.Shared.Prototypes; // Frontier
 using Robust.Shared.Timing;
 
 namespace Content.Server.NPC.Systems;
@@ -12,7 +12,7 @@ namespace Content.Server.NPC.Systems;
 /// <summary>
 ///     Handles NPC which become aggressive after being attacked.
 /// </summary>
-public sealed class NPCRetaliationSystem : EntitySystem
+public sealed partial class NPCRetaliationSystem : EntitySystem // Frontier
 {
     [Dependency] private readonly NpcFactionSystem _npcFaction = default!;
     [Dependency] private readonly IGameTiming _timing = default!;
@@ -22,6 +22,7 @@ public sealed class NPCRetaliationSystem : EntitySystem
     {
         SubscribeLocalEvent<NPCRetaliationComponent, DamageChangedEvent>(OnDamageChanged);
         SubscribeLocalEvent<NPCRetaliationComponent, DisarmedEvent>(OnDisarmed);
+        SubscribeLocalEvent<PrototypesReloadedEventArgs>(_ => _investigationRoots.Clear()); // Frontier
     }
 
     private void OnDamageChanged(Entity<NPCRetaliationComponent> ent, ref DamageChangedEvent args)
@@ -32,7 +33,7 @@ public sealed class NPCRetaliationSystem : EntitySystem
         if (args.Origin is not {} origin)
             return;
 
-        TryRetaliate(ent, origin);
+        TryRetaliate(ent, origin, args.OriginCoordinates); // Frontier
     }
 
     private void OnDisarmed(Entity<NPCRetaliationComponent> ent, ref DisarmedEvent args)
@@ -40,19 +41,27 @@ public sealed class NPCRetaliationSystem : EntitySystem
         TryRetaliate(ent, args.Source);
     }
 
-    public bool TryRetaliate(Entity<NPCRetaliationComponent> ent, EntityUid target)
+    public bool TryRetaliate(Entity<NPCRetaliationComponent> ent, EntityUid target,
+        EntityCoordinates? originCoordinates = null) // Frontier
     {
         // don't retaliate against inanimate objects.
-        if (!HasComp<MobStateComponent>(target))
+        if (target == ent.Owner || TerminatingOrDeleted(target) || !HasComp<MobStateComponent>(target)) // Frontier
             return false;
 
         // don't retaliate against the same faction
         if (_npcFaction.IsEntityFriendly(ent.Owner, target))
             return false;
 
-        _npcFaction.AggroEntity(ent.Owner, target);
-        if (ent.Comp.AttackMemoryLength is {} memoryLength)
-            ent.Comp.AttackMemories[target] = _timing.CurTime + memoryLength;
+        // Frontier: only expire exceptions added by retaliation itself.
+        if (ent.Comp.AttackMemories.ContainsKey(target) || !HasExplicitHostility(ent.Owner, target))
+        {
+            _npcFaction.AggroEntity(ent.Owner, target);
+            if (ent.Comp.AttackMemoryLength is { } memoryLength)
+                ent.Comp.AttackMemories[target] = _timing.CurTime + memoryLength;
+        }
+
+        RememberAttack(ent, target, originCoordinates);
+        // End Frontier
 
         return true;
     }
@@ -61,18 +70,6 @@ public sealed class NPCRetaliationSystem : EntitySystem
     {
         base.Update(frameTime);
 
-        var query = EntityQueryEnumerator<NPCRetaliationComponent, FactionExceptionComponent>();
-        while (query.MoveNext(out var uid, out var retaliationComponent, out var factionException))
-        {
-            // TODO: can probably reuse this allocation and clear it
-            foreach (var entity in new ValueList<EntityUid>(retaliationComponent.AttackMemories.Keys))
-            {
-                if (!TerminatingOrDeleted(entity) && _timing.CurTime < retaliationComponent.AttackMemories[entity])
-                    continue;
-
-                _npcFaction.DeAggroEntity((uid, factionException), entity);
-                // TODO: should probably remove the AttackMemory, thats the whole point of the ValueList right??
-            }
-        }
+        PruneMemories(); // Frontier: remove expired records on a shared interval.
     }
 }

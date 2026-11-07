@@ -148,6 +148,7 @@ public sealed partial class NPCSteeringComponent : Component
 
     [AutoPausedField]
     public TimeSpan? DoorRetryAt;
+    internal NPCThreatStimulus? Investigation; // Frontier: bound investigation even while HTN is replanning.
     // End Frontier
 }
 

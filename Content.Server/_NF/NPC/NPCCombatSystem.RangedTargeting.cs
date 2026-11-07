@@ -10,6 +10,8 @@ public sealed partial class NPCCombatSystem
         EntityCoordinates? previousPursuit)
     {
         var (uid, combat) = ent;
+        if (combat.Target != target)
+            _retaliation.RetireObservation(uid, combat.Target);
         combat.Target = target;
         combat.PursuitGoal = null;
         ResetRangedPerception(combat);

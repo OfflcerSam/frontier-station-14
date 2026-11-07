@@ -21,4 +21,12 @@ public sealed partial class NPCRetaliationComponent : Component
     /// todo: this needs to support timeoffsetserializer at some point
     [DataField("attackMemories")]
     public Dictionary<EntityUid, TimeSpan> AttackMemories = new();
+
+    // Frontier: mobility packages can investigate a damage stimulus without attacking its source.
+    [DataField]
+    public bool InvestigateThreats;
+
+    internal NPCThreatStimulus? Threat;
+    internal NPCThreatObservation? Observation;
+    // End Frontier
 }

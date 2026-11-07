@@ -56,6 +56,7 @@ public sealed partial class NPCCombatSystem
 
     private void OnRangedShutdown(EntityUid uid, NPCRangedCombatComponent component, ComponentShutdown args)
     {
+        _retaliation.RetireObservation(uid, component.Target); // Frontier: retain a lost sighting during HTN teardown.
         if (TryComp<CombatModeComponent>(uid, out var combat))
         {
             _combat.SetInCombatMode(uid, false, combat);
@@ -84,6 +85,17 @@ public sealed partial class NPCCombatSystem
                 !_physicsQuery.TryComp(comp.Target, out var targetBody) ||
                 targetXform.MapID != xform.MapID)
             {
+                comp.Status = CombatStatus.TargetUnreachable;
+                ResetRangedPerception(comp);
+                continue;
+            }
+            // End Frontier
+
+            // Frontier: stop live pursuit on loss of visual contact. The HTN may investigate a snapshot.
+            if (comp.PursuitGoal != null && !_retaliation.CanPursueVisibleTarget(uid, comp.Target))
+            {
+                if (steering != null)
+                    _steering.Unregister(uid, steering);
                 comp.Status = CombatStatus.TargetUnreachable;
                 ResetRangedPerception(comp);
                 continue;
