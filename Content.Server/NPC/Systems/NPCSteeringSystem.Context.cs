@@ -170,6 +170,7 @@ public sealed partial class NPCSteeringSystem
         // Frontier: resume movement and schedule a replacement search for invalid routes.
         steering.Status = SteeringStatus.Moving;
         var needsPath = invalidatedPath;
+        var forceSearch = invalidatedPath;
         // End Frontier
 
         // Check if mapids match.
@@ -268,6 +269,7 @@ public sealed partial class NPCSteeringSystem
                 // Frontier: handle invalidation after advancing past a node as well.
                 targetCoordinates = GetTargetCoordinates(steering, out invalidatedPath);
                 needsPath |= invalidatedPath;
+                forceSearch |= invalidatedPath;
                 // End Frontier
 
                 if (!targetCoordinates.IsValid(EntityManager))
@@ -315,6 +317,7 @@ public sealed partial class NPCSteeringSystem
                 // and I don't want to spam grafana even harder than it gets spammed rn.
                 Log.Debug($"NPC {ToPrettyString(uid)} found stuck at {ourCoordinates}");
                 needsPath = true;
+                forceSearch = true; // Frontier: close destinations can still have a solid blocker between them.
 
                 if (stuckTime.TotalSeconds > maxStuckTime * 3)
                 {
@@ -338,7 +341,7 @@ public sealed partial class NPCSteeringSystem
 
         // TODO: Probably need partial planning support i.e. patch from the last node to where the target moved to.
         if (!directMove) // Wizden#38846
-            CheckPath(uid, steering, xform, needsPath, targetDistance, invalidatedPath); // Frontier: force a search for an invalid route.
+            CheckPath(uid, steering, xform, needsPath, targetDistance, forceSearch); // Frontier: recover close or invalid routes.
 
         // whether we should want to brake right now
         var haveToBrake = finalInRange && velocityHigh; // Wizden#38846
@@ -438,7 +441,7 @@ public sealed partial class NPCSteeringSystem
     }
 
     // Frontier: propagate route invalidation and detach cancelled requests.
-    private void CheckPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, bool needsPath, float targetDistance, bool invalidatedPath = false)
+    private void CheckPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, bool needsPath, float targetDistance, bool forceSearch = false)
     {
         if (!_pathfinding)
         {
@@ -464,7 +467,7 @@ public sealed partial class NPCSteeringSystem
         // Request the new path.
         if (needsPath)
         {
-            RequestPath(uid, steering, xform, targetDistance, invalidatedPath);
+            RequestPath(uid, steering, xform, targetDistance, forceSearch);
         }
     }
     // End Frontier

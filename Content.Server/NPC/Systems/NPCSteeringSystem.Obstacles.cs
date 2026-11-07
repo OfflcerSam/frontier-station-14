@@ -81,6 +81,11 @@ public sealed partial class NPCSteeringSystem
                     return status;
             }
 
+            // An empty locker can block the route to a visible target just like occupied storage.
+            var storage = TryOpenRouteStorage(uid, component.Flags, obstacleEnts);
+            if (storage != SteeringObstacleStatus.Failed)
+                return storage;
+
             var id = component.DoAfterId;
             var isClimbable = obstacleEnts.Exists(ent => HasComp<ClimbableComponent>(ent));
             // End Frontier

@@ -20,6 +20,7 @@ using Content.Shared.Prying.Systems;
 using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Timing;
 using Robust.UnitTesting;
 
 namespace Content.IntegrationTests._NF.NPC;
@@ -274,6 +275,34 @@ public sealed class AIDoorObstacleTest
             Assert.That(steering.DoAfterId, Is.Null);
             Assert.That(server.EntMan.GetComponent<DamageableComponent>(door).TotalDamage.Float(), Is.GreaterThan(0));
             Assert.That(steering.Status, Is.EqualTo(SteeringStatus.Moving));
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task AStuckActorSearchesForTheDoorEvenInsideDirectSteerRange()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var map = await pair.CreateTestMap();
+        var server = pair.Server;
+        var blocked = map.GridCoords.Offset(new(1.5f, 0.5f));
+        var start = blocked.Offset(new(-0.8f, 0));
+        var goal = blocked.Offset(new(0.6f, 0));
+        await server.WaitPost(() =>
+        {
+            AddDoorTiles(server, map.Grid.Owner, map.Grid.Comp, blocked);
+            server.EntMan.SpawnEntity("Airlock", blocked);
+        });
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            var actor = server.EntMan.SpawnEntity("MobHumanPathDummy", start);
+            var steeringSystem = server.System<NPCSteeringSystem>();
+            var steering = steeringSystem.Register(actor, goal);
+            server.EntMan.EnsureComponent<ActiveNPCComponent>(actor);
+            steering.LastStuckTime = server.ResolveDependency<IGameTiming>().CurTime - TimeSpan.FromSeconds(2);
+            steeringSystem.Update(1f / 30);
+            Assert.That(steering.Pathfind, Is.True);
         });
         await pair.CleanReturnAsync();
     }

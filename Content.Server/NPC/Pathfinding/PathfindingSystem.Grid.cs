@@ -524,6 +524,11 @@ public sealed partial class PathfindingSystem
                                 flags |= PathfindingBreadcrumbFlag.Door;
                             }
 
+                            // Frontier: offer an interaction route through colliding storage.
+                            if (_storageQuery.TryComp(ent, out var storage) && !storage.Open)
+                                flags |= PathfindingBreadcrumbFlag.Storage;
+                            // End Frontier
+
                             if (_climbableQuery.HasComponent(ent))
                             {
                                 flags |= PathfindingBreadcrumbFlag.Climb;

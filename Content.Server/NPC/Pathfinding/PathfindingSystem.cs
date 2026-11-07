@@ -11,6 +11,7 @@ using Content.Shared.Administration;
 using Content.Shared.Climbing.Components;
 using Content.Shared.Doors.Components;
 using Content.Shared.NPC;
+using Content.Shared.Storage.Components; // Frontier
 using Robust.Server.Player;
 using Robust.Shared.Enums;
 using Robust.Shared.Map;
@@ -73,6 +74,7 @@ namespace Content.Server.NPC.Pathfinding
         private EntityQuery<AccessReaderComponent> _accessQuery;
         private EntityQuery<DestructibleComponent> _destructibleQuery;
         private EntityQuery<DoorComponent> _doorQuery;
+        private EntityQuery<EntityStorageComponent> _storageQuery; // Frontier
         private EntityQuery<ClimbableComponent> _climbableQuery;
         private EntityQuery<FixturesComponent> _fixturesQuery;
         private EntityQuery<MapGridComponent> _gridQuery;
@@ -85,6 +87,7 @@ namespace Content.Server.NPC.Pathfinding
             _accessQuery = GetEntityQuery<AccessReaderComponent>();
             _destructibleQuery = GetEntityQuery<DestructibleComponent>();
             _doorQuery = GetEntityQuery<DoorComponent>();
+            _storageQuery = GetEntityQuery<EntityStorageComponent>(); // Frontier
             _climbableQuery = GetEntityQuery<ClimbableComponent>();
             _fixturesQuery = GetEntityQuery<FixturesComponent>();
             _gridQuery = GetEntityQuery<MapGridComponent>();

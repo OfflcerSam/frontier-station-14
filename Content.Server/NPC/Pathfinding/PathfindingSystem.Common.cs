@@ -97,6 +97,12 @@ public sealed partial class PathfindingSystem
             {
                 modifier += 10f;
             }
+            else if ((end.Data.Flags & PathfindingBreadcrumbFlag.Storage) != 0x0 &&
+                     (request.Flags & PathFlags.Interact) != 0x0)
+            {
+                // Like doors, storage access is checked by the actor at the obstacle.
+                modifier += 0.5f;
+            }
             // End Frontier
             else if ((request.Flags & PathFlags.Smashing) != 0x0 && end.Data.Damage > 0f)
             {

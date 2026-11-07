@@ -40,6 +40,7 @@ public sealed partial class NPCCombatSystem
 
         SubscribeLocalEvent<NPCRangedCombatComponent, ComponentStartup>(OnRangedStartup);
         SubscribeLocalEvent<NPCRangedCombatComponent, ComponentShutdown>(OnRangedShutdown);
+        SubscribeLocalEvent<NPCRangedCombatComponent, ShotAttemptedEvent>(OnRangedShotAttempted); // Frontier
     }
 
     private void OnRangedStartup(EntityUid uid, NPCRangedCombatComponent component, ComponentStartup args)

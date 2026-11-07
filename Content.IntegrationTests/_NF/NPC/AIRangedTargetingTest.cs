@@ -12,6 +12,7 @@ using Content.Server.NPC.Pathfinding;
 using Content.Server.NPC.Systems;
 using Content.Server.Weapons.Ranged.Systems;
 using Content.Shared.Hands.EntitySystems;
+using Content.Shared.NPC.Systems;
 using Content.Shared.Weapons.Ranged.Components;
 using Content.Shared.Wieldable;
 using Content.Shared.Wieldable.Components;
@@ -297,7 +298,49 @@ public sealed class AIRangedTargetingTest
     }
 
     [Test]
-    public async Task HeldBurstContinuationRetainsTheSelectedEntity()
+    public async Task FriendlyBodyBlocksAReadyShotUntilItMovesAside()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var map = await pair.CreateTestMap();
+        var server = pair.Server;
+        var start = map.GridCoords.Offset(new(0.5f, 0.5f));
+        var (actor, weapon) = await SpawnArmedActor(server, start);
+
+        await server.WaitAssertion(() =>
+        {
+            var entities = server.EntMan;
+            var faction = "NFSyndicate";
+            var factions = server.System<NpcFactionSystem>();
+            var ally = entities.SpawnEntity("MobHumanPathDummy", start.Offset(new(3, 0)));
+            var target = entities.SpawnEntity("MobHumanPathDummy", start.Offset(new(6, 0)));
+            factions.ClearFactions(actor);
+            factions.AddFaction(actor, faction);
+            factions.AddFaction(ally, faction);
+            Assert.That(factions.IsEntityFriendly(actor, ally), Is.True);
+            Assert.That(factions.IsEntityFriendly(actor, target), Is.False);
+
+            var combat = entities.EnsureComponent<NPCRangedCombatComponent>(actor);
+            combat.Target = target;
+            combat.MissChance = 0f;
+            combat.ShootDelay = 0f;
+            var gun = entities.GetComponent<GunComponent>(weapon);
+            var cooldown = gun.NextFire;
+            var system = server.System<NPCCombatSystem>();
+            system.Update(1f / 60);
+            Assert.That(combat.TargetInLOS, Is.True, "The ally does not obscure target perception.");
+            Assert.That(gun.NextFire, Is.EqualTo(cooldown));
+            Assert.That(entities.EntityQuery<TargetedProjectileComponent>().Any(shot => shot.Target == target), Is.False);
+
+            server.System<SharedTransformSystem>().SetCoordinates(ally, start.Offset(new(3, 2)));
+            system.Update(1f / 60);
+            Assert.That(entities.EntityQuery<TargetedProjectileComponent>().Any(shot => shot.Target == target), Is.True);
+        });
+        await pair.CleanReturnAsync();
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public async Task HeldBurstContinuationRetainsTheSelectedEntity(bool allyCrossesAfterFirstShot)
     {
         await using var pair = await PoolManager.GetServerClient();
         var map = await pair.CreateTestMap();
@@ -305,7 +348,10 @@ public sealed class AIRangedTargetingTest
         var start = map.GridCoords.Offset(new(0.5f, 0.5f));
         var (actor, weapon) = await SpawnArmedActor(server, start, "NFWeaponEnergyRifleAssaultLaserRepeater");
         var destination = start.Offset(new(30, 0));
+        var faction = "NFSyndicate";
         EntityUid target = default;
+        EntityUid ally = default;
+        TimeSpan firstCooldown = default;
 
         await server.WaitAssertion(() =>
         {
@@ -314,17 +360,47 @@ public sealed class AIRangedTargetingTest
             var wieldable = entities.GetComponent<WieldableComponent>(weapon);
             Assert.That(server.System<SharedWieldableSystem>().TryWield(weapon, wieldable, actor), Is.True);
             var gun = entities.GetComponent<GunComponent>(weapon);
+            if (allyCrossesAfterFirstShot)
+            {
+                server.System<NpcFactionSystem>().AddFaction(actor, faction);
+                var combat = entities.EnsureComponent<NPCRangedCombatComponent>(actor);
+                combat.Target = target;
+                combat.ShootDelay = 60f;
+            }
             server.System<GunSystem>().AttemptShoot(actor, weapon, gun, destination, target);
+            firstCooldown = gun.NextFire;
             Assert.That(gun.BurstActivated, Is.True);
             Assert.That(entities.EntityQuery<TargetedProjectileComponent>().Count(projectile => projectile.Target == target),
                 Is.EqualTo(1));
+            if (allyCrossesAfterFirstShot)
+            {
+                ally = entities.SpawnEntity("MobHumanPathDummy", start.Offset(new(3, 0)));
+                server.System<NpcFactionSystem>().AddFaction(ally, faction);
+            }
         });
         // The repeater fires its second round after 200 ms. The distant target keeps both projectiles in flight.
         await server.WaitRunTicks(18);
+        if (allyCrossesAfterFirstShot)
+        {
+            await server.WaitAssertion(() =>
+            {
+                Assert.That(server.EntMan.GetComponent<GunComponent>(weapon).NextFire, Is.EqualTo(firstCooldown));
+                server.System<SharedTransformSystem>().SetCoordinates(ally, start.Offset(new(3, 2)));
+            });
+            await server.WaitRunTicks(3);
+        }
         await server.WaitAssertion(() =>
         {
             var projectiles = server.EntMan.EntityQuery<TargetedProjectileComponent>();
-            Assert.That(projectiles.Count(projectile => projectile.Target == target), Is.EqualTo(2));
+            if (allyCrossesAfterFirstShot)
+            {
+                Assert.That(server.EntMan.GetComponent<GunComponent>(weapon).NextFire, Is.GreaterThan(firstCooldown));
+                Assert.That(projectiles.Any(projectile => projectile.Target == target), Is.True);
+            }
+            else
+            {
+                Assert.That(projectiles.Count(projectile => projectile.Target == target), Is.EqualTo(2));
+            }
         });
         await pair.CleanReturnAsync();
     }

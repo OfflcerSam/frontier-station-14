@@ -9,6 +9,7 @@
   - MobHumanoidInvetory
   id: MobExplorerBase
   components:
+  - type: ComplexInteraction # Testing: Allow humanoid explorers to operate doors and storage
   - type: NpcFactionMember
     factions:
     - ExplorersExpeditionNF

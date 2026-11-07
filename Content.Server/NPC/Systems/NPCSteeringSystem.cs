@@ -485,11 +485,11 @@ public sealed partial class NPCSteeringSystem : SharedNPCSteeringSystem
     /// Get a new job from the pathfindingsystem
     /// </summary>
     // Frontier: tie path completions to the current goal and steering instance.
-    private async void RequestPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, float targetDistance, bool invalidatedPath)
+    private async void RequestPath(EntityUid uid, NPCSteeringComponent steering, TransformComponent xform, float targetDistance, bool forceSearch)
     {
         // Keep one pending search per goal. Normally we steer directly over short distances,
-        // but an invalidated route needs a replacement search even when the destination is close.
-        if (steering.Pathfind || (!invalidatedPath && targetDistance < steering.RepathRange))
+        // but stuck actors and invalidated routes also need a search for nearby goals.
+        if (steering.Pathfind || (!forceSearch && targetDistance < steering.RepathRange))
             return;
 
         // Short-circuit with no path.

@@ -455,6 +455,88 @@ public sealed class AIStorageCombatTest
         await pair.CleanReturnAsync();
     }
 
+    [Test]
+    public async Task LiveExplorerOpensKnownOccupiedCrate()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var map = await pair.CreateTestMap();
+        var server = pair.Server;
+        EntityUid actor = default, target = default, crate = default;
+        await server.WaitAssertion(() =>
+        {
+            var start = AddFloor(server, map);
+            var gravity = server.EntMan.EnsureComponent<GravityComponent>(map.Grid);
+            server.System<GravitySystem>().EnableGravity(map.Grid, gravity);
+            actor = server.EntMan.SpawnEntity("MobExplorerMeleeT1", start);
+            target = SpawnDamageTarget(server, start.Offset(new(4, 0)));
+            crate = server.EntMan.SpawnEntity("CrateGenericSteel", start.Offset(new(4, 1)));
+            // Use the real Explorer HTN root and equipment, with explicit hostility for this target.
+            server.System<NpcFactionSystem>().AggroEntity(actor, target);
+        });
+        Assert.That(await WaitFor(server, () =>
+            server.EntMan.TryGetComponent<NPCMeleeCombatComponent>(actor, out var melee) && melee.Target == target), Is.True);
+        await server.WaitAssertion(() => Assert.That(server.System<EntityStorageSystem>().Insert(target, crate), Is.True));
+        await AssertStorageOpens(server, actor, crate);
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task LiveDeckhandCanAcquireAndShootPastANewSteelCrate()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var map = await pair.CreateTestMap();
+        var server = pair.Server;
+        EntityUid actor = default, target = default;
+        await server.WaitPost(() =>
+        {
+            var start = AddFloor(server, map);
+            var gravity = server.EntMan.EnsureComponent<GravityComponent>(map.Grid);
+            server.System<GravitySystem>().EnableGravity(map.Grid, gravity);
+            actor = server.EntMan.SpawnEntity("MobSyndicateNavalDeckhandA", start);
+            server.EntMan.SpawnEntity("CrateGenericSteel", start.Offset(new(3, 0)));
+            target = SpawnDamageTarget(server, start.Offset(new(6, 0)));
+            server.System<NpcFactionSystem>().AggroEntity(actor, target);
+        });
+        Assert.That(await WaitFor(server, () =>
+            server.EntMan.TryGetComponent<NPCRangedCombatComponent>(actor, out var ranged) && ranged.Target == target &&
+            server.EntMan.GetComponent<GunComponent>(actor).Target == target), Is.True);
+        await pair.CleanReturnAsync();
+    }
+
+    [Test]
+    public async Task InteractOnlySteeringOpensAnEmptyClosetOnItsRoute()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var map = await pair.CreateTestMap();
+        var server = pair.Server;
+        var start = map.GridCoords.Offset(new(0.5f, 0.5f));
+        var blocker = start.Offset(new(1, 0));
+        var destination = start.Offset(new(3, 0));
+        EntityUid actor = default, closet = default;
+        await server.WaitPost(() =>
+        {
+            var maps = server.System<SharedMapSystem>();
+            var tile = new Tile(server.ResolveDependency<ITileDefinitionManager>()["Plating"].TileId);
+            for (var x = 1; x <= 3; x++)
+                maps.SetTile(map.Grid.Owner, map.Grid.Comp, start.Offset(new(x, 0)), tile);
+            var gravity = server.EntMan.EnsureComponent<GravityComponent>(map.Grid);
+            server.System<GravitySystem>().EnableGravity(map.Grid, gravity);
+            closet = server.EntMan.SpawnEntity("ClosetSteelBase", blocker);
+            actor = server.EntMan.SpawnEntity("MobHumanPathDummy", start);
+            var htn = server.EntMan.EnsureComponent<HTNComponent>(actor);
+            htn.Enabled = false;
+            htn.Blackboard.SetValue(NPCBlackboard.NavInteract, true);
+        });
+        await server.WaitRunTicks(30);
+        await server.WaitAssertion(() =>
+        {
+            var steering = server.System<NPCSteeringSystem>().Register(actor, destination);
+            Assert.That(steering.Flags, Is.EqualTo(PathFlags.Interact));
+        });
+        Assert.That(await WaitFor(server, () => server.EntMan.GetComponent<EntityStorageComponent>(closet).Open), Is.True);
+        await pair.CleanReturnAsync();
+    }
+
     [TestCase("NFWeaponEnergyPistolLaser", false)]
     [TestCase("NFWeaponEnergyPistolLaserMakeshift", true)]
     public async Task RangedBreachTargetsTheCrateAndResumesTheOriginalPursuit(string weaponPrototype, bool retarget)

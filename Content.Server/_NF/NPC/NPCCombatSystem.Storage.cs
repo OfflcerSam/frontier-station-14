@@ -6,7 +6,6 @@ using Content.Server.Storage.EntitySystems;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Damage;
 using Content.Shared.Examine;
-using Content.Shared.Hands.Components;
 using Content.Shared.Lock;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Movement.Components;
@@ -72,7 +71,7 @@ public sealed partial class NPCCombatSystem
     internal bool CanKeepStorageTarget(EntityUid owner, EntityUid target, EntityUid storage, PathFlags flags)
     {
         if (owner == storage || !HasComp<InputMoverComponent>(owner) || _storageContainers.IsEntityInContainer(owner) ||
-            (!CanOperateStorage(owner, flags) && (flags & PathFlags.Smashing) == 0))
+            (!_steering.CanOperateStorage(owner, flags) && (flags & PathFlags.Smashing) == 0))
         {
             return false;
         }
@@ -93,9 +92,6 @@ public sealed partial class NPCCombatSystem
     private bool SameStorageAttempt(NPCStorageCombatComponent attempt, EntityUid target, EntityUid storage) =>
         attempt.Hostile == target && attempt.Storage == storage &&
         attempt.Welded == _storageWelds.IsWelded(storage) && attempt.Locked == _storageLocks.IsLocked(storage);
-
-    private bool CanOperateStorage(EntityUid owner, PathFlags flags) =>
-        (flags & PathFlags.Interact) != 0 && HasComp<HandsComponent>(owner) && _storageActions.CanComplexInteract(owner);
 
     private bool HandleCombatStorage(EntityUid uid, EntityUid target, NPCRangedCombatComponent? ranged,
         float frameTime, out CombatStatus status)
@@ -153,7 +149,7 @@ public sealed partial class NPCCombatSystem
         var lockComp = CompOrNull<LockComponent>(storage);
         var canUnlock = lockComp is { UnlockTime: var time } && time == TimeSpan.Zero &&
             (lockComp.UnlockOnClick || lockComp.ShowLockVerbs);
-        if (!attempt.TriedOpen && !attempt.Welded && (!attempt.Locked || canUnlock) && CanOperateStorage(uid, flags))
+        if (!attempt.TriedOpen && !attempt.Welded && (!attempt.Locked || canUnlock) && _steering.CanOperateStorage(uid, flags))
         {
             if (!_interaction.InRangeAndAccessible(uid, storage))
             {
