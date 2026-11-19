@@ -37,7 +37,7 @@
   A single hit dealing at least 25 percent of maximum chassis durability after resistance can catastrophically rupture a pressurized boiler, even before the chassis would normally be destroyed. Standard needs 25 damage in one hit; Commercial needs 45. Separate small hits do not add together for this trigger. A depressurized boiler cannot produce a pressure blast; a small finishing hit breaks and vents it without the catastrophic explosion.
 
   A pressure rupture damages the machine and its immediate surroundings. Commercial blast damage reaches about 2.25 metres at rated pressure and 3 metres at maximum pressure. Only tiles directly beneath the Commercial chassis can lose plating, and each has a chance to remain intact. Standard blasts preserve plating and reach about 1.5 to 2 metres. The initial flash can look larger than the damaging blast; lingering fires follow actual spilled fuel. Escaped burner fuel can also burn in oxygen. Switching off does not instantly remove pressure: a cooling boiler remains dangerous until its gauge falls.
-  The casing warms the room, including while a stopped boiler cools. Keep ventilation and gas scrubbing available. Standard requires a 2×2 machine frame; Commercial requires a 2×3 frame. A normal machine frame is too small.
+  The casing warms the room, including while a stopped boiler cools. Keep ventilation and gas scrubbing available. Both models use a standard machine frame. Allow a clear 2×2 footprint for Standard or 2×3 for Commercial.
 
   # Rotor Safety
 

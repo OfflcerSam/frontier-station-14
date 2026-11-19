@@ -4,6 +4,7 @@
 using System.Numerics;
 using System.Collections.Generic;
 using Content.IntegrationTests.Tests.Interaction;
+using Content.Server.Construction.Components;
 using Content.Server._NF.Power.FuelModules;
 using Content.Server._NF.Power.Steam;
 using Content.Server.Atmos.EntitySystems;
@@ -14,6 +15,8 @@ using Content.Shared._NF.Power.FuelModules;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Construction;
+using Content.Shared.Construction.Components;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Examine;
@@ -81,54 +84,76 @@ public sealed class SteamTurbineTests : InteractionTest
         });
     }
 
-    [TestCase("NFStationaryGeneratorGasTurbineCommercialEmpty", "NFMachineFrame2x3")]
-    [TestCase("NFStationaryGeneratorCombustionStandardEmpty", "NFMachineFrame1x2")]
-    [TestCase("NFStationaryGeneratorCombustionCommercialEmpty", "NFMachineFrame1x3")]
-    [TestCase("NFStationaryGeneratorStirlingStandardEmpty", "NFMachineFrame1x2")]
-    [TestCase("NFStationaryGeneratorIsotopeStandardEmpty", "NFMachineFrame1x2")]
-    [TestCase("NFStationaryGeneratorSteamStandardEmpty", "NFMachineFrame2x2")]
-    [TestCase("NFStationaryGeneratorSteamCommercialEmpty", "NFMachineFrame2x3")]
-    public async Task LargeMachineFrames(string machine, string frame)
+    [TestCase("GasTurbineCommercial", 50, 6)]
+    [TestCase("CombustionStandard", 15, 2)]
+    [TestCase("CombustionCommercial", 20, 3)]
+    [TestCase("StirlingStandard", 13, 2)]
+    [TestCase("IsotopeStandard", 20, 2)]
+    [TestCase("SteamStandard", 35, 4)]
+    [TestCase("SteamCommercial", 40, 6)]
+    public async Task StationaryGeneratorConstruction(string model, int totalSteel, int totalCable)
     {
+        const string frame = "MachineFrame";
+        var machine = "NFStationaryGenerator" + model + "Empty";
+        var board = "NFStationaryGenerator" + model + "MachineCircuitboard";
         await Server.WaitAssertion(() =>
         {
-            for (var tileX = 0; tileX < 8; tileX++)
-            for (var tileY = 0; tileY < 8; tileY++)
-                MapSystem.SetTile(MapData.Grid, new Robust.Shared.Maths.Vector2i(tileX, tileY), new Tile(TileMan[Plating].TileId));
+            for (var x = -3; x < 8; x++)
+            for (var y = -3; y < 8; y++)
+                MapSystem.SetTile(MapData.Grid, new Robust.Shared.Maths.Vector2i(x, y), new Tile(TileMan[Plating].TileId));
         });
         await StartConstruction(frame);
-        await InteractUsing(Steel, frame == "NFMachineFrame2x3" ? 30 : frame == "NFMachineFrame2x2" ? 20 : frame == "NFMachineFrame1x3" ? 15 : 10);
+        await InteractUsing(Steel, 5);
         await Interact(Wrench);
-        await InteractUsing(Cable, frame == "NFMachineFrame2x3" ? 6 : frame == "NFMachineFrame2x2" ? 4 : frame == "NFMachineFrame1x3" ? 3 : 2);
+        await InteractUsing(Cable);
         AssertPrototype(frame);
-        await Server.WaitPost(() => SEntMan.DeleteEntity(STarget!.Value));
-        await RunTicks(3);
-        await SpawnTarget(machine);
-        await Interact(Screw, Pry);
-        AssertPrototype(frame);
+
+        var parts = new List<(string Prototype, int Count)>();
+        await InteractUsing(board);
+        await Server.WaitAssertion(() =>
+        {
+            var frameComponent = SEntMan.GetComponent<MachineFrameComponent>(STarget!.Value);
+            Assert.That(frameComponent.BoardContainer.ContainedEntities, Has.Count.EqualTo(1));
+            var boardUid = frameComponent.BoardContainer.ContainedEntities[0];
+            var machineBoard = SEntMan.GetComponent<MachineBoardComponent>(boardUid);
+            Assert.That(machineBoard.StackRequirements[Steel] + 5, Is.EqualTo(totalSteel));
+            Assert.That(machineBoard.StackRequirements[Cable] + 1, Is.EqualTo(totalCable));
+            foreach (var (material, count) in frameComponent.MaterialRequirements)
+            {
+                var stack = ProtoMan.Index(material);
+                var max = stack.MaxCount ?? count;
+                for (var remaining = count; remaining > 0; remaining -= max)
+                    parts.Add((stack.Spawn.Id, Math.Min(remaining, max)));
+            }
+            foreach (var (part, count) in frameComponent.Requirements)
+                parts.Add((ProtoMan.Index(part).StockPartPrototype.Id, count));
+
+            var flatpacker = SEntMan.SpawnEntity("MachineFlatpacker", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
+            var frameMaterialCost = SEntMan.System<SharedFlatpackSystem>().GetFlatpackCreationCost(
+                (flatpacker, SEntMan.GetComponent<FlatpackCreatorComponent>(flatpacker)), (boardUid, machineBoard));
+            var materialCosts = SEntMan.System<MachinePartSystem>().GetMachineBoardMaterialCost((boardUid, machineBoard), -1);
+            Assert.That(frameMaterialCost["Steel"] - materialCosts.GetValueOrDefault("Steel"), Is.EqualTo(-750));
+            Assert.That(frameMaterialCost["Silver"] - materialCosts.GetValueOrDefault("Silver"), Is.EqualTo(-100));
+            Assert.That(frameMaterialCost["Gold"] - materialCosts.GetValueOrDefault("Gold"), Is.EqualTo(-50));
+        });
+
+        foreach (var (part, count) in parts)
+            await InteractUsing(part, count);
         await Interact(Screw);
         AssertPrototype(machine);
-        await Interact(Screw, Pry, Pry);
+        await Interact(Screw, Pry);
         AssertPrototype(frame);
         await Server.WaitAssertion(() =>
         {
-            var footprint = SEntMan.System<Content.Shared._NF.Construction.MachineFootprintSystem>();
-            Assert.That(footprint.CanFitBoard(STarget!.Value, machine), Is.True);
-            Assert.That(footprint.CanFitBoard(STarget.Value, "Protolathe"), Is.False);
-            var entity = SEntMan.SpawnEntity("MachineFrame", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
-            Assert.That(footprint.CanFitBoard(entity, machine), Is.False);
-            var board = SEntMan.SpawnEntity(machine.Replace("Empty", "") + "MachineCircuitboard", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
-            var machineBoard = SEntMan.GetComponent<Content.Shared.Construction.Components.MachineBoardComponent>(board);
-            var flatpacker = SEntMan.SpawnEntity("MachineFlatpacker", SEntMan.GetComponent<TransformComponent>(SPlayer).Coordinates);
-            var frameArea = frame == "NFMachineFrame2x3" ? 5 : frame == "NFMachineFrame2x2" ? 3 : frame == "NFMachineFrame1x3" ? 2 : 1;
-            var frameMaterialCost = SEntMan.System<Content.Shared.Construction.SharedFlatpackSystem>().GetFlatpackCreationCost(
-                (flatpacker, SEntMan.GetComponent<Content.Shared.Construction.Components.FlatpackCreatorComponent>(flatpacker)),
-                (board, machineBoard));
-            var materialCosts = SEntMan.System<Content.Shared.Construction.MachinePartSystem>().GetMachineBoardMaterialCost((board, machineBoard), -1);
-            // Per extra tile: five steel sheets (500) and one LV cable (15), on top of the 750 base steel fee.
-            Assert.That(frameMaterialCost["Steel"] - materialCosts.GetValueOrDefault("Steel"), Is.EqualTo(-750 - 515 * frameArea));
-            Assert.That(frameMaterialCost["Silver"] - materialCosts.GetValueOrDefault("Silver"), Is.EqualTo(-100));
-            Assert.That(frameMaterialCost["Gold"] - materialCosts.GetValueOrDefault("Gold"), Is.EqualTo(-50));
+            var frameComponent = SEntMan.GetComponent<MachineFrameComponent>(STarget!.Value);
+            Assert.That(frameComponent.MaterialProgress[Steel] + 5, Is.EqualTo(totalSteel));
+            Assert.That(frameComponent.MaterialProgress[Cable] + 1, Is.EqualTo(totalCable));
+        });
+        await Interact(Screw);
+        AssertPrototype(machine);
+
+        await Server.WaitAssertion(() =>
+        {
             var generator = SEntMan.SpawnEntity(machine, new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)));
             Transform.SetLocalRotation(generator, Robust.Shared.Maths.Angle.FromDegrees(90));
             SEntMan.System<DamageableSystem>().TryChangeDamage(generator,
@@ -138,12 +163,14 @@ public sealed class SteamTurbineTests : InteractionTest
         await Server.WaitAssertion(() =>
         {
             var frameCount = 0;
-            foreach (var nearby in SEntMan.System<EntityLookupSystem>().GetEntitiesInRange<Content.Server.Construction.Components.MachineFrameComponent>(
+            foreach (var nearby in SEntMan.System<EntityLookupSystem>().GetEntitiesInRange<MachineFrameComponent>(
                          new EntityCoordinates(MapData.Grid.Owner, new Vector2(5.5f, 5.5f)), 0.3f))
             {
                 Assert.That(SEntMan.GetComponent<MetaDataComponent>(nearby.Owner).EntityPrototype!.ID, Is.EqualTo(frame));
                 Assert.That(SEntMan.GetComponent<TransformComponent>(nearby.Owner).LocalRotation.Degrees,
                     Is.EqualTo(90).Within(0.01), "Destruction must preserve the sideways machine rotation.");
+                Assert.That(nearby.Comp.MaterialProgress[Steel] + 5, Is.EqualTo(totalSteel));
+                Assert.That(nearby.Comp.MaterialProgress[Cable] + 1, Is.EqualTo(totalCable));
                 frameCount++;
             }
             Assert.That(frameCount, Is.EqualTo(1));

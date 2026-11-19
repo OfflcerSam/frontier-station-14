@@ -99,7 +99,7 @@
           medium: { color: "#B3E77B" }
           full: { color: "#51F28B" }
   - type: Construction
-    graph: NFMachine1x2
+    graph: Machine
     node: machine
   - type: Machine
     board: NFStationaryGeneratorCombustionStandardMachineCircuitboard
@@ -204,7 +204,8 @@
     stackRequirements:
       Glass: 2
       CableHV: 10
-      Steel: 5
+      Steel: 10
+      Cable: 1
 
 
 

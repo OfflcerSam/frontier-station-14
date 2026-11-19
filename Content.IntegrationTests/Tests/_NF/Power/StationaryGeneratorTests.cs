@@ -220,6 +220,39 @@ public sealed class StationaryGeneratorTests : InteractionTest
     }
 
     [Test]
+    public async Task AnchorRechecksOuterTileAfterWrenchDelay()
+    {
+        await Server.WaitAssertion(() =>
+        {
+            for (var x = -2; x < 5; x++)
+            for (var y = -2; y < 5; y++)
+                MapSystem.SetTile(MapData.Grid, new Vector2i(x, y), new Tile(TileMan[Plating].TileId));
+        });
+        await SpawnTarget("NFStationaryGeneratorCombustionStandardEmpty");
+        EntityCoordinates outerTile = default;
+        await Server.WaitAssertion(() =>
+        {
+            var target = STarget!.Value;
+            Transform.Unanchor(target);
+            var transform = SEntMan.GetComponent<TransformComponent>(target);
+            outerTile = transform.Coordinates.Offset(transform.LocalRotation.RotateVec(Vector2.UnitY));
+            Assert.That(transform.Anchored, Is.False);
+        });
+
+        await InteractUsing(Wrench, awaitDoAfters: false);
+        Assert.That(ActiveDoAfters, Is.Not.Empty);
+        await Server.WaitPost(() => MapSystem.SetTile(MapData.Grid, outerTile, Tile.Empty));
+        await AwaitDoAfters();
+        await Server.WaitAssertion(() =>
+            Assert.That(SEntMan.GetComponent<TransformComponent>(STarget!.Value).Anchored, Is.False));
+
+        await Server.WaitPost(() => MapSystem.SetTile(MapData.Grid, outerTile, new Tile(TileMan[Plating].TileId)));
+        await Interact(Wrench);
+        await Server.WaitAssertion(() =>
+            Assert.That(SEntMan.GetComponent<TransformComponent>(STarget!.Value).Anchored, Is.True));
+    }
+
+    [Test]
     public async Task FlatpackerChargesStockParts()
     {
         await SpawnTarget("NFStationaryGeneratorCombustionStandardMachineCircuitboard");

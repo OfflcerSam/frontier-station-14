@@ -132,7 +132,7 @@
           normal: { color: "#51F28B" }
           high: { color: "#FF544A" }
   - type: Construction
-    graph: NFMachine2x2
+    graph: Machine
     node: machine
   - type: Machine
     board: NFStationaryGeneratorSteamStandardMachineCircuitboard
@@ -265,7 +265,8 @@
       MatterBin: 1
     stackRequirements:
       CableHV: 15
-      Steel: 15
+      Steel: 30
+      Cable: 3
       Glass: 12
 
 - type: entity
@@ -312,7 +313,7 @@
   - type: FuelModuleHost
     moduleSize: Commercial
   - type: Construction
-    graph: NFMachine2x3
+    graph: Machine
     node: machine
   - type: MachineFootprint
     tiles: ["0, 0", "1, 0", "0, 1", "1, 1", "0, 2", "1, 2"]
@@ -536,5 +537,6 @@
       Plasteel: 10
       ReinforcedGlass: 5
       CableHV: 20
-      Steel: 10
+      Steel: 35
+      Cable: 5
       Glass: 15

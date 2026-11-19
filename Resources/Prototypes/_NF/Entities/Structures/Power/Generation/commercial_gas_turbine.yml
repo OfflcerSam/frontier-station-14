@@ -133,7 +133,7 @@
           True: { color: "#FF544A" }
           False: { color: "#4B5563" }
   - type: Construction
-    graph: NFMachine2x3
+    graph: Machine
     node: machine
   - type: Machine
     board: NFStationaryGeneratorGasTurbineCommercialMachineCircuitboard
@@ -253,7 +253,8 @@
       MatterBin: 2
     stackRequirements:
       CableHV: 20
-      Steel: 20
+      Steel: 45
+      Cable: 5
       Plasteel: 15
       ReinforcedPlasmaGlass: 5
 

@@ -16,7 +16,7 @@
   - type: Machine
     board: NFStationaryGeneratorCombustionCommercialMachineCircuitboard
   - type: Construction
-    graph: NFMachine1x3
+    graph: Machine
     node: machine
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1", "0, 2"]
@@ -171,7 +171,8 @@
       Plasteel: 5
       ReinforcedGlass: 5
       CableHV: 15
-      Steel: 5
+      Steel: 15
+      Cable: 2
 
 - type: entity
   parent: NFStationaryGeneratorCombustionCommercialLiquidEmpty

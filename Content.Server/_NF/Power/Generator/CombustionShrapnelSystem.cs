@@ -28,6 +28,7 @@ public sealed class CombustionShrapnelSystem : EntitySystem
     {
         SubscribeLocalEvent<CombustionShrapnelComponent, DamageChangedEvent>(OnDamage,
             before: new[] { typeof(DestructibleSystem) }, after: new[] { typeof(GeneratorFireSystem) });
+        SubscribeLocalEvent<CombustionShrapnelComponent, EntityTerminatingEvent>(OnGeneratorTerminating);
         SubscribeLocalEvent<GeneratorShrapnelComponent, ProjectileHitEvent>(OnHit);
     }
 
@@ -75,6 +76,22 @@ public sealed class CombustionShrapnelSystem : EntitySystem
         }
         _logs.Add(LogType.Damaged, LogImpact.High,
             $"{ToPrettyString(ent.Owner):subject} released {count} mechanical fragments; damage source {ToPrettyString(actor):actor}.");
+    }
+
+    private void OnGeneratorTerminating(Entity<CombustionShrapnelComponent> ent, ref EntityTerminatingEvent args)
+    {
+        // Fragments can outlive the generator and still be replicated to nearby clients.
+        var fragments = AllEntityQuery<GeneratorShrapnelComponent, ProjectileComponent>();
+        while (fragments.MoveNext(out var uid, out _, out var projectile))
+        {
+            if (projectile.Weapon != ent.Owner)
+                continue;
+
+            projectile.Weapon = null;
+            if (projectile.Shooter == ent.Owner)
+                projectile.Shooter = null;
+            Dirty(uid, projectile);
+        }
     }
 
     private void OnHit(Entity<GeneratorShrapnelComponent> ent, ref ProjectileHitEvent args)

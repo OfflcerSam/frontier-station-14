@@ -1,5 +1,6 @@
 using Content.Server.Construction.Components;
 using Content.Server.Containers;
+using Content.Shared._NF.Construction; // Frontier
 using Content.Shared.Construction;
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Construction.Steps;
@@ -305,13 +306,8 @@ namespace Content.Server.Construction
             if (newEntity == metaData.EntityPrototype?.ID || !PrototypeManager.HasIndex<EntityPrototype>(newEntity))
                 return null;
 
-            // Frontier: same-size frame transitions retain existing space even if contents were dropped.
-            // Completed machines still require a clear footprint.
-            var frameFootprint = PrototypeManager.Index<EntityPrototype>(newEntity)
-                .TryGetComponent<ConstructionComponent>(out var frameConstruction, EntityManager.ComponentFactory) &&
-                frameConstruction.Node != "machine" &&
-                EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanFitBoard(uid, newEntity);
-            if (!frameFootprint && !EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(
+            // Frontier: check the finished machine's full footprint before it replaces the frame.
+            if (!EntityManager.System<MachineFootprintSystem>().CanPlace(
                 newEntity, transform.Coordinates, transform.LocalRotation, uid))
                 return null;
 

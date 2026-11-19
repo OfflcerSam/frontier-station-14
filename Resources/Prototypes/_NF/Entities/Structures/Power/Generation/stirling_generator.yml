@@ -221,7 +221,7 @@
   - type: MachineFootprint
     tiles: ["0, 0", "0, 1"]
   - type: Construction
-    graph: NFMachine1x2
+    graph: Machine
     node: machine
   - type: Fixtures
     fixtures:
@@ -321,7 +321,8 @@
     stackRequirements:
       Glass: 2
       CableHV: 5
-      Steel: 3
+      Steel: 8
+      Cable: 1
 
 - type: entity
   parent: NFStationaryGeneratorStirlingCompactEmpty

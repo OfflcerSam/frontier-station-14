@@ -7,11 +7,13 @@
 
   # Installation
 
-  Research and print the appropriate machine board. Assemble the machine through a frame or the Flatpacker. The Flatpacker includes standard stock parts; use an [textlink="RPED" link="MachineUpgrading"] for later upgrades.
+  Research and print the appropriate machine board. Install it in a standard machine frame and add the materials and stock parts listed on the board.
+
+  To make a flatpack, insert the board and supply the materials shown by the Flatpacker. Place the package on the floor and use a multitool to unpack it. The generator comes with standard stock parts. Use an [textlink="RPED" link="MachineUpgrading"] for later upgrades.
 
   Newly constructed machines start empty and off. Install their fuel modules or cells, add the required supplies, and start them according to the family guide.
 
-  Clear every tile the machine occupies. Rotate a flatpack before unpacking to choose its orientation. Unanchor a placed generator before rotating it. The electrical connection is at the base tile.
+  Clear every tile the machine occupies. Set the frame or flatpack's orientation before completing installation. Unanchor a placed generator before rotating it. The electrical connection is at the base tile.
   
   Connect a supported [color=yellow]MV[/color] or [color=orange]HV[/color] [textlink="power cable" link="VoltageNetworks"] and select the matching voltage.
 

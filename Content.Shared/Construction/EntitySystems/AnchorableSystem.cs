@@ -1,4 +1,5 @@
 using Content.Shared.Administration.Logs;
+using Content.Shared._NF.Construction; // Frontier
 using Content.Shared.Examine;
 using Content.Shared.Construction.Components;
 using Content.Shared.Containers.ItemSlots;
@@ -148,7 +149,15 @@ public sealed partial class AnchorableSystem : EntitySystem
 
         // Snap rotation to cardinal (multiple of 90)
         var rot = xform.LocalRotation;
-        xform.LocalRotation = Math.Round(rot / (Math.PI / 2)) * (Math.PI / 2);
+        var cardinalRotation = Math.Round(rot / (Math.PI / 2)) * (Math.PI / 2);
+        // Frontier: support or clearance beyond the origin tile can change during the wrench action.
+        if (TryComp<MachineFootprintComponent>(uid, out var footprint) &&
+            !EntityManager.System<MachineFootprintSystem>().IsFootprintClear(footprint, xform.Coordinates, cardinalRotation, uid))
+        {
+            _popup.PopupClient(Loc.GetString("machine-footprint-blocked"), uid, args.User);
+            return;
+        }
+        xform.LocalRotation = cardinalRotation;
 
         if (TryComp<PullableComponent>(uid, out var pullable) && pullable.Puller != null)
         {

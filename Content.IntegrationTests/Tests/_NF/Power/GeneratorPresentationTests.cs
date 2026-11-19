@@ -5,8 +5,6 @@ using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Tests.Interaction;
 using Content.Server._NF.Power.Steam;
-using Content.Server.Construction.Components;
-using Content.Shared._NF.Construction;
 using Content.Shared._NF.Power;
 using Content.Shared._NF.Power.Isotope;
 using Content.Shared.Chemistry.EntitySystems;
@@ -86,63 +84,6 @@ public sealed class GeneratorPresentationTests : InteractionTest
             Assert.That(layers[sprites.LayerMapGet((CTarget.Value, sprite), GeneratorStatusLayers.Damage)].Visible, Is.EqualTo(damaged));
             Assert.That(layers.Last().RsiState.ToString(), Is.EqualTo("border"));
         });
-    }
-
-    [TestCase("1x2")]
-    [TestCase("1x3")]
-    [TestCase("2x2")]
-    [TestCase("2x3")]
-    public async Task FrameSpritesRotateAndShowStages(string size)
-    {
-        foreach (var (prefix, state) in new[] { ("NFUnfinishedMachineFrame", "box_0"), ("NFMachineFrame", "box_1"), ("NFMachineFrameDestroyed", "destroyed") })
-        {
-            await SpawnTarget(prefix + size);
-            await Server.WaitAssertion(() => Transform.SetLocalRotation(STarget!.Value, Angle.FromDegrees(90)));
-            await RunTicks(10);
-            await Client.WaitAssertion(() =>
-            {
-                var sprite = CEntMan.GetComponent<SpriteComponent>(CTarget!.Value);
-                Assert.That(sprite.NoRotation, Is.False);
-                Assert.That(sprite.SnapCardinals, Is.False);
-                Assert.That(sprite.Scale, Is.EqualTo(Vector2.One));
-                Assert.That(sprite.AllLayers.First().RsiState.ToString(), Is.EqualTo(state));
-                Assert.That(CEntMan.GetComponent<TransformComponent>(CTarget.Value).LocalRotation.Degrees, Is.EqualTo(90).Within(0.01));
-            });
-            await Server.WaitPost(() => SEntMan.DeleteEntity(STarget!.Value));
-            await RunTicks(3);
-        }
-    }
-
-    [Test]
-    public async Task FrameDotsTrackBoardAndParts()
-    {
-        await Server.WaitAssertion(() =>
-        {
-            for (var x = -3; x < 6; x++)
-            for (var y = -3; y < 6; y++)
-                MapSystem.SetTile(MapData.Grid, new Vector2i(x, y), new Tile(TileMan[Plating].TileId));
-        });
-        await SpawnTarget("NFStationaryGeneratorSteamCommercialEmpty");
-        await Interact(Screw, Pry);
-        AssertPrototype("NFMachineFrame2x3");
-        await AssertFrameStage("ready", "box_3");
-        await Interact(Pry);
-        await AssertFrameStage("wired", "box_1");
-        await InteractUsing("NFStationaryGeneratorSteamCommercialMachineCircuitboard");
-        await AssertFrameStage("board", "box_2");
-    }
-
-    private async Task AssertFrameStage(string stage, string state)
-    {
-        await RunTicks(10);
-        await Server.WaitAssertion(() =>
-        {
-            Assert.That(SEntMan.System<SharedAppearanceSystem>().TryGetData<string>(STarget!.Value,
-                MachineFrameStatusVisuals.Stage, out var value), Is.True);
-            Assert.That(value, Is.EqualTo(stage));
-        });
-        await Client.WaitAssertion(() =>
-            Assert.That(CEntMan.GetComponent<SpriteComponent>(CTarget!.Value).AllLayers.First().RsiState.ToString(), Is.EqualTo(state)));
     }
 
     [TestCase(false)]

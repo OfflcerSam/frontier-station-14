@@ -83,7 +83,10 @@ public abstract class SharedFlatpackSystem : EntitySystem
         // TODO FLATPAK
         // Make this logic smarter. This should eventually allow for shit like building microwaves on tables and such.
         // Also: make it ignore ghosts
-        if (_entityLookup.AnyEntitiesIntersecting(coords, LookupFlags.Dynamic | LookupFlags.Static) || // Frontier: full machine footprint
+        // Frontier: exclude the package itself and validate the finished machine's footprint.
+        var obstructions = _entityLookup.GetEntitiesIntersecting(coords, LookupFlags.Dynamic | LookupFlags.Static);
+        obstructions.Remove(uid);
+        if (obstructions.Count > 0 ||
             !EntityManager.System<Content.Shared._NF.Construction.MachineFootprintSystem>().CanPlace(comp.Entity.Value, coords, xform.LocalRotation, uid))
         {
             // this popup is on the server because the predicts on the intersection is crazy
@@ -132,6 +135,7 @@ public abstract class SharedFlatpackSystem : EntitySystem
             BindToStation(ent, bound); // Frontier: station binding
 
         Dirty(ent, meta);
+        Dirty(ent, ent.Comp); // Frontier: replicate the finished package's destination prototype.
         Appearance.SetData(ent, FlatpackVisuals.Machine, MetaData(board).EntityPrototype?.ID ?? string.Empty);
     }
 
@@ -144,25 +148,6 @@ public abstract class SharedFlatpackSystem : EntitySystem
         {
             cost = MachinePart.GetMachineBoardMaterialCost(machineBoard.Value, -1);
             baseCost = entity.Comp.BaseMachineCost;
-            // Frontier: pay for the extra frame area as well as the standard flatpacking fee.
-            if (PrototypeManager.Index(machineBoard.Value.Comp.Prototype)
-                .TryGetComponent<Content.Shared._NF.Construction.MachineFootprintComponent>(out var footprint, Factory) &&
-                footprint.Tiles.Count > 1)
-            {
-                var frameArea = footprint.Tiles.Count - 1;
-                if (PrototypeManager.Index<EntityPrototype>("SheetSteel1")
-                    .TryGetComponent<PhysicalCompositionComponent>(out var frameMaterialCost, Factory))
-                {
-                    foreach (var (mat, frameMaterialAmount) in frameMaterialCost.MaterialComposition)
-                        cost[mat] = cost.GetValueOrDefault(mat) - frameMaterialAmount * 5 * frameArea;
-                }
-                if (PrototypeManager.Index<EntityPrototype>("CableApcStack1")
-                    .TryGetComponent<PhysicalCompositionComponent>(out frameMaterialCost, Factory))
-                {
-                    foreach (var (mat, frameMaterialAmount) in frameMaterialCost.MaterialComposition)
-                        cost[mat] = cost.GetValueOrDefault(mat) - frameMaterialAmount * frameArea;
-                }
-            }
         }
         else
             baseCost = entity.Comp.BaseComputerCost;
