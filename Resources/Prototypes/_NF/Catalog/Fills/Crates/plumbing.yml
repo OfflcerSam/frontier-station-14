@@ -1,12 +1,21 @@
 - type: entity
-  parent: CrateMedicalSecure
+  parent: CrateMedical
   id: CrateRPLD
   name: rapid plumbing device crate
   description: Contains a rapid plumbing device.
   components:
-  - type: AccessReader
-    access: [[Engineering], [Medical]]
   - type: EntityTableContainerFill
     containers:
       entity_storage:
         id: RPLD
+
+- type: entity
+  parent: CrateRPLD
+  id: CrateShipyardRPLD
+  name: shipyard rapid plumbing device crate
+  description: Contains a shipyard rapid plumbing device.
+  components:
+  - type: EntityTableContainerFill
+    containers:
+      entity_storage:
+        id: ShipyardRPLD

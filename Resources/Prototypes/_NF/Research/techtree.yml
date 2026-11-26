@@ -231,6 +231,7 @@
   cost: 15000
   recipeUnlocks:
   - BorgModuleRCD
+  - BorgModuleAdvancedPlumbing
   prerequisiteLineType: Tree
   technologyPrerequisites:
   - NFRapidConstruction

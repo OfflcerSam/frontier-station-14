@@ -1,0 +1,40 @@
+- type: entity
+  id: BorgModuleAdvancedPlumbing
+  parent: [ BaseBorgModuleEngineering, BaseProviderBorgModule ] # Frontier: engineering chassis.
+  name: advanced plumbing cyborg module
+  description: A module that equips engineering cyborgs with a recharging RPLD and plumbing tools.
+  components:
+  - type: Sprite
+    layers:
+    - state: engineering
+    - sprite: _Starlight/Objects/Specific/Robotics/plumbing_borgmodule.rsi
+      state: icon-plumbing
+  - type: ItemBorgModule
+    moduleId: AdvancedPlumbing
+    hands:
+    - item: RPLDRecharging
+    - item: Crowbar
+    - item: Wrench
+    - item: trayScanner
+    - hand:
+        emptyRepresentative: BorgModuleConstructionMaterialPlaceholder
+        emptyLabel: borg-slot-construction-empty
+        whitelist:
+          tags:
+          - ConstructionMaterial
+    - hand:
+        emptyRepresentative: APCElectronics
+        emptyLabel: borg-slot-circuitboards-empty
+        whitelist:
+          components:
+          - Circuitboard
+    - item: CableApcStack10
+      hand:
+        emptyRepresentative: CableApcStack10
+        emptyLabel: borg-slot-cables-empty
+        whitelist:
+          tags:
+          - CableCoil
+    - item: Plunger
+  - type: BorgModuleIcon
+    icon: { sprite: _Starlight/Interface/Actions/plumbing_borg_actions.rsi, state: plumbing-module }

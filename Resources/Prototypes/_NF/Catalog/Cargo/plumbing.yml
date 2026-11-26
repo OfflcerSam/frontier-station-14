@@ -3,7 +3,7 @@
   icon:
     sprite: _Starlight/Objects/Tools/rpld.rsi
     state: icon
-  product: CrateRPLD
+  product: CrateShipyardRPLD
   cost: 800
   category: cargoproduct-category-name-medical
   group: market

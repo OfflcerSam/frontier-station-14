@@ -4,8 +4,6 @@
   name: RPLD
   description: A device used to rapidly deploy plumbing ducts and machines.
   components:
-  - type: Contraband
-    allowedDepartments: [ Engineering, Medical ]
   - type: RCD
     availablePrototypes:
     - PlumbingRpldDuctStraight
@@ -48,3 +46,15 @@
   components:
   - type: LimitedCharges
     lastCharges: -1
+
+- type: entity
+  id: RPLDRecharging
+  parent: RPLD
+  name: experimental RPLD
+  description: A cyborg-mounted rapid plumbing device that creates its own compressed matter.
+  suffix: AutoRecharge
+  components:
+  - type: LimitedCharges
+    maxCharges: 20
+  - type: AutoRecharge
+    rechargeDuration: 10

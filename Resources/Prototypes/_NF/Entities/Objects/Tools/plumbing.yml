@@ -1,0 +1,9 @@
+- type: entity
+  id: ShipyardRPLD
+  parent: RPLD
+  name: shipyard RPLD
+  description: A rapid plumbing device with a slot for swiping an ID card bearing a ship deed. Uses shipyard compressed matter.
+  components:
+  - type: RCD
+    isShipyardRCD: true
+  - type: GridAccess

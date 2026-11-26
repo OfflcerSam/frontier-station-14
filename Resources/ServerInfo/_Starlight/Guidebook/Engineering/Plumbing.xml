@@ -3,13 +3,15 @@
   Plumbing is a reagent piping system that lets you build fluid supply systems and automated chemical factories. Fluid ducts connect machines together into networks, moving reagents between them without manual intervention.
 
   <Box>
-    <GuideEntityEmbed Entity="RPLD" Caption="RPLD"/>
+    <GuideEntityEmbed Entity="ShipyardRPLD" Caption="Shipyard RPLD"/>
   </Box>
 
   ## Getting Started
   Plumbing is built using the [color=#a4885c]RPLD[/color] (Rapid Plumbing Device), which works like an RCD but for plumbing. It can place fluid ducts and all plumbing machines (but not all machines with plumbing connectors). Select what to build from its radial menu.
 
-  Cargo sells the rapid plumbing device crate in its Medical category. The device uses compressed matter.
+  Order the shipyard rapid plumbing device crate from Cargo's Medical category. Swipe an ID card bearing your ship deed on the device to authorize that ship, the device uses shipyard compressed matter.
+
+  Engineering cyborgs can install the advanced plumbing module for a self-recharging RPLD. Research Matter-Energy Conversion to unlock the module at an exosuit fabricator.
 
   All plumbing machines and ducts are [color=#a4885c]rotatable[/color]. Use the rotation key before or after placing to orient inlets and outlets correctly. Machines must be oriented so their connectors line up with adjacent ducts. Most plumbing machines are rotatable while anchored.
 
