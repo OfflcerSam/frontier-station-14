@@ -17,4 +17,5 @@ public enum NodeGroupID : byte
     /// <seealso cref="Content.Server.Power.Generation.Teg.TegNodeGroup"/>
     Teg,
     ExCable,
+    Plumbing, // Frontier: use a separate node group for Starlight reagent ducts.
 }

@@ -87,7 +87,7 @@ namespace Content.Server.NodeContainer.Nodes
         ///     The <see cref="IPipeNet"/> this pipe is a part of.
         /// </summary>
         [ViewVariables]
-        private IPipeNet? PipeNet => (IPipeNet?) NodeGroup;
+        private IPipeNet? PipeNet => NodeGroup as IPipeNet; // Frontier: Starlight ducts have a different node group.
 
         /// <summary>
         ///     The gases in this pipe.

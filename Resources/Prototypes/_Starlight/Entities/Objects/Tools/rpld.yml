@@ -1,0 +1,50 @@
+- type: entity
+  id: RPLD
+  parent: RCD
+  name: RPLD
+  description: A device used to rapidly deploy plumbing ducts and machines.
+  components:
+  - type: Contraband
+    allowedDepartments: [ Engineering, Medical ]
+  - type: RCD
+    availablePrototypes:
+    - PlumbingRpldDuctStraight
+    - PlumbingRpldDuctBend
+    - PlumbingRpldDuctTJunction
+    - PlumbingRpldDuctFourway
+    - PlumbingRpldDuctManifold
+    - PlumbingRpldTank
+    - PlumbingRpldBuffer
+    - PlumbingRpldInput
+    - PlumbingRpldOutput
+    - PlumbingRpldSink
+    - PlumbingRpldReactor
+    - PlumbingRpldPillPress
+    - PlumbingRpldFilter
+    - PlumbingRpldInlineFilter
+    - PlumbingRpldSynthesizer
+    - PlumbingRpldSmartDispenser
+    - PlumbingRpldDrain
+    - PlumbingRpldDisposal
+    - PlumbingRpldDuctStraightAlt1
+    - PlumbingRpldDuctStraightAlt2
+    - PlumbingRpldDuctBendAlt1
+    - PlumbingRpldDuctBendAlt2
+    - PlumbingRpldDuctTJunctionAlt1
+    - PlumbingRpldDuctTJunctionAlt2
+    - PlumbingRpldDuctFourwayAlt1
+    - PlumbingRpldDuctFourwayAlt2
+    - PlumbingRpldFilterFlipped
+    - PlumbingRpldDeconstruct
+  - type: LimitedCharges
+    maxCharges: 45
+  - type: Sprite
+    sprite: _Starlight/Objects/Tools/rpld.rsi
+
+- type: entity
+  id: RPLDEmpty
+  parent: RPLD
+  suffix: Empty
+  components:
+  - type: LimitedCharges
+    lastCharges: -1

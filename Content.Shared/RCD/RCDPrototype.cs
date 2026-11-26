@@ -1,4 +1,5 @@
 using Content.Shared.Physics;
+using Content.Shared.Tag; // Frontier
 using Robust.Shared.Physics.Collision.Shapes;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
@@ -113,6 +114,16 @@ public sealed partial class RCDPrototype : IPrototype
     /// </summary>
     [DataField, ViewVariables(VVAccess.ReadOnly)]
     public RcdRotation Rotation { get; private set; } = RcdRotation.User;
+
+    // Frontier: constraints used by the Starlight rapid plumbing device.
+    /// <summary>Only entities with this tag can be deconstructed by this operation.</summary>
+    [DataField]
+    public ProtoId<TagPrototype>? DeconstructTargetTag { get; private set; }
+
+    /// <summary>Prevents placement on a tile already occupied by the same kind of structure on the same layer.</summary>
+    [DataField]
+    public ProtoId<TagPrototype>? UniqueOnTileTag { get; private set; }
+    // End Frontier
 }
 
 public enum RcdMode : byte

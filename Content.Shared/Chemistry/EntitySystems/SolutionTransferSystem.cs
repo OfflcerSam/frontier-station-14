@@ -165,7 +165,10 @@ public sealed partial class SolutionTransferSystem : EntitySystem
         Entity<SolutionComponent> target,
         FixedPoint2 amount)
     {
-        var transferAttempt = new SolutionTransferAttemptEvent(sourceEntity, targetEntity);
+        var transferAttempt = new SolutionTransferAttemptEvent(sourceEntity, targetEntity)
+        {
+            SourceSolution = source, // Frontier: let Starlight refill filters inspect the selected solution.
+        };
 
         // Check if the source is cancelling the transfer
         RaiseLocalEvent(sourceEntity, ref transferAttempt);
@@ -220,6 +223,8 @@ public sealed partial class SolutionTransferSystem : EntitySystem
 [ByRefEvent]
 public record struct SolutionTransferAttemptEvent(EntityUid From, EntityUid To, string? CancelReason = null)
 {
+    public Entity<SolutionComponent>? SourceSolution { get; init; } // Frontier: Starlight refill filters.
+
     /// <summary>
     /// Cancels the transfer.
     /// </summary>

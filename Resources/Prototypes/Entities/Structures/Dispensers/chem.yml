@@ -54,6 +54,40 @@
         layer:
         - MachineLayer
 
+  # Frontier: Starlight plumbing integration.
+  - type: PlumbingConnectorAppearance
+    offset: 0.09375
+  - type: PlumbingOutlet
+    solutionName: beaker
+    connectedOutlets: true
+    containerSlotId: beakerSlot
+    enabled: false
+    allowValveToggle: true
+    outletNames:
+    - outletNorth
+    - outletEast
+    - outletSouth
+    - outletWest
+  - type: NodeContainer
+    nodes:
+      outletNorth:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: North
+      outletEast:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: East
+      outletSouth:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: South
+      outletWest:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: West
+  # End Frontier
+
 - type: entity
   id: ChemDispenser
   suffix: Filled

@@ -8,7 +8,7 @@
   components:
   - type: Sprite
     sprite: Structures/Machines/mixer.rsi
-    snapCardinals: true
+    snapCardinals: false # Frontier: true<false for directional plumbing overlays.
     layers:
     - state: mixer_empty
     - state: mixer_screens
@@ -100,3 +100,44 @@
     guides:
     - Chemicals
     - Chemist
+  # Frontier: Starlight plumbing integration.
+  - type: PlumbingConnectorAppearance
+    offset: 0.09375
+  - type: PlumbingDevice
+    updateInterval: 2
+    requiresPower: true
+  - type: PlumbingInlet
+    solutionName: buffer
+    transferAmount: 40
+    maxFill: 10000
+    inletNames:
+    - inletNorth
+    - inletEast
+    - inletWest
+  - type: PlumbingOutlet
+    solutionName: beaker
+    connectedOutlets: true
+    containerSlotId: beakerSlot
+    enabled: false
+    allowValveToggle: true
+    outletNames:
+    - outletSouth
+  - type: NodeContainer
+    nodes:
+      inletNorth:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: North
+      inletEast:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: East
+      inletWest:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: West
+      outletSouth:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: South
+  # End Frontier

@@ -380,6 +380,15 @@ public sealed partial class RCDSystem : EntitySystem
             case RcdMode.ConstructObject:
                 return IsConstructionLocationValid(uid, component, gridUid, mapGrid, tile, position, user, popMsgs);
             case RcdMode.Deconstruct:
+                // Frontier: the rapid plumbing device can only deconstruct plumbing.
+                if (prototype.DeconstructTargetTag is { } tag && (target is not { } entity || !_tags.HasTag(entity, tag)))
+                {
+                    if (popMsgs)
+                        _popup.PopupClient(Loc.GetString("rcd-component-deconstruct-target-not-on-whitelist-message"), uid, user);
+
+                    return false;
+                }
+                // End Frontier
                 return IsDeconstructionStillValid(uid, tile, target, user, popMsgs);
         }
 
@@ -441,6 +450,16 @@ public sealed partial class RCDSystem : EntitySystem
             // Ensure that all construction rules shared between tiles and object are checked before exiting here
             return true;
         }
+
+        // Frontier: prevent overlapping plumbing structures before spending a charge.
+        if (prototype.UniqueOnTileTag is { } placementTag && HasMatchingStructureOnTile(prototype, placementTag, gridUid, mapGrid, position))
+        {
+            if (popMsgs)
+                _popup.PopupClient(Loc.GetString("rcd-component-cannot-build-on-occupied-tile-message"), uid, user);
+
+            return false;
+        }
+        // End Frontier
 
         // Entity specific rules
 

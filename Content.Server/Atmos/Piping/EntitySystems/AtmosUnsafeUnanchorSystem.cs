@@ -8,6 +8,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Construction.Components;
 using Content.Shared.Destructible;
 using Content.Shared.NodeContainer;
+using Content.Shared.NodeContainer.NodeGroups; // Frontier
 using Content.Shared.Popups;
 using JetBrains.Annotations;
 
@@ -37,7 +38,7 @@ namespace Content.Server.Atmos.Piping.EntitySystems
 
             foreach (var node in nodes.Nodes.Values)
             {
-                if (node is not PipeNode pipe)
+                if (node is not PipeNode { NodeGroupID: not NodeGroupID.Plumbing } pipe) // Frontier: only gas pipes have pressure or gas to leak.
                     continue;
 
                 if (pipe.Air.Pressure - environment.Pressure > 2 * Atmospherics.OneAtmosphere)
@@ -88,7 +89,7 @@ namespace Content.Server.Atmos.Piping.EntitySystems
 
             foreach (var node in nodes.Nodes.Values)
             {
-                if (node is not PipeNode pipe)
+                if (node is not PipeNode { NodeGroupID: not NodeGroupID.Plumbing } pipe) // Frontier: only gas pipes have pressure or gas to leak.
                     continue;
 
                 if (removeFromPipe)

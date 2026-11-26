@@ -20,6 +20,7 @@ using System.Linq;
 using Content.Server.Atmos.EntitySystems;
 using Content.Shared.DeviceNetwork.Components;
 using Content.Shared.NodeContainer;
+using Content.Shared.NodeContainer.NodeGroups; // Frontier
 
 namespace Content.Server.Atmos.Consoles;
 
@@ -425,7 +426,7 @@ public sealed partial class AtmosMonitoringConsoleSystem : SharedAtmosMonitoring
 
         foreach ((var id, var node) in nodeContainer.Nodes)
         {
-            if (node is not PipeNode { } pipeNode)
+            if (node is not PipeNode { NodeGroupID: not NodeGroupID.Plumbing } pipeNode) // Frontier: omit liquid ducts from the gas map.
                 continue;
 
             if (!showAbsentConnections && !pipeNode.ReachableNodes.Any(x => x.Owner != uid))
@@ -451,7 +452,7 @@ public sealed partial class AtmosMonitoringConsoleSystem : SharedAtmosMonitoring
 
         foreach (var node in nodeContainer.Nodes.Values)
         {
-            if (node is PipeNode)
+            if (node is PipeNode { NodeGroupID: not NodeGroupID.Plumbing }) // Frontier: omit liquid ducts from the gas map.
             {
                 pipeNode = (PipeNode)node;
                 netId = GetPipeNodeNetId(pipeNode);

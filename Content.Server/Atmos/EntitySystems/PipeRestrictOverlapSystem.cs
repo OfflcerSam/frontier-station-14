@@ -7,6 +7,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Construction.Components;
 using Content.Shared.NodeContainer;
+using Content.Shared.NodeContainer.NodeGroups; // Frontier
 using JetBrains.Annotations;
 using Robust.Server.GameObjects;
 using Robust.Shared.Map.Components;
@@ -101,25 +102,28 @@ public sealed partial class PipeRestrictOverlapSystem : EntitySystem
         var entDirsAndLayers = GetAllDirectionsAndLayers(ent).ToList();
         var otherDirsAndLayers = GetAllDirectionsAndLayers(other).ToList();
 
-        foreach (var (dir, layer) in entDirsAndLayers)
+        // Frontier: gas pipes and reagent ducts can share a tile and layer.
+        foreach (var (dir, layer, isPlumbing) in entDirsAndLayers)
         {
-            foreach (var (otherDir, otherLayer) in otherDirsAndLayers)
+            foreach (var (otherDir, otherLayer, otherIsPlumbing) in otherDirsAndLayers)
             {
-                if ((dir & otherDir) != 0 && layer == otherLayer)
+                if ((dir & otherDir) != 0 && layer == otherLayer && isPlumbing == otherIsPlumbing)
                     return true;
             }
         }
 
         return false;
 
-        IEnumerable<(PipeDirection, AtmosPipeLayer)> GetAllDirectionsAndLayers(Entity<NodeContainerComponent, TransformComponent> pipe)
+        IEnumerable<(PipeDirection, AtmosPipeLayer, bool)> GetAllDirectionsAndLayers(Entity<NodeContainerComponent, TransformComponent> pipe)
         {
             foreach (var node in pipe.Comp1.Nodes.Values)
             {
                 // we need to rotate the pipe manually like this because the rotation doesn't update for pipes that are unanchored.
                 if (node is PipeNode pipeNode)
-                    yield return (pipeNode.OriginalPipeDirection.RotatePipeDirection(pipe.Comp2.LocalRotation), pipeNode.CurrentPipeLayer);
+                    yield return (pipeNode.OriginalPipeDirection.RotatePipeDirection(pipe.Comp2.LocalRotation),
+                        pipeNode.CurrentPipeLayer, pipeNode.NodeGroupID == NodeGroupID.Plumbing);
             }
         }
+        // End Frontier
     }
 }

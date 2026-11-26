@@ -29,6 +29,13 @@ public sealed partial class RCDMenuBoundUserInterface : BoundUserInterface
             ["PirateWindowsAndGrilles"] = ("rcd-component-pirate-windows-and-grilles", new SpriteSpecifier.Texture(new ResPath("/Textures/_NF/Interface/Radial/RCD/windows_and_grilles.png"))),
             ["PirateAirlocks"] = ("rcd-component-pirate-airlocks", new SpriteSpecifier.Texture(new ResPath("/Textures/_NF/Interface/Radial/RCD/airlocks.png"))),
             // End Frontier
+            // Frontier: Starlight rapid plumbing device categories.
+            ["PlumbingDucts"] = ("rpld-component-ducts", new SpriteSpecifier.Texture(new ResPath("/Textures/_Starlight/Interface/Radial/RPLD/category_ducts.png"))),
+            ["PlumbingDuctsSecondary"] = ("rpld-component-ducts-secondary", new SpriteSpecifier.Texture(new ResPath("/Textures/_Starlight/Interface/Radial/RPLD/category_ducts.png"))),
+            ["PlumbingDuctsTertiary"] = ("rpld-component-ducts-tertiary", new SpriteSpecifier.Texture(new ResPath("/Textures/_Starlight/Interface/Radial/RPLD/category_ducts.png"))),
+            ["PlumbingSupply"] = ("rpld-component-supply", new SpriteSpecifier.Texture(new ResPath("/Textures/_Starlight/Interface/Radial/RPLD/tank.png"))),
+            ["PlumbingProduction"] = ("rpld-component-production", new SpriteSpecifier.Texture(new ResPath("/Textures/_Starlight/Interface/Radial/RPLD/reaction_chamber.png"))),
+            // End Frontier
         };
 
     [Dependency] private IPrototypeManager _prototypeManager = default!;

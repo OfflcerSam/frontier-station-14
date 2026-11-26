@@ -4,6 +4,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.NodeContainer;
+using Content.Shared.NodeContainer.NodeGroups; // Frontier
 using Robust.Shared.Map.Components;
 
 namespace Content.Server.Atmos.Piping.EntitySystems;
@@ -42,7 +43,7 @@ public sealed partial class AtmosPipeAppearanceSystem : SharedAtmosPipeAppearanc
 
         foreach (var node in container.Nodes.Values)
         {
-            if (node is not PipeNode)
+            if (node is not PipeNode localPipe) // Frontier: use the duct layer for liquid connections.
                 continue;
 
             anyPipeNodes = true;
@@ -50,7 +51,11 @@ public sealed partial class AtmosPipeAppearanceSystem : SharedAtmosPipeAppearanc
             foreach (var connectedNode in node.ReachableNodes)
             {
                 if (connectedNode is PipeNode { } pipeNode)
-                    connected.Add((connectedNode.Owner, pipeNode.CurrentPipeLayer));
+                {
+                    // Frontier: a liquid duct can connect to a machine on any layer.
+                    var layer = node.NodeGroupID == NodeGroupID.Plumbing ? localPipe.CurrentPipeLayer : pipeNode.CurrentPipeLayer;
+                    connected.Add((connectedNode.Owner, layer));
+                }
             }
         }
 

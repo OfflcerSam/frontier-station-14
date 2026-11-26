@@ -1,0 +1,364 @@
+# =============================================================================
+# RPLD (Rapid Plumbing Device) - RCD prototypes for plumbing placement
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Category: PlumbingDucts
+# -----------------------------------------------------------------------------
+
+- type: rcd
+  id: PlumbingRpldDuctStraight
+  category: PlumbingDucts
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_straight.png
+  mode: ConstructObject
+  prototype: PlumbingDuctStraight
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctBend
+  category: PlumbingDucts
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_bend.png
+  mode: ConstructObject
+  prototype: PlumbingDuctBend
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctTJunction
+  category: PlumbingDucts
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_tjunction.png
+  mode: ConstructObject
+  prototype: PlumbingDuctTJunction
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctFourway
+  category: PlumbingDucts
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_fourway.png
+  mode: ConstructObject
+  prototype: PlumbingDuctFourway
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctManifold
+  category: PlumbingDucts
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_manifold.png
+  mode: ConstructObject
+  prototype: PlumbingDuctManifold
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+# -----------------------------------------------------------------------------
+# Category: PlumbingSupply
+# -----------------------------------------------------------------------------
+
+- type: rcd
+  id: PlumbingRpldInput
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/pipe_input.png
+  mode: ConstructObject
+  prototype: PlumbingInput
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldTank
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/tank.png
+  mode: ConstructObject
+  prototype: PlumbingTank
+  uniqueOnTileTag: PlumbingMachine
+  cost: 2
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldBuffer
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/buffer_tank.png
+  mode: ConstructObject
+  prototype: PlumbingBuffer
+  uniqueOnTileTag: PlumbingMachine
+  cost: 2
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldOutput
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/pipe_output.png
+  mode: ConstructObject
+  prototype: PlumbingOutput
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldSink
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/sink.png
+  mode: ConstructObject
+  prototype: PlumbingSink
+  uniqueOnTileTag: PlumbingMachine
+  cost: 2
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDrain
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/drain.png
+  mode: ConstructObject
+  prototype: PlumbingDrain
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDisposal
+  category: PlumbingSupply
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/disposal.png
+  mode: ConstructObject
+  prototype: PlumbingDisposal
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+# -----------------------------------------------------------------------------
+# Category: PlumbingProduction
+# -----------------------------------------------------------------------------
+
+- type: rcd
+  id: PlumbingRpldFilter
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/filter.png
+  mode: ConstructObject
+  prototype: PlumbingFilter
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldInlineFilter
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/filter_inline.png
+  mode: ConstructObject
+  prototype: PlumbingInlineFilter
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldSynthesizer
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/synthesizer.png
+  mode: ConstructObject
+  prototype: PlumbingSynthesizer
+  uniqueOnTileTag: PlumbingMachine
+  cost: 2
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldReactor
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/reaction_chamber.png
+  mode: ConstructObject
+  prototype: PlumbingReactor
+  uniqueOnTileTag: PlumbingMachine
+  cost: 3
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldPillPress
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/pill_press.png
+  mode: ConstructObject
+  prototype: PlumbingPillPress
+  uniqueOnTileTag: PlumbingMachine
+  cost: 3
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldSmartDispenser
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/smart_dispenser.png
+  mode: ConstructObject
+  prototype: PlumbingSmartDispenser
+  uniqueOnTileTag: PlumbingMachine
+  cost: 3
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+# Frontier: explicit layer and mirror selections use the existing RCD radial menu.
+- type: rcd
+  id: PlumbingRpldDuctStraightAlt1
+  category: PlumbingDuctsSecondary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_straight.png
+  mode: ConstructObject
+  prototype: PlumbingDuctStraightAlt1
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctStraightAlt2
+  category: PlumbingDuctsTertiary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_straight.png
+  mode: ConstructObject
+  prototype: PlumbingDuctStraightAlt2
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctBendAlt1
+  category: PlumbingDuctsSecondary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_bend.png
+  mode: ConstructObject
+  prototype: PlumbingDuctBendAlt1
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctBendAlt2
+  category: PlumbingDuctsTertiary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_bend.png
+  mode: ConstructObject
+  prototype: PlumbingDuctBendAlt2
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctTJunctionAlt1
+  category: PlumbingDuctsSecondary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_tjunction.png
+  mode: ConstructObject
+  prototype: PlumbingDuctTJunctionAlt1
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctTJunctionAlt2
+  category: PlumbingDuctsTertiary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_tjunction.png
+  mode: ConstructObject
+  prototype: PlumbingDuctTJunctionAlt2
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctFourwayAlt1
+  category: PlumbingDuctsSecondary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_fourway.png
+  mode: ConstructObject
+  prototype: PlumbingDuctFourwayAlt1
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDuctFourwayAlt2
+  category: PlumbingDuctsTertiary
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/duct_fourway.png
+  mode: ConstructObject
+  prototype: PlumbingDuctFourwayAlt2
+  uniqueOnTileTag: PlumbingDuct
+  cost: 1
+  delay: 0
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldFilterFlipped
+  category: PlumbingProduction
+  sprite: /Textures/_Starlight/Interface/Radial/RPLD/filter.png
+  mode: ConstructObject
+  prototype: PlumbingFilterFlipped
+  uniqueOnTileTag: PlumbingMachine
+  cost: 1
+  delay: 0
+  collisionMask: MachineMask
+  rotation: User
+  fx: EffectRCDConstruct0
+
+- type: rcd
+  id: PlumbingRpldDeconstruct
+  name: rcd-component-deconstruct
+  category: Main
+  sprite: /Textures/Interface/Radial/RCD/deconstruct.png
+  mode: Deconstruct
+  prototype: EffectRCDDeconstructPreview
+  rotation: Camera
+  deconstructTargetTag: PlumbingStructure

@@ -37,6 +37,10 @@ namespace Content.Shared.SubFloor
         [DataField]
         public bool BlockAmbience { get; set; } = true;
 
+        // Frontier: some plumbing machines remain above the floor while only their connectors are covered.
+        [DataField]
+        public bool AllowAnchoringUnderCover;
+
         /// <summary>
         ///     Sprite layer keys for the layers that are always visible, even if the entity is below a floor tile. E.g.,
         ///     the vent part of a vent is always visible, even though the piping is hidden.

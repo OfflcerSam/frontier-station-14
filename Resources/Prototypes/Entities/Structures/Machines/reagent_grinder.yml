@@ -104,3 +104,34 @@
     solution: output
   - type: ExaminableSolution
     solution: output
+  # Frontier: Starlight plumbing integration.
+  - type: PlumbingConnectorAppearance
+    offset: 0.09375
+  - type: Appearance
+  - type: PlumbingOutlet
+    solutionName: output
+    connectedOutlets: true
+    outletNames:
+    - outletNorth
+    - outletEast
+    - outletSouth
+    - outletWest
+  - type: NodeContainer
+    nodes:
+      outletNorth:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: North
+      outletEast:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: East
+      outletSouth:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: South
+      outletWest:
+        !type:PlumbingNode
+        nodeGroupID: Plumbing
+        pipeDirection: West
+  # End Frontier

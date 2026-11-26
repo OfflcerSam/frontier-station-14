@@ -1,0 +1,20 @@
+# Blank patch used by the Starlight plumbing pill press.
+- type: entity
+  id: Patch
+  parent: BaseItem
+  name: patch
+  description: A single-use patch that delivers reagents over time.
+  components:
+  - type: Sprite
+    sprite: _Starlight/Objects/Specific/Medical/patch.rsi
+    state: bandaid
+  - type: Item
+    size: Tiny
+  - type: Appearance
+  - type: Patch
+  - type: SolutionContainerManager
+    solutions:
+      patch:
+        maxVol: 20
+  - type: Extractable
+    grindableSolutionName: patch

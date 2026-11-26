@@ -6,6 +6,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Interaction;
 using Content.Shared.NodeContainer;
+using Content.Shared.NodeContainer.NodeGroups; // Frontier
 using JetBrains.Annotations;
 using Robust.Server.GameObjects;
 using static Content.Shared.Atmos.Components.GasAnalyzerComponent;
@@ -196,7 +197,7 @@ public sealed partial class GasAnalyzerSystem : EntitySystem
                 {
                     foreach (var pair in node.Nodes)
                     {
-                        if (pair.Value is PipeNode pipeNode)
+                        if (pair.Value is PipeNode { NodeGroupID: not NodeGroupID.Plumbing } pipeNode) // Frontier: skip liquid ducts.
                         {
                             // check if the volume is zero for some reason so we don't divide by zero
                             if (pipeNode.Air.Volume == 0f)
