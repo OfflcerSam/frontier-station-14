@@ -4,7 +4,7 @@ meta:
   engineVersion: 267.3.0
   forkId: ""
   forkVersion: ""
-  time: 11/27/2026 04:42:12
+  time: 11/27/2026 04:46:41
   entityCount: 433
 maps: []
 grids:
@@ -142,11 +142,11 @@ entities:
             502: 0,-2
             580: 0,-2
         - node:
-            zIndex: 5
-            color: '#496EA0FF'
+            zIndex: 4
+            color: '#1F6626FF'
             id: BrickEndOverlayN
           decals:
-            415: 3,0
+            591: 3,0
         - node:
             zIndex: 3
             color: '#1F6626FF'
@@ -336,6 +336,12 @@ entities:
         - node:
             zIndex: 3
             color: '#FFFFFFFF'
+            id: BrickTileSteelEndN
+          decals:
+            590: 3,0
+        - node:
+            zIndex: 3
+            color: '#FFFFFFFF'
             id: BrickTileSteelInnerNe
           decals:
             588: 6,-3
@@ -371,7 +377,6 @@ entities:
             color: '#FFFFFFFF'
             id: BrickTileSteelLineN
           decals:
-            417: 3,0
             435: 3,-1
         - node:
             zIndex: 4
